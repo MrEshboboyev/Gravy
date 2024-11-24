@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gravy.Domain", "Gravy.Domai
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gravy.Application", "Gravy.Application\Gravy.Application.csproj", "{BB8AF9D6-43C1-4B47-B9C1-52902975109A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gravy.Persistence", "Gravy.Persistence\Gravy.Persistence.csproj", "{D0BC05CB-3D54-4696-89D9-EB7119F52714}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BB8AF9D6-43C1-4B47-B9C1-52902975109A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB8AF9D6-43C1-4B47-B9C1-52902975109A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB8AF9D6-43C1-4B47-B9C1-52902975109A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0BC05CB-3D54-4696-89D9-EB7119F52714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0BC05CB-3D54-4696-89D9-EB7119F52714}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0BC05CB-3D54-4696-89D9-EB7119F52714}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0BC05CB-3D54-4696-89D9-EB7119F52714}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
