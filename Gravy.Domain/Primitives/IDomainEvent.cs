@@ -8,4 +8,8 @@ namespace Gravy.Domain.Primitives;
 /// </summary>
 public interface IDomainEvent : INotification
 {
+    /// <summary> 
+    /// Gets the unique identifier of the domain event. 
+    /// </summary>
+    public Guid Id { get; init; }
 }
