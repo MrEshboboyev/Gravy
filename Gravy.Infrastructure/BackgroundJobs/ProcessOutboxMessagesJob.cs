@@ -5,6 +5,8 @@ using MediatR;
 using Newtonsoft.Json;
 using Quartz;
 using Microsoft.EntityFrameworkCore;
+using Polly.Retry;
+using Polly;
 
 namespace Gravy.Infrastructure.BackgroundJobs;
 
@@ -46,6 +48,7 @@ public class ProcessOutboxMessagesJob : IJob
         // Process each outbox message
         foreach (OutboxMessage outboxMessage in messages)
         {
+            // Deserialize the domain event from the message content
             var domainEvent = JsonConvert
                 .DeserializeObject<IDomainEvent>(outboxMessage.Content);
             if (domainEvent is null)
@@ -53,11 +56,22 @@ public class ProcessOutboxMessagesJob : IJob
                 continue;
             }
 
-            // Publish the domain event
-            await _publisher.Publish(domainEvent, context.CancellationToken);
+            // Define a retry policy to handle transient exceptions
+            AsyncRetryPolicy policy = Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(3, attempt => TimeSpan.FromMilliseconds(50 * attempt));
+
+            // Execute the publish operation with retry policy
+            PolicyResult result = await policy.ExecuteAndCaptureAsync(() =>
+                _publisher.Publish(
+                    domainEvent,
+                    context.CancellationToken));
+
+            // Record any errors that occurred during publishing
+            outboxMessage.Error = result.FinalException?.ToString();
 
             // Mark the outbox message as processed
-            outboxMessage.ProcessedOnUtc = DateTime.Now;
+            outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
         }
 
         // Save changes to the database
