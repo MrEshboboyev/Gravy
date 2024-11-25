@@ -1,9 +1,12 @@
+using Gravy.App.Configurations;
 using Gravy.App.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services
+    .InstallServices(
+        builder.Configuration,
+        typeof(IServiceInstaller).Assembly);
 
 var app = builder.Build();
 
