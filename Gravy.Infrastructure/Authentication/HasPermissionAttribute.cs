@@ -1,4 +1,4 @@
-﻿using Gravy.Domain.Entities;
+﻿using Gravy.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Gravy.Infrastructure.Authentication;

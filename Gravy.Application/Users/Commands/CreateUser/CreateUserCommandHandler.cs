@@ -27,14 +27,15 @@ internal sealed class CreateUserCommandHandler : ICommandHandler<CreateUserComma
     public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         Result<Email> emailResult = Email.Create(request.Email);
-        Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
-        Result<LastName> lastNameResult = LastName.Create(request.LastName);
-        string passwordHash = _passwordHasher.Hash(request.Password);
 
         if (!await _userRepository.IsEmailUniqueAsync(emailResult.Value, cancellationToken))
         {
             return Result.Failure<Guid>(DomainErrors.User.EmailAlreadyInUse);
         }
+
+        Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
+        Result<LastName> lastNameResult = LastName.Create(request.LastName);
+        string passwordHash = _passwordHasher.Hash(request.Password);
 
         var user = User.Create(
             Guid.NewGuid(),

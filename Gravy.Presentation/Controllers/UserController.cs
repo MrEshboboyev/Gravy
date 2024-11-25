@@ -1,7 +1,9 @@
 ﻿using Gravy.Application.Users.Commands.CreateUser;
 using Gravy.Application.Users.Commands.Login;
 using Gravy.Application.Users.Queries.GetUserById;
+using Gravy.Domain.Enums;
 using Gravy.Domain.Shared;
+using Gravy.Infrastructure.Authentication;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Users;
 using MediatR;
@@ -12,6 +14,7 @@ namespace Gravy.Presentation.Controllers;
 [Route("api/users")]
 public sealed class UsersController(ISender sender) : ApiController(sender)
 {
+    [HasPermission(Permission.ReadUser)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetUserById(Guid id, CancellationToken cancellationToken)
     {

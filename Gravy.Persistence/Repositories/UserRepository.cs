@@ -15,23 +15,23 @@ public sealed class UserRepository(ApplicationDbContext dbContext) : IUserReposi
     public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<User>()
-            .FirstOrDefaultAsync(member => member.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
 
     public async Task<User> GetByEmailAsync(Email email, CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<User>()
-            .FirstOrDefaultAsync(member => member.Email == email, cancellationToken);
+            .FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
 
     public async Task<bool> IsEmailUniqueAsync(
         Email email,
         CancellationToken cancellationToken = default) =>
         !await _dbContext
             .Set<User>()
-            .AnyAsync(member => member.Email == email, cancellationToken);
+            .AnyAsync(user => user.Email == email, cancellationToken);
 
-    public void Add(User member) =>
-        _dbContext.Set<User>().Add(member);
+    public void Add(User user) =>
+        _dbContext.Set<User>().Add(user);
 
-    public void Update(User member) =>
-        _dbContext.Set<User>().Update(member);
+    public void Update(User user) =>
+        _dbContext.Set<User>().Update(user);
 }
