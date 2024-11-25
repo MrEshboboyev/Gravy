@@ -50,7 +50,13 @@ public class ProcessOutboxMessagesJob : IJob
         {
             // Deserialize the domain event from the message content
             var domainEvent = JsonConvert
-                .DeserializeObject<IDomainEvent>(outboxMessage.Content);
+                .DeserializeObject<IDomainEvent>(
+                    outboxMessage.Content,
+                    new JsonSerializerSettings 
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    });
+
             if (domainEvent is null)
             {
                 continue;

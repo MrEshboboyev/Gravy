@@ -1,4 +1,4 @@
-﻿using Gravy.Application.Users.Commands;
+﻿using Gravy.Application.Users.Commands.CreateUser;
 using Gravy.Application.Users.Commands.Login;
 using Gravy.Application.Users.Queries.GetUserById;
 using Gravy.Domain.Shared;

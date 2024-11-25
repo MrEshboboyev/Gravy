@@ -1,6 +1,6 @@
 ﻿using Gravy.Application.Abstractions.Messaging;
 
-namespace Gravy.Application.Users.Commands;
+namespace Gravy.Application.Users.Commands.CreateUser;
 
 public sealed record CreateUserCommand(
     string Email,
