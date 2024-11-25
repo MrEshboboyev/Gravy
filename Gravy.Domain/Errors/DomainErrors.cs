@@ -7,22 +7,22 @@ namespace Gravy.Domain.Errors;
 /// </summary>
 public static class DomainErrors
 {
-    public static class Member
+    public static class User
     {
         public static readonly Error EmailAlreadyInUse = new(
-            "Member.EmailAlreadyInUse",
+            "User.EmailAlreadyInUse",
             "The specified email is already in use");
 
         public static readonly Func<Guid, Error> NotFound = id => new Error(
-                "Member.NotFound",
-                $"The member with the identifier {id} was not found.");
+                "User.NotFound",
+                $"The user with the identifier {id} was not found.");
 
         public static readonly Error NotExist = new(
-                "Members.NotExist",
-                $"There is no members");
+                "Users.NotExist",
+                $"There is no users");
 
         public static readonly Error InvalidCredentials = new(
-               "Member.InvalidCredentials",
+               "User.InvalidCredentials",
                "The provided credentials are invalid");
     }
 
