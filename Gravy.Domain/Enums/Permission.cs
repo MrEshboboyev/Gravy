@@ -1,7 +1,10 @@
 ﻿namespace Gravy.Domain.Enums;
 
+/// <summary> 
+/// Represents different permissions that can be assigned to roles. 
+/// </summary>
 public enum Permission
 {
-    ReadMember = 1,
-    UpdateMember = 2
+    ReadUser = 1,
+    UpdateUser = 2
 }
