@@ -1,6 +1,8 @@
 ﻿using Gravy.Persistence.Interceptors;
 using Gravy.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Gravy.Domain.Repositories;
+using Gravy.Persistence.Repositories;
 
 namespace Gravy.App.Configurations;
 
@@ -10,11 +12,7 @@ public class PersistenceServiceInstaller : IServiceInstaller
     {
         services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
         services.AddDbContext<ApplicationDbContext>(
-            (sp, optionsBuilder) =>
-            {
-                //TODO use options pattern
-                optionsBuilder.UseSqlServer(
-                    configuration.GetConnectionString("Database"));
-            });
+            options => options.UseSqlServer(
+                    configuration.GetConnectionString("Database")));
     }
 }
