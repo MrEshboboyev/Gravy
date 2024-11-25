@@ -7,21 +7,26 @@ public class BackgroundJobsServiceInstaller : IServiceInstaller
 {
     public void Install(IServiceCollection services, IConfiguration configuration)
     {
+        // Register the job with DI
         services.AddScoped<IJob, ProcessOutboxMessagesJob>();
+
+        // Configure Quartz
         services.AddQuartz(configure =>
         {
             var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
             configure
-                .AddJob<ProcessOutboxMessagesJob>(jobKey)
-                .AddTrigger(
+                .AddJob<ProcessOutboxMessagesJob>(jobKey)  // Add the job
+                .AddTrigger(                               // Add a trigger
                     trigger =>
-                        trigger.ForJob(jobKey)
+                        trigger.ForJob(jobKey) 
                             .WithSimpleSchedule(
                                 schedule =>
                                     schedule.WithIntervalInSeconds(10)
                                         .RepeatForever()));
-            configure.UseMicrosoftDependencyInjectionJobFactory();
+            // Remove the obsolete method. The default DI job factory is now used automatically.
         });
+
+        // Add Quartz as a hosted service
         services.AddQuartzHostedService();
     }
 }
