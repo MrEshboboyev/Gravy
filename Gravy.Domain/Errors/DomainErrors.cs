@@ -91,5 +91,16 @@ public static class DomainErrors
             "DeliveryAddress.PostalCodeEmpty",
             "The postal code cannot be empty.");
     }
+
+    public static class Vehicle
+    {
+        public static readonly Error TypeEmpty = new(
+            "Vehicle.TypeEmpty",
+            "Vehicle type cannot be empty.");
+
+        public static readonly Error LicensePlateEmpty = new(
+            "Vehicle.LicensePlateEmpty",
+            "License plate cannot be empty.");
+    }
 }
 
