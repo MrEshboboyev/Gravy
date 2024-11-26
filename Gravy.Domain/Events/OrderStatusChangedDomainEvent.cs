@@ -10,5 +10,5 @@ namespace Gravy.Domain.Events;
 /// <param name="OldStatus">Previous status of the order.</param>
 /// <param name="NewStatus">New status of the order.</param>
 /// <param name="UpdatedAt">The timestamp when the status was updated.</param>
-public sealed record OrderStatusChangedDomainEvent(Guid Id, Guid OrderId, Status OldStatus, Status NewStatus, DateTime UpdatedAt)
+public sealed record OrderStatusChangedDomainEvent(Guid Id, Guid OrderId, OrderStatus OldStatus, OrderStatus NewStatus, DateTime UpdatedAt)
     : DomainEvent(Id);

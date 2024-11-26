@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents the status of an order.
 /// </summary>
-public enum Status
+public enum OrderStatus
 {
     Pending = 10,
     Confirmed = 20,

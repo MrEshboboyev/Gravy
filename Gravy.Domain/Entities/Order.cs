@@ -13,7 +13,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     private Order(Guid id, 
         Guid customerId, Guid restaurantId, Guid? deliveryId, 
         decimal totalPrice, 
-        DeliveryAddress deliveryAddress, Status status, DateTime placedAt, DateTime? deliveredAt) : base(id)
+        DeliveryAddress deliveryAddress, OrderStatus status, DateTime placedAt, DateTime? deliveredAt) : base(id)
     {
         CustomerId = customerId;
         RestaurantId = restaurantId;
@@ -35,7 +35,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public Guid? DeliveryId { get; private set; }
     public decimal TotalPrice { get; private set; }
     public DeliveryAddress DeliveryAddress { get; private set; }
-    public Status Status { get; private set; }
+    public OrderStatus Status { get; private set; }
     public DateTime PlacedAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public DateTime CreatedOnUtc { get; set; }
@@ -60,7 +60,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             deliveryId,
             totalPrice,
             deliveryAddress,
-            Status.Pending, // Default status
+            OrderStatus.Pending, // Default status
             DateTime.UtcNow,
             null);
 
@@ -76,7 +76,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// <summary>
     /// Updates the delivery status of the order.
     /// </summary>
-    public void UpdateStatus(Status newStatus)
+    public void UpdateStatus(OrderStatus newStatus)
     {
         Status = newStatus;
         ModifiedOnUtc = DateTime.UtcNow;
@@ -94,7 +94,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// </summary>
     public void MarkAsDelivered()
     {
-        Status = Status.Delivered;
+        Status = OrderStatus.Delivered;
         DeliveredAt = DateTime.UtcNow;
         ModifiedOnUtc = DateTime.UtcNow;
 
