@@ -17,17 +17,16 @@ public sealed class User : AggregateRoot, IAuditableEntity
         PasswordHash = passwordHash;
         FirstName = firstName;
         LastName = lastName;
-        LastName = lastName;
     }
 
     private User()
     {
     }
 
+    public Email Email { get; set; }
     public string PasswordHash { get; set; }
     public FirstName FirstName { get; set; }
     public LastName LastName { get; set; }
-    public Email Email { get; set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
     public ICollection<Role> Roles { get; set; } = [];

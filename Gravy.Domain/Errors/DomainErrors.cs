@@ -55,5 +55,22 @@ public static class DomainErrors
             "LastName.TooLong",
             "Last name is too long");
     }
+
+    public static class Address
+    {
+        public static readonly Error Empty = new(
+            "Address.Empty",
+            "Address is empty");
+        public static readonly Error TooLong = new(
+            "Address.TooLong",
+            "Address is too long");
+    }
+
+    public static class OpeningHours
+    {
+        public static readonly Error InvalidTimeRange = new(
+            "OpeningHours.InvalidTimeRange",
+            "Opening time must be earlier than closing time.");
+    }
 }
 
