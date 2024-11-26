@@ -72,5 +72,24 @@ public static class DomainErrors
             "OpeningHours.InvalidTimeRange",
             "Opening time must be earlier than closing time.");
     }
+
+    public static class DeliveryAddress
+    {
+        public static readonly Error StreetEmpty = new(
+            "DeliveryAddress.StreetEmpty",
+            "The street cannot be empty.");
+
+        public static readonly Error CityEmpty = new(
+            "DeliveryAddress.CityEmpty",
+            "The city cannot be empty.");
+
+        public static readonly Error StateEmpty = new(
+            "DeliveryAddress.StateEmpty",
+            "The state cannot be empty.");
+
+        public static readonly Error PostalCodeEmpty = new(
+            "DeliveryAddress.PostalCodeEmpty",
+            "The postal code cannot be empty.");
+    }
 }
 
