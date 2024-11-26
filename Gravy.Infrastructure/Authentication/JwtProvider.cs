@@ -2,6 +2,7 @@
 using Gravy.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -14,11 +15,23 @@ internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 
     public async Task<string> GenerateAsync(User user)
     {
-        var claims = new Claim[]
+        var claims = new List<Claim>
         {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Email.Value)
         };
+
+        var roles = user.Roles;
+
+        // add Roles
+        claims.AddRange(roles
+            .Select(role => 
+                new Claim(
+                    ClaimTypes.Role,
+                    role.Name
+                    )
+                )
+            );
 
         var signingCredentials = new SigningCredentials(
              new SymmetricSecurityKey(

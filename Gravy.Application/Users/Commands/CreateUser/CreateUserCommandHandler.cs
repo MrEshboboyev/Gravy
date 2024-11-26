@@ -8,21 +8,16 @@ using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Application.Users.Commands.CreateUser;
 
-internal sealed class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
+internal sealed class CreateUserCommandHandler(
+    IUserRepository userRepository,
+    IRoleRepository roleRepository,
+    IUnitOfWork unitOfWork,
+    IPasswordHasher passwordHasher) : ICommandHandler<CreateUserCommand, Guid>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IPasswordHasher _passwordHasher;
-
-    public CreateUserCommandHandler(
-        IUserRepository userRepository,
-        IUnitOfWork unitOfWork,
-        IPasswordHasher passwordHasher)
-    {
-        _userRepository = userRepository;
-        _unitOfWork = unitOfWork;
-        _passwordHasher = passwordHasher;
-    }
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IRoleRepository _roleRepository = roleRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
     public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
@@ -37,12 +32,15 @@ internal sealed class CreateUserCommandHandler : ICommandHandler<CreateUserComma
         Result<LastName> lastNameResult = LastName.Create(request.LastName);
         string passwordHash = _passwordHasher.Hash(request.Password);
 
-        var user = User.Create(
+        var user = await User.CreateAsync(
             Guid.NewGuid(),
             emailResult.Value,
             passwordHash,
             firstNameResult.Value,
-            lastNameResult.Value);
+            lastNameResult.Value,
+            _roleRepository,
+            cancellationToken
+            );
 
         _userRepository.Add(user);
 

@@ -15,11 +15,13 @@ public sealed class UserRepository(ApplicationDbContext dbContext) : IUserReposi
     public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<User>()
+            .Include(u => u.Roles)
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
 
     public async Task<User> GetByEmailAsync(Email email, CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<User>()
+            .Include(u => u.Roles)
             .FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
 
     public async Task<bool> IsEmailUniqueAsync(

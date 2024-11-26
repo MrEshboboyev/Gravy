@@ -1,5 +1,6 @@
 ﻿using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
+using Gravy.Domain.Repositories;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
@@ -29,17 +30,19 @@ public sealed class User : AggregateRoot, IAuditableEntity
     public Email Email { get; set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
-    public ICollection<Role> Roles { get; set; }
+    public ICollection<Role> Roles { get; set; } = [];
 
     /// <summary> 
     /// Creates a new user instance. 
     /// </summary>
-    public static User Create(
+    public static async Task<User> CreateAsync(
         Guid id,
         Email email,
         string passwordHash,
         FirstName firstName,
-        LastName lastName
+        LastName lastName,
+        IRoleRepository roleRepository,
+        CancellationToken cancellationToken
         )
     {
         var user = new User(
@@ -52,6 +55,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
         user.RaiseDomainEvent(new UserRegisteredDomainEvent(
             Guid.NewGuid(),
             user.Id));
+
+        var registeredRole = await roleRepository.GetByNameAsync("Registered", cancellationToken);
+        user.AssignRole(registeredRole);    
 
         return user;
     }
@@ -69,6 +75,12 @@ public sealed class User : AggregateRoot, IAuditableEntity
 
         FirstName = firstName;
         LastName = lastName;
+    }
+
+    public void AssignRole(Role role)
+    {
+        if (!Roles.Contains(role))
+            Roles.Add(role);
     }
 }
 
