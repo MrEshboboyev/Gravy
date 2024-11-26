@@ -3,7 +3,18 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Gravy.Infrastructure.Authentication;
 
-public sealed class HasPermissionAttribute(Permission permission) : 
-    AuthorizeAttribute(policy: permission.ToString())
+/// <summary>
+/// Attribute to enforce permission-based authorization on an endpoint.
+/// </summary>
+public sealed class HasPermissionAttribute : 
+    AuthorizeAttribute
 {
+    /// <summary>
+    /// Creates an instance of the attribute with the specified permission.
+    /// </summary>
+    /// <param name="permission">The required permission.</param>
+    public HasPermissionAttribute(Permission permission)
+        : base(policy: permission.ToString())
+    {
+    }
 }

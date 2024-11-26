@@ -22,6 +22,7 @@ public sealed class UserRepository(ApplicationDbContext dbContext) : IUserReposi
         await _dbContext
             .Set<User>()
             .Include(u => u.Roles)
+            .ThenInclude(r => r.Permissions)
             .FirstOrDefaultAsync(user => user.Email == email, cancellationToken);
 
     public async Task<bool> IsEmailUniqueAsync(

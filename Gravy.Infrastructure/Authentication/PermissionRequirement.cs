@@ -2,7 +2,18 @@
 
 namespace Gravy.Infrastructure.Authentication;
 
-public class PermissionRequirement(string permission) : IAuthorizationRequirement
+/// <summary>
+/// Represents a requirement for a specific permission.
+/// </summary>
+public class PermissionRequirement : IAuthorizationRequirement
 {
-    public string Permission { get; } = permission;
+    /// <summary>
+    /// The required permission name.
+    /// </summary>
+    public string Permission { get; }
+
+    public PermissionRequirement(string permission)
+    {
+        Permission = permission;
+    }
 }

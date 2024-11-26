@@ -3,6 +3,9 @@ using Microsoft.Extensions.Options;
 
 namespace Gravy.Infrastructure.Authentication;
 
+/// <summary>
+/// Dynamically generates authorization policies for permissions.
+/// </summary>
 public class PermissionAuthorizationPolicyProvider(
     IOptions<AuthorizationOptions> options)
         : DefaultAuthorizationPolicyProvider(options)
@@ -14,6 +17,8 @@ public class PermissionAuthorizationPolicyProvider(
         {
             return policy;
         }
+
+        // Create a new policy if not found
         return new AuthorizationPolicyBuilder()
             .AddRequirements(new PermissionRequirement(policyName))
             .Build();

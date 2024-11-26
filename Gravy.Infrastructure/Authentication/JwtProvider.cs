@@ -9,10 +9,16 @@ using System.Text;
 
 namespace Gravy.Infrastructure.Authentication;
 
+/// <summary>
+/// Generates JWT tokens for authenticated users.
+/// </summary>
 internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions _options = options.Value;
 
+    /// <summary>
+    /// Generates a JWT token for the given user.
+    /// </summary>
     public async Task<string> GenerateAsync(User user)
     {
         var claims = new List<Claim>
@@ -21,17 +27,18 @@ internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
                 new(JwtRegisteredClaimNames.Email, user.Email.Value)
         };
 
-        var roles = user.Roles;
+        #region Add Roles and Permissions
+        // Add roles
+        claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name)));
 
-        // add Roles
-        claims.AddRange(roles
-            .Select(role => 
-                new Claim(
-                    ClaimTypes.Role,
-                    role.Name
-                    )
-                )
-            );
+        var permissions = user.Roles
+            .SelectMany(role => role.Permissions)
+            .Select(permission => permission.Name)
+            .ToHashSet();
+
+        // Add permissions
+        claims.AddRange(permissions.Select(permission => new Claim(CustomClaims.Permissions, permission)));
+        #endregion
 
         var signingCredentials = new SigningCredentials(
              new SymmetricSecurityKey(
