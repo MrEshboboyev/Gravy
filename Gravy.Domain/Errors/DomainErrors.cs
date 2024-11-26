@@ -102,5 +102,27 @@ public static class DomainErrors
             "Vehicle.LicensePlateEmpty",
             "License plate cannot be empty.");
     }
+
+    public static class Payment
+    {
+        public static readonly Error InvalidAmount = new(
+            "Payment.InvalidAmount", 
+            "The payment amount must be greater than zero.");
+        
+        public static readonly Error TransactionIdEmpty = new(
+            "Payment.TransactionIdEmpty", 
+            "The transaction ID cannot be empty.");
+    }
+
+    public static class Money
+    {
+        public static readonly Error InvalidAmount = new(
+            "Money.InvalidAmount", 
+            "The monetary amount must be greater than zero.");
+        
+        public static readonly Error CurrencyEmpty = new(
+            "Money.CurrencyEmpty", 
+            "The currency cannot be empty.");
+    }
 }
 
