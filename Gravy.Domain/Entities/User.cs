@@ -1,12 +1,11 @@
 ﻿using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
-using Gravy.Domain.Repositories;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
 
-/// <summary> 
-/// Represents a user in the system. 
+/// <summary>
+/// Represents a system user and acts as the aggregate root for user-related entities.
 /// </summary>
 public sealed class User : AggregateRoot, IAuditableEntity
 {
@@ -17,69 +16,136 @@ public sealed class User : AggregateRoot, IAuditableEntity
         PasswordHash = passwordHash;
         FirstName = firstName;
         LastName = lastName;
+
+        RaiseDomainEvent(new UserCreatedDomainEvent(
+            Guid.NewGuid(),
+            Id, 
+            email.Value));
     }
 
     private User()
     {
     }
 
-    public Email Email { get; set; }
-    public string PasswordHash { get; set; }
-    public FirstName FirstName { get; set; }
-    public LastName LastName { get; set; }
+    // Properties
+    public Email Email { get; private set; }
+    public string PasswordHash { get; private set; }
+    public FirstName FirstName { get; private set; }
+    public LastName LastName { get; private set; }
+    public Customer? CustomerDetails { get; private set; }
+    public DeliveryPerson? DeliveryPersonDetails { get; private set; }
+    public ICollection<Role> Roles { get; private set; } = [];
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
-    public ICollection<Role> Roles { get; set; } = [];
 
-    /// <summary> 
-    /// Creates a new user instance. 
+    ///// <summary> 
+    ///// Creates a new user instance. 
+    ///// </summary>
+    //public static async Task<User> CreateAsync(
+    //    Guid id,
+    //    Email email,
+    //    string passwordHash,
+    //    FirstName firstName,
+    //    LastName lastName,
+    //    IRoleRepository roleRepository,
+    //    CancellationToken cancellationToken
+    //    )
+    //{
+    //    var user = new User(
+    //        id,
+    //        email,
+    //        passwordHash,
+    //        firstName,
+    //        lastName);
+
+    //    user.RaiseDomainEvent(new UserRegisteredDomainEvent(
+    //        Guid.NewGuid(),
+    //        user.Id));
+
+    //    var registeredRole = await roleRepository.GetByNameAsync("Registered", cancellationToken);
+    //    user.AssignRole(registeredRole);    
+
+    //    return user;
+    //}
+
+    /// <summary>
+    /// Factory method to create a new user.
     /// </summary>
-    public static async Task<User> CreateAsync(
-        Guid id,
-        Email email,
-        string passwordHash,
-        FirstName firstName,
-        LastName lastName,
-        IRoleRepository roleRepository,
-        CancellationToken cancellationToken
-        )
+    public static User Create(Guid id, 
+        Email email, 
+        string passwordHash, 
+        FirstName firstName, 
+        LastName lastName)
     {
-        var user = new User(
-            id,
-            email,
-            passwordHash,
-            firstName,
+        return new User(id, 
+            email, 
+            passwordHash, 
+            firstName, 
             lastName);
-        
-        user.RaiseDomainEvent(new UserRegisteredDomainEvent(
-            Guid.NewGuid(),
-            user.Id));
-
-        var registeredRole = await roleRepository.GetByNameAsync("Registered", cancellationToken);
-        user.AssignRole(registeredRole);    
-
-        return user;
     }
 
-    /// <summary> 
-    /// Changes the user's name and raises a domain event if the name has changed. 
+    /// <summary>
+    /// Updates the user's name.
     /// </summary>
-    public void ChangeName(FirstName firstName, LastName lastName)
+    public void UpdateName(FirstName firstName, LastName lastName)
     {
         if (!FirstName.Equals(firstName) || !LastName.Equals(lastName))
         {
-            RaiseDomainEvent(new UserNameChangedDomainEvent(
-                Guid.NewGuid(), Id));
-        }
+            FirstName = firstName;
+            LastName = lastName;
+            ModifiedOnUtc = DateTime.UtcNow;
 
-        FirstName = firstName;
-        LastName = lastName;
+            RaiseDomainEvent(new UserNameUpdatedDomainEvent(
+                Guid.NewGuid(), 
+                Id, 
+                firstName.Value, 
+                lastName.Value));
+        }
     }
 
+    /// <summary>
+    /// Assigns a role to the user.
+    /// </summary>
     public void AssignRole(Role role)
     {
         if (!Roles.Contains(role))
+        {
             Roles.Add(role);
+            ModifiedOnUtc = DateTime.UtcNow;
+
+            RaiseDomainEvent(new RoleAssignedToUserDomainEvent(
+                Guid.NewGuid(), 
+                Id, 
+                role.Id));
+        }
+    }
+
+    /// <summary>
+    /// Links customer-specific details to the user.
+    /// </summary>
+    public void AddCustomerDetails(Customer customer)
+    {
+        CustomerDetails = customer;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new CustomerLinkedToUserDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            customer.Id));
+    }
+
+    /// <summary>
+    /// Links delivery-person-specific details to the user.
+    /// </summary>
+    public void AddDeliveryPersonDetails(DeliveryPerson deliveryPerson)
+    {
+        DeliveryPersonDetails = deliveryPerson;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new DeliveryPersonLinkedToUserDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            deliveryPerson.Id));
     }
 }
 
