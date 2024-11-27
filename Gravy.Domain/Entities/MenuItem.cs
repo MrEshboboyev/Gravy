@@ -1,5 +1,4 @@
 ﻿using Gravy.Domain.Enums;
-using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 
 namespace Gravy.Domain.Entities;

@@ -15,20 +15,20 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
 
     // Constructor
     private Restaurant(Guid id, string name, string description, Email email, string phoneNumber,
-        Address address, string ownerName, OpeningHours openingHours) : base(id)
+        Address address, Guid ownerId, OpeningHours openingHours) : base(id)
     {
         Name = name;
         Description = description;
         Email = email;
         PhoneNumber = phoneNumber;
         Address = address;
-        OwnerName = ownerName;
+        OwnerId = ownerId;
         OpeningHours = openingHours;
         IsActive = true;
 
         RaiseDomainEvent(new RestaurantCreatedDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
+            Guid.NewGuid(),
+            Id,
             Name));
     }
 
@@ -37,12 +37,12 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
     }
 
     // Properties
+    public Guid OwnerId { get; private set; } // Reference to the User entity
     public string Name { get; private set; }
     public string Description { get; private set; }
     public Email Email { get; private set; }
     public string PhoneNumber { get; private set; }
     public Address Address { get; private set; }
-    public string OwnerName { get; private set; }
     public OpeningHours OpeningHours { get; private set; }
     public bool IsActive { get; private set; }
     public IReadOnlyCollection<MenuItem> MenuItems => _menuItems.AsReadOnly();
@@ -59,16 +59,17 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
         Email email,
         string phoneNumber,
         Address address,
-        string ownerName,
+        Guid ownerId,
         OpeningHours openingHours)
     {
-        return new Restaurant(id, 
-            name, 
-            description, 
-            email, 
-            phoneNumber, 
-            address, 
-            ownerName, 
+        return new Restaurant(
+            id,
+            name,
+            description,
+            email,
+            phoneNumber,
+            address,
+            ownerId,
             openingHours);
     }
 
@@ -147,4 +148,3 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
             menuItemId));
     }
 }
-
