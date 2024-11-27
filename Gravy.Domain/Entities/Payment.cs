@@ -1,35 +1,32 @@
 ﻿using Gravy.Domain.Enums;
-using Gravy.Domain.Errors;
-using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
-using Gravy.Domain.Shared;
-using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
 
 /// <summary>
-/// Represents a payment made for an order.
+/// Represents payment details for an order.
+/// Part of the Order Aggregate.
 /// </summary>
-public sealed class Payment : AggregateRoot, IAuditableEntity
+public sealed class Payment : IAuditableEntity
 {
     // Constructor
-    private Payment(Guid id, Guid orderId, Guid customerId, Money amount, PaymentMethod paymentMethod,
-        PaymentStatus paymentStatus, string transactionId) : base(id)
+    private Payment(Guid id, Guid orderId, decimal amount, PaymentMethod method,
+        string transactionId)
     {
+        Id = id;
         OrderId = orderId;
-        CustomerId = customerId;
         Amount = amount;
-        Method = paymentMethod;
-        Status = paymentStatus;
+        Method = method;
         TransactionId = transactionId;
+        Status = PaymentStatus.Pending;
     }
 
     private Payment() { }
 
     // Properties
+    public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
-    public Guid CustomerId { get; private set; }
-    public Money Amount { get; private set; }
+    public decimal Amount { get; private set; }
     public PaymentMethod Method { get; private set; }
     public PaymentStatus Status { get; private set; }
     public string TransactionId { get; private set; }
@@ -37,78 +34,32 @@ public sealed class Payment : AggregateRoot, IAuditableEntity
     public DateTime? ModifiedOnUtc { get; set; }
 
     /// <summary>
-    /// Factory method to create a new payment.
+    /// Factory method to create a payment.
     /// </summary>
-    public static Result<Payment> Create(
-        Guid id,
-        Guid orderId,
-        Guid customerId,
-        Money amount,
-        PaymentMethod paymentMethod,
+    public static Payment Create(Guid id, 
+        Guid orderId, 
+        decimal amount, 
+        PaymentMethod method, 
         string transactionId)
     {
-        if (amount == null || amount.Amount <= 0)
-            return Result.Failure<Payment>(DomainErrors.Payment.InvalidAmount);
-
-        if (string.IsNullOrWhiteSpace(transactionId))
-            return Result.Failure<Payment>(DomainErrors.Payment.TransactionIdEmpty);
-
-        var payment = new Payment(
-            id,
-            orderId,
-            customerId,
-            amount,
-            paymentMethod,
-            PaymentStatus.Pending,
-            transactionId);
-
-        payment.RaiseDomainEvent(new PaymentCreatedDomainEvent(
-            Guid.NewGuid(),
-            payment.Id,
-            payment.OrderId,
-            payment.Amount.Amount,
-            payment.Method,
-            payment.Status
-            ));
-
-        return payment;
+        return new Payment(id, orderId, amount, method, transactionId);
     }
 
     /// <summary>
-    /// Marks the payment as completed and raises a domain event.
+    /// Marks the payment as completed.
     /// </summary>
     public void MarkAsCompleted()
     {
-        if (Status != PaymentStatus.Pending)
-            throw new InvalidOperationException("Payment can only be completed if it is pending.");
-
         Status = PaymentStatus.Completed;
         ModifiedOnUtc = DateTime.UtcNow;
-
-        RaiseDomainEvent(new PaymentCompletedDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
-            OrderId, 
-            Amount.Amount, 
-            DateTime.UtcNow));
     }
 
     /// <summary>
-    /// Marks the payment as failed and raises a domain event.
+    /// Marks the payment as failed.
     /// </summary>
     public void MarkAsFailed()
     {
-        if (Status != PaymentStatus.Pending)
-            throw new InvalidOperationException("Payment can only be marked as failed if it is pending.");
-
         Status = PaymentStatus.Failed;
         ModifiedOnUtc = DateTime.UtcNow;
-
-        RaiseDomainEvent(new PaymentFailedDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
-            OrderId, 
-            Amount.Amount, 
-            DateTime.UtcNow));
     }
 }

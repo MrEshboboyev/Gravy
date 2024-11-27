@@ -1,18 +1,19 @@
 ﻿using Gravy.Domain.Enums;
-using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 
 namespace Gravy.Domain.Entities;
 
 /// <summary>
-/// Represents the delivery details for an order.
+/// Represents delivery details for an order.
+/// Part of the Order Aggregate.
 /// </summary>
-public sealed class Delivery : AggregateRoot, IAuditableEntity
+public sealed class Delivery : IAuditableEntity
 {
     // Constructor
     private Delivery(Guid id, Guid orderId, Guid deliveryPersonId, 
-        TimeSpan estimatedDeliveryTime) : base(id)
+        TimeSpan estimatedDeliveryTime) 
     {
+        Id = id;
         OrderId = orderId;
         DeliveryPersonId = deliveryPersonId;
         EstimatedDeliveryTime = estimatedDeliveryTime;
@@ -24,6 +25,7 @@ public sealed class Delivery : AggregateRoot, IAuditableEntity
     }
 
     // Properties
+    public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
     public Guid DeliveryPersonId { get; private set; }
     public DateTime? PickUpTime { get; private set; }
@@ -34,52 +36,14 @@ public sealed class Delivery : AggregateRoot, IAuditableEntity
     public DateTime? ModifiedOnUtc { get; set; }
 
     /// <summary>
-    /// Factory method to create a new delivery.
+    /// Factory method to create a delivery.
     /// </summary>
-    public static Delivery Create(
-        Guid id,
+    public static Delivery Create(Guid id, 
         Guid orderId, 
         Guid deliveryPersonId, 
         TimeSpan estimatedDeliveryTime)
     {
-        var delivery = new Delivery(
-            id,
-            orderId,
-            deliveryPersonId,
-            estimatedDeliveryTime);
-
-        return delivery;
-    }
-
-    /// <summary>
-    /// Assigns a delivery person to the delivery.
-    /// </summary>
-    public void AssignDeliveryPerson(Guid deliveryPersonId)
-    {
-        DeliveryPersonId = deliveryPersonId;
-        DeliveryStatus = DeliveryStatus.Assigned;
-        ModifiedOnUtc = DateTime.UtcNow;
-
-        this.RaiseDomainEvent(new DeliveryAssignedDomainEvent(
-            Guid.NewGuid(),
-            this.Id,
-            deliveryPersonId,
-            DateTime.UtcNow));
-    }
-
-    /// <summary>
-    /// Marks the delivery as picked up.
-    /// </summary>
-    public void MarkAsPickedUp()
-    {
-        DeliveryStatus = DeliveryStatus.PickedUp;
-        PickUpTime = DateTime.UtcNow;
-        ModifiedOnUtc = DateTime.UtcNow;
-
-        this.RaiseDomainEvent(new DeliveryPickedUpDomainEvent(
-            Guid.NewGuid(),
-            this.Id,
-            DateTime.UtcNow));
+        return new Delivery(id, orderId, deliveryPersonId, estimatedDeliveryTime);
     }
 
     /// <summary>
@@ -90,25 +54,6 @@ public sealed class Delivery : AggregateRoot, IAuditableEntity
         DeliveryStatus = DeliveryStatus.Delivered;
         ActualDeliveryTime = DateTime.UtcNow;
         ModifiedOnUtc = DateTime.UtcNow;
-
-        this.RaiseDomainEvent(new DeliveryCompletedDomainEvent(
-            Guid.NewGuid(),
-            this.Id,
-            DateTime.UtcNow));
-    }
-
-    /// <summary>
-    /// Marks the delivery as failed.
-    /// </summary>
-    public void MarkAsFailed()
-    {
-        DeliveryStatus = DeliveryStatus.Failed;
-        ModifiedOnUtc = DateTime.UtcNow;
-
-        this.RaiseDomainEvent(new DeliveryFailedDomainEvent(
-            Guid.NewGuid(),
-            this.Id,
-            DateTime.UtcNow));
     }
 }
 

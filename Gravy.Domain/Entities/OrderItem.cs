@@ -1,15 +1,16 @@
-﻿using Gravy.Domain.Events;
-using Gravy.Domain.Primitives;
+﻿using Gravy.Domain.Primitives;
 
 namespace Gravy.Domain.Entities;
 
 /// <summary>
-/// Represents an individual item within a customer's order.
+/// Represents an individual item in an order.
+/// Part of the Order Aggregate.
 /// </summary>
-public sealed class OrderItem : AggregateRoot, IAuditableEntity
+public sealed class OrderItem : IAuditableEntity
 {
-    private OrderItem(Guid id, Guid orderId, Guid menuItemId, int quantity, decimal price) : base(id)
+    private OrderItem(Guid id, Guid orderId, Guid menuItemId, int quantity, decimal price)
     {
+        Id = id;
         OrderId = orderId;
         MenuItemId = menuItemId;
         Quantity = quantity;
@@ -21,6 +22,7 @@ public sealed class OrderItem : AggregateRoot, IAuditableEntity
     }
 
     // Properties
+    public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
     public Guid MenuItemId { get; private set; }
     public int Quantity { get; private set; }
@@ -29,46 +31,14 @@ public sealed class OrderItem : AggregateRoot, IAuditableEntity
     public DateTime? ModifiedOnUtc { get; set; }
 
     /// <summary>
-    /// Factory method to create a new order item.
+    /// Factory method to create an order item.
     /// </summary>
-    public static OrderItem Create(
-        Guid id,
-        Guid orderId,
-        Guid menuItemId,
-        int quantity,
-        decimal price
-        )
+    public static OrderItem Create(Guid id, 
+        Guid orderId, 
+        Guid menuItemId, 
+        int quantity, 
+        decimal price)
     {
-        var orderItem = new OrderItem(
-            id,
-            orderId,
-            menuItemId,
-            quantity, 
-            price);
-
-        orderItem.RaiseDomainEvent(new OrderItemCreatedDomainEvent(
-            Guid.NewGuid(),
-            orderItem.Id,
-            orderItem.OrderId,
-            orderItem.MenuItemId,
-            orderItem.Quantity,
-            DateTime.UtcNow));
-
-        return orderItem;
-    }
-
-    /// <summary>
-    /// Updates the quantity of the order item.
-    /// </summary>
-    public void UpdateQuantity(int newQuantity)
-    {
-        Quantity = newQuantity;
-        ModifiedOnUtc = DateTime.UtcNow;
-
-        this.RaiseDomainEvent(new OrderItemUpdatedDomainEvent(
-            Guid.NewGuid(),
-            this.Id,
-            this.Quantity,
-            DateTime.UtcNow));
+        return new OrderItem(id, orderId, menuItemId, quantity, price);
     }
 }

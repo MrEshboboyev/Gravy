@@ -6,40 +6,48 @@ using Gravy.Domain.ValueObjects;
 namespace Gravy.Domain.Entities;
 
 /// <summary>
-/// Represents a customer's order in the system.
+/// Represents a customer's order.
+/// Acts as the root entity of the Order Aggregate.
 /// </summary>
 public sealed class Order : AggregateRoot, IAuditableEntity
 {
+    private readonly List<OrderItem> _orderItems = [];
+    private Delivery? _delivery;
+    private Payment? _payment;
+
     private Order(Guid id, 
-        Guid customerId, Guid restaurantId, Guid? deliveryId, 
-        decimal totalPrice, 
-        DeliveryAddress deliveryAddress, OrderStatus status, DateTime placedAt, DateTime? deliveredAt) : base(id)
+        Guid customerId, 
+        Guid restaurantId, 
+        DeliveryAddress deliveryAddress) : base(id)
     {
         CustomerId = customerId;
         RestaurantId = restaurantId;
-        DeliveryId = deliveryId;
-        TotalPrice = totalPrice;
         DeliveryAddress = deliveryAddress;
-        Status = status;
-        PlacedAt = placedAt;
-        DeliveredAt = deliveredAt;
+        Status = OrderStatus.Pending;
+        PlacedAt = DateTime.UtcNow;
+
+        RaiseDomainEvent(new OrderCreatedDomainEvent(
+            Guid.NewGuid(),
+            Id, 
+            CustomerId, 
+            PlacedAt));
     }
 
-    private Order()
-    {
-    }
+    private Order(){ }
 
     // Properties
     public Guid CustomerId { get; private set; }
     public Guid RestaurantId { get; private set; }
-    public Guid? DeliveryId { get; private set; }
-    public decimal TotalPrice { get; private set; }
     public DeliveryAddress DeliveryAddress { get; private set; }
     public OrderStatus Status { get; private set; }
-    public DateTime PlacedAt { get; set; }
-    public DateTime? DeliveredAt { get; set; }
+    public DateTime PlacedAt { get; private set; }
+    public DateTime? DeliveredAt { get; private set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
+
+    public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
+    public Delivery? Delivery => _delivery;
+    public Payment? Payment => _payment;
 
     /// <summary>
     /// Factory method to create a new order.
@@ -48,59 +56,90 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         Guid id,
         Guid customerId, 
         Guid restaurantId, 
-        Guid? deliveryId, 
-        decimal totalPrice,
         DeliveryAddress deliveryAddress
         )
     {
-        var order = new Order(
-            id,
-            customerId,
-            restaurantId,
-            deliveryId,
-            totalPrice,
-            deliveryAddress,
-            OrderStatus.Pending, // Default status
-            DateTime.UtcNow,
-            null);
-
-        order.RaiseDomainEvent(new OrderCreatedDomainEvent(
-            Guid.NewGuid(),
-            order.Id,
-            order.CustomerId,
-            DateTime.UtcNow));
-
-        return order;
+        return new Order(id, 
+            customerId, 
+            restaurantId, 
+            deliveryAddress);
     }
 
     /// <summary>
-    /// Updates the delivery status of the order.
+    /// Adds an item to the order.
     /// </summary>
-    public void UpdateStatus(OrderStatus newStatus)
+    public void AddOrderItem(Guid menuItemId, int quantity, decimal price)
     {
-        Status = newStatus;
+        var orderItem = OrderItem.Create(Guid.NewGuid(), Id, menuItemId, quantity, price);
+        _orderItems.Add(orderItem);
         ModifiedOnUtc = DateTime.UtcNow;
 
-        this.RaiseDomainEvent(new OrderStatusChangedDomainEvent(
+        RaiseDomainEvent(new OrderItemAddedDomainEvent(
             Guid.NewGuid(),
-            this.Id,
-            this.Status,
-            newStatus,
+            Id, // OrderId
+            orderItem.Id, // OrderItemId
+            menuItemId,
+            quantity,
+            price));
+    }
+
+
+    /// <summary>
+    /// Assigns a delivery to the order.
+    /// </summary>
+    public void AssignDelivery(Guid deliveryId, Guid deliveryPersonId, TimeSpan estimatedDeliveryTime)
+    {
+        if (_delivery != null)
+            throw new InvalidOperationException("Delivery is already assigned to this order.");
+
+        _delivery = Delivery.Create(deliveryId, Id, deliveryPersonId, estimatedDeliveryTime);
+        Status = OrderStatus.OnTheWay;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new DeliveryAssignedDomainEvent(
+            Guid.NewGuid(), 
+            deliveryId, 
+            deliveryPersonId, 
             DateTime.UtcNow));
     }
 
     /// <summary>
-    /// Marks the order as delivered.
+    /// Sets the payment for the order.
     /// </summary>
-    public void MarkAsDelivered()
+    public void SetPayment(Guid paymentId, decimal amount, PaymentMethod method, string transactionId)
     {
+        if (_payment != null)
+            throw new InvalidOperationException("Payment is already set for this order.");
+
+        _payment = Payment.Create(paymentId, Id, amount, method, transactionId);
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new PaymentSetDomainEvent(
+            Guid.NewGuid(),
+            Id, // OrderId
+            paymentId,
+            amount,
+            method,
+            transactionId));
+    }
+
+
+    /// <summary>
+    /// Marks the delivery as completed and updates the order status.
+    /// </summary>
+    public void CompleteDelivery()
+    {
+        if (_delivery == null)
+            throw new InvalidOperationException("No delivery is assigned to this order.");
+
+        _delivery.MarkAsDelivered();
         Status = OrderStatus.Delivered;
         DeliveredAt = DateTime.UtcNow;
         ModifiedOnUtc = DateTime.UtcNow;
 
-        this.RaiseDomainEvent(new OrderDeliveredDomainEvent(
-            Guid.NewGuid(),
-            this.Id,
-            DateTime.UtcNow));
+        RaiseDomainEvent(new OrderDeliveredDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            DeliveredAt.Value));
     }
 }
