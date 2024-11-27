@@ -5,14 +5,16 @@ using Gravy.Domain.Primitives;
 namespace Gravy.Domain.Entities;
 
 /// <summary>
-/// Represents a menu item in the system.
+/// Represents a menu item offered by a restaurant.
+/// Part of the Restaurant aggregate.
 /// </summary>
-public sealed class MenuItem : AggregateRoot, IAuditableEntity
+public sealed class MenuItem : IAuditableEntity
 {
     // Constructor
-    private MenuItem(Guid id, string name, string description, decimal price, Category category,
-        bool isAvailable, Guid restaurantId) : base(id)
+    private MenuItem(Guid id, Guid restaurantId, string name, string description, 
+        decimal price, Category category, bool isAvailable)
     {
+        Id = id;
         Name = name;
         Description = description;
         Price = price;
@@ -26,6 +28,8 @@ public sealed class MenuItem : AggregateRoot, IAuditableEntity
     }
 
     // Properties
+    public Guid Id { get; private set; }
+    public Guid RestaurantId { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
     public decimal Price { get; private set; }
@@ -33,52 +37,38 @@ public sealed class MenuItem : AggregateRoot, IAuditableEntity
     public bool IsAvailable { get; private set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
-    public Guid RestaurantId { get; private set; }
 
     /// <summary>
-    /// Creates a new menu item.
+    /// Factory method to create a menu item.
     /// </summary>
     public static MenuItem Create(
         Guid id,
+        Guid restaurantId,
         string name,
         string description,
         decimal price,
         Category category,
-        bool isAvailable, 
-        Guid restaurantId
-        )
+        bool isAvailable)
     {
-        var menuItem = new MenuItem(
-            id,
-            name,
-            description,
-            price,
-            category,
-            isAvailable, 
-            restaurantId);
-
-        menuItem.RaiseDomainEvent(new MenuItemCreatedDomainEvent(
-            Guid.NewGuid(),
-            menuItem.Id));
-
-        return menuItem;
+        return new MenuItem(
+            id, 
+            restaurantId, 
+            name, 
+            description, 
+            price, 
+            category, 
+            isAvailable);
     }
 
     /// <summary>
-    /// Marks the menu item as unavailable.
+    /// Updates the menu item's details.
     /// </summary>
-    public void MarkAsUnavailable()
+    public void UpdateDetails(string name, string description, decimal price, bool isAvailable)
     {
-        IsAvailable = false;
-        ModifiedOnUtc = DateTime.UtcNow;
-    }
-
-    /// <summary>
-    /// Updates the price of the menu item.
-    /// </summary>
-    public void UpdatePrice(decimal newPrice)
-    {
-        Price = newPrice;
+        Name = name;
+        Description = description;
+        Price = price;
+        IsAvailable = isAvailable;
         ModifiedOnUtc = DateTime.UtcNow;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Gravy.Domain.Events;
+﻿using Gravy.Domain.Enums;
+using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 using Gravy.Domain.ValueObjects;
 
@@ -6,12 +7,15 @@ namespace Gravy.Domain.Entities;
 
 /// <summary>
 /// Represents a restaurant in the system.
+/// Acts as the aggregate root for restaurant-related data.
 /// </summary>
 public sealed class Restaurant : AggregateRoot, IAuditableEntity
 {
+    private readonly List<MenuItem> _menuItems = [];
+
     // Constructor
     private Restaurant(Guid id, string name, string description, Email email, string phoneNumber,
-        Address address, string ownerName, OpeningHours openingHours, bool isActive) : base(id)
+        Address address, string ownerName, OpeningHours openingHours) : base(id)
     {
         Name = name;
         Description = description;
@@ -20,7 +24,12 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
         Address = address;
         OwnerName = ownerName;
         OpeningHours = openingHours;
-        IsActive = isActive;
+        IsActive = true;
+
+        RaiseDomainEvent(new RestaurantCreatedDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            Name));
     }
 
     private Restaurant()
@@ -36,40 +45,53 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
     public string OwnerName { get; private set; }
     public OpeningHours OpeningHours { get; private set; }
     public bool IsActive { get; private set; }
+    public IReadOnlyCollection<MenuItem> MenuItems => _menuItems.AsReadOnly();
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
 
     /// <summary>
-    /// Creates a new restaurant.
+    /// Factory method to create a new restaurant.
     /// </summary>
     public static Restaurant Create(
         Guid id,
         string name,
         string description,
-        Email email, 
+        Email email,
         string phoneNumber,
-        Address address, 
-        string ownerName, 
-        OpeningHours openingHours, 
-        bool isActive
-        )
+        Address address,
+        string ownerName,
+        OpeningHours openingHours)
     {
-        var restaurant = new Restaurant(
-            id,
-            name,
-            description,
+        return new Restaurant(id, 
+            name, 
+            description, 
             email, 
             phoneNumber, 
             address, 
             ownerName, 
-            openingHours,
-            isActive);
+            openingHours);
+    }
 
-        restaurant.RaiseDomainEvent(new RestaurantCreatedDomainEvent(
-            Guid.NewGuid(),
-            restaurant.Id));
+    /// <summary>
+    /// Updates the restaurant's details.
+    /// </summary>
+    public void UpdateDetails(string name, 
+        string description, 
+        Email email, 
+        string phoneNumber, 
+        Address address)
+    {
+        Name = name;
+        Description = description;
+        Email = email;
+        PhoneNumber = phoneNumber;
+        Address = address;
+        ModifiedOnUtc = DateTime.UtcNow;
 
-        return restaurant;
+        RaiseDomainEvent(new RestaurantUpdatedDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            Name));
     }
 
     /// <summary>
@@ -79,6 +101,50 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
     {
         IsActive = false;
         ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new RestaurantDeactivatedDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            Name));
+    }
+
+    /// <summary>
+    /// Adds a new menu item to the restaurant.
+    /// </summary>
+    public void AddMenuItem(
+        Guid menuItemId, 
+        string name, 
+        string description, 
+        decimal price, 
+        Category category)
+    {
+        var menuItem = MenuItem.Create(menuItemId, Id, name, description, price, category, true);
+        _menuItems.Add(menuItem);
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new MenuItemAddedDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            menuItemId, 
+            name, 
+            price, 
+            category));
+    }
+
+    /// <summary>
+    /// Removes a menu item from the restaurant's menu.
+    /// </summary>
+    public void RemoveMenuItem(Guid menuItemId)
+    {
+        var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId) 
+            ?? throw new InvalidOperationException("Menu item not found.");
+        _menuItems.Remove(menuItem);
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new MenuItemRemovedDomainEvent(
+            Guid.NewGuid(), 
+            Id, 
+            menuItemId));
     }
 }
 
