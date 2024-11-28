@@ -26,6 +26,17 @@ public static class DomainErrors
                "The provided credentials are invalid");
     }
 
+    public static class Restaurant
+    {
+        public static readonly Func<Guid, Error> NotFound = id => new Error(
+                "Restaurant.NotFound",
+                $"The restaurant with the identifier {id} was not found.");
+
+        public static readonly Error NotExist = new(
+                "Restaurant.NotExist",
+                $"There is no restaurants");
+    }
+
     public static class Email
     {
         public static readonly Error Empty = new(
