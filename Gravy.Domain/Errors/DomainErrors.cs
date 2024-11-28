@@ -13,7 +13,7 @@ public static class DomainErrors
             "User.EmailAlreadyInUse",
             "The specified email is already in use");
 
-        public static readonly Func<Guid, Error> NotFound = id => new Error(
+        public static readonly Func<Guid, Error> NotFound = id => new(
                 "User.NotFound",
                 $"The user with the identifier {id} was not found.");
 
@@ -28,9 +28,13 @@ public static class DomainErrors
 
     public static class Restaurant
     {
-        public static readonly Func<Guid, Error> NotFound = id => new Error(
+        public static readonly Func<Guid, Error> NotFound = id => new(
                 "Restaurant.NotFound",
                 $"The restaurant with the identifier {id} was not found.");
+
+        public static readonly Func<string, Error> NoRestaurantsFound = searchTerm => new(
+                "Restaurant.NoRestaurantsFound",
+                $"No restaurants were found matching this {searchTerm}.");
 
         public static readonly Error NotExist = new(
                 "Restaurant.NotExist",
