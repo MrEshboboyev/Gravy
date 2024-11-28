@@ -41,6 +41,17 @@ public static class DomainErrors
                 $"There is no restaurants");
     }
 
+    public static class Order
+    {
+        public static readonly Func<Guid, Error> NotFound = id => new(
+                "Order.NotFound",
+                $"The Order with the identifier {id} was not found.");
+
+        public static readonly Error NotExist = new(
+                "Order.NotExist",
+                $"There is no orders");
+    }
+
     public static class Email
     {
         public static readonly Error Empty = new(

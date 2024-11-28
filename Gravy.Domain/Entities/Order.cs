@@ -123,6 +123,22 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             transactionId));
     }
 
+    /// <summary>
+    /// Marks the payment as completed
+    /// </summary>
+    public void CompletePayment()
+    {
+        if (_payment == null)
+            throw new InvalidOperationException("No delivery is setted to this order.");
+
+        _payment.MarkAsCompleted();
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new PaymentCompletedDomainEvent(
+            Guid.NewGuid(),
+            Id, // OrderId
+            DateTime.UtcNow));
+    }
 
     /// <summary>
     /// Marks the delivery as completed and updates the order status.
