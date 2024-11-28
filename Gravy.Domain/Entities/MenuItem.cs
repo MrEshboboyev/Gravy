@@ -14,12 +14,12 @@ public sealed class MenuItem : IAuditableEntity
         decimal price, Category category, bool isAvailable)
     {
         Id = id;
+        RestaurantId = restaurantId;
         Name = name;
         Description = description;
         Price = price;
         Category = category;
         IsAvailable = isAvailable;
-        RestaurantId = restaurantId;
     }
 
     private MenuItem()
