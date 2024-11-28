@@ -12,8 +12,8 @@ namespace Gravy.Domain.Entities;
 public sealed class Order : AggregateRoot, IAuditableEntity
 {
     private readonly List<OrderItem> _orderItems = [];
-    private Delivery? _delivery;
-    private Payment? _payment;
+    private Delivery _delivery;
+    private Payment _payment;
 
     private Order(Guid id, 
         Guid customerId, 
@@ -46,8 +46,8 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public DateTime? ModifiedOnUtc { get; set; }
 
     public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
-    public Delivery? Delivery => _delivery;
-    public Payment? Payment => _payment;
+    public Delivery Delivery => _delivery;
+    public Payment Payment => _payment;
 
     /// <summary>
     /// Factory method to create a new order.

@@ -4,7 +4,7 @@ namespace Gravy.Domain.Repositories;
 
 public interface IOrderRepository : IRepository<Order>
 {
-    Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Order> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<List<Order>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
     Task<List<Order>> GetByRestaurantIdAsync(Guid restaurantId, CancellationToken cancellationToken = default);
     void Add(Order order);

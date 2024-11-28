@@ -9,4 +9,4 @@ public sealed record RestaurantResponse(
     string Address, 
     Guid OwnerId,
     TimeSpan[] OpeningHours, 
-    IReadOnlyCollection<MenuItemResponse> MenuItemResponses);
+    IReadOnlyCollection<MenuItemResponse> MenuItems);
