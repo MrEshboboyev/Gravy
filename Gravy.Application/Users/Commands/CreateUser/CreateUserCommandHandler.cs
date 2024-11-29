@@ -32,14 +32,12 @@ internal sealed class CreateUserCommandHandler(
         Result<LastName> lastNameResult = LastName.Create(request.LastName);
         string passwordHash = _passwordHasher.Hash(request.Password);
 
-        var user = await User.CreateAsync(
+        var user = User.Create(
             Guid.NewGuid(),
             emailResult.Value,
             passwordHash,
             firstNameResult.Value,
-            lastNameResult.Value,
-            _roleRepository,
-            cancellationToken
+            lastNameResult.Value
             );
 
         _userRepository.Add(user);
