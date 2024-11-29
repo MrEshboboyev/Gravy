@@ -10,12 +10,16 @@ using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Orders;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Gravy.Presentation.Controllers;
 
 [Route("api/orders")]
-public sealed class OrderController(ISender sender) : ApiController(sender)
+public sealed class OrdersController(ISender sender) : ApiController(sender)
 {
+    private Guid GetUserId() =>
+        Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetOrderById(Guid id, CancellationToken cancellationToken)
     {
@@ -30,7 +34,7 @@ public sealed class OrderController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var command = new CreateOrderCommand(
-            request.CustomerId,
+            GetUserId(),
             request.RestaurantId,
             request.Street,
             request.City,

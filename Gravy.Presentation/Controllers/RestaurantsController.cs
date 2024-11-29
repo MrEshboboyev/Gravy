@@ -17,11 +17,12 @@ namespace Gravy.Presentation.Controllers;
 
 [Authorize]
 [Route("api/restaurants")]
-public sealed class RestaurantController(ISender sender) : ApiController(sender)
+public sealed class RestaurantsController(ISender sender) : ApiController(sender)
 {
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
+    [AllowAnonymous]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetRestaurantById(Guid id, CancellationToken cancellationToken)
     {
@@ -30,6 +31,7 @@ public sealed class RestaurantController(ISender sender) : ApiController(sender)
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
 
+    [AllowAnonymous]
     [HttpGet("search")]
     public async Task<IActionResult> SearchRestaurantsByName(
         [FromQuery] string name,

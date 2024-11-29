@@ -31,7 +31,16 @@ internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurant
             price,
             category);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return Result.Failure(
+                DomainErrors.Restaurant.Concurrency);
+        }
 
         return Result.Success();
     }

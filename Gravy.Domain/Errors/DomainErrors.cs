@@ -39,6 +39,11 @@ public static class DomainErrors
         public static readonly Error NotExist = new(
                 "Restaurant.NotExist",
                 $"There is no restaurants");
+
+
+        public static readonly Error Concurrency = new(
+                "Restaurant.Concurrency",
+                $"DbUpdateConcurrencyException");
     }
 
     public static class Order

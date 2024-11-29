@@ -121,7 +121,6 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
     {
         var menuItem = MenuItem.Create(menuItemId, Id, name, description, price, category, true);
         _menuItems.Add(menuItem);
-        ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new MenuItemAddedDomainEvent(
             Guid.NewGuid(), 
