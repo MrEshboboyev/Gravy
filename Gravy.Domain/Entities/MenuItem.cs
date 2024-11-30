@@ -7,19 +7,26 @@ namespace Gravy.Domain.Entities;
 /// Represents a menu item offered by a restaurant.
 /// Part of the Restaurant aggregate.
 /// </summary>
-public sealed class MenuItem : IAuditableEntity
+public sealed class MenuItem : Entity
 {
     // Constructor
-    private MenuItem(Guid id, Guid restaurantId, string name, string description, 
-        decimal price, Category category, bool isAvailable)
+    internal MenuItem(
+        Guid id, 
+        Guid restaurantId, 
+        string name, 
+        string description, 
+        decimal price, 
+        Category category, 
+        bool isAvailable) 
+        : base(id)
     {
-        Id = id;
         RestaurantId = restaurantId;
         Name = name;
         Description = description;
         Price = price;
         Category = category;
         IsAvailable = isAvailable;
+        CreatedOnUtc = DateTime.UtcNow;
     }
 
     private MenuItem()
@@ -27,37 +34,14 @@ public sealed class MenuItem : IAuditableEntity
     }
 
     // Properties
-    public Guid Id { get; private set; }
     public Guid RestaurantId { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
     public decimal Price { get; private set; }
     public Category Category { get; private set; }
     public bool IsAvailable { get; private set; }
-    public DateTime CreatedOnUtc { get; set; }
-    public DateTime? ModifiedOnUtc { get; set; }
-
-    /// <summary>
-    /// Factory method to create a menu item.
-    /// </summary>
-    public static MenuItem Create(
-        Guid id,
-        Guid restaurantId,
-        string name,
-        string description,
-        decimal price,
-        Category category,
-        bool isAvailable)
-    {
-        return new MenuItem(
-            id, 
-            restaurantId, 
-            name, 
-            description, 
-            price, 
-            category, 
-            isAvailable);
-    }
+    public DateTime CreatedOnUtc { get; private set; }
+    public DateTime? ModifiedOnUtc { get; private set; }
 
     /// <summary>
     /// Updates the menu item's details.

@@ -9,7 +9,7 @@ namespace Gravy.Domain.Entities;
 /// Represents a restaurant in the system.
 /// Acts as the aggregate root for restaurant-related data.
 /// </summary>
-public sealed class Restaurant : AggregateRoot, IAuditableEntity
+public sealed class Restaurant : AggregateRoot
 {
     private readonly List<MenuItem> _menuItems = [];
 
@@ -46,8 +46,8 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
     public OpeningHours OpeningHours { get; private set; }
     public bool IsActive { get; private set; }
     public IReadOnlyCollection<MenuItem> MenuItems => _menuItems.AsReadOnly();
-    public DateTime CreatedOnUtc { get; set; }
-    public DateTime? ModifiedOnUtc { get; set; }
+    public DateTime CreatedOnUtc { get; private set; }
+    public DateTime? ModifiedOnUtc { get; private set; }
 
     /// <summary>
     /// Factory method to create a new restaurant.
@@ -113,22 +113,21 @@ public sealed class Restaurant : AggregateRoot, IAuditableEntity
     /// Adds a new menu item to the restaurant.
     /// </summary>
     public void AddMenuItem(
-        Guid menuItemId, 
         string name, 
         string description, 
         decimal price, 
         Category category)
     {
-        var menuItem = MenuItem.Create(menuItemId, Id, name, description, price, category, true);
+        var menuItem = new MenuItem(Guid.NewGuid(), Id, name, description, price, category, true);
         _menuItems.Add(menuItem);
 
-        RaiseDomainEvent(new MenuItemAddedDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
-            menuItemId, 
-            name, 
-            price, 
-            category));
+        //RaiseDomainEvent(new MenuItemAddedDomainEvent(
+        //    Guid.NewGuid(), 
+        //    Id, 
+        //    menuItemId, 
+        //    name, 
+        //    price, 
+        //    category));
     }
 
     /// <summary>
