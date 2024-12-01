@@ -25,6 +25,7 @@ internal sealed class GetRestaurantByIdQueryHandler(IRestaurantRepository restau
 
         var response = new RestaurantResponse(
             restaurant.Id,
+            restaurant.IsActive,
             restaurant.Name,
             restaurant.Description,
             restaurant.Email.Value,

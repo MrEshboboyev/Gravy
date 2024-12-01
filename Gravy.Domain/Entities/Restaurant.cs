@@ -97,6 +97,22 @@ public sealed class Restaurant : AggregateRoot
             Name));
     }
 
+
+    /// <summary>
+    /// Marks the restaurant as active.
+    /// </summary>
+    public void Activate()
+    {
+        IsActive = true;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new RestaurantDeactivatedDomainEvent(
+            Guid.NewGuid(),
+            Id,
+            Name));
+    }
+
+
     /// <summary>
     /// Marks the restaurant as inactive.
     /// </summary>

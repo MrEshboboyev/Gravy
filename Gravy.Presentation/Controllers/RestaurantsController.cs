@@ -1,4 +1,5 @@
-﻿using Gravy.Application.Restaurants.Commands.AddMenuItem;
+﻿using Gravy.Application.Restaurants.Commands.ActivateRestaurant;
+using Gravy.Application.Restaurants.Commands.AddMenuItem;
 using Gravy.Application.Restaurants.Commands.CreateRestaurant;
 using Gravy.Application.Restaurants.Commands.DeactivateRestaurant;
 using Gravy.Application.Restaurants.Commands.RemoveMenuItem;
@@ -129,7 +130,20 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         return NoContent();
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpPut("{id:guid}/activate")]
+    public async Task<IActionResult> ActivateRestaurant(Guid id, CancellationToken cancellationToken)
+    {
+        var command = new ActivateRestaurantCommand(id);
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/deactivate")]
     public async Task<IActionResult> DeactivateRestaurant(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeactivateRestaurantCommand(id);

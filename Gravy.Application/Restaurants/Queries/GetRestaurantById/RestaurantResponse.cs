@@ -2,6 +2,7 @@
 
 public sealed record RestaurantResponse(
     Guid Id,
+    bool IsActive,
     string Name, 
     string Description, 
     string Email, 

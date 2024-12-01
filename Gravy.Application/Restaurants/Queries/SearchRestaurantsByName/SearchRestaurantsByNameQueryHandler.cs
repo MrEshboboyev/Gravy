@@ -28,6 +28,7 @@ internal sealed class SearchRestaurantsByNameQueryHandler(IRestaurantRepository 
         var response = new RestaurantListResponse(
             restaurants.Select(restaurant => new RestaurantResponse(
                 restaurant.Id,
+                restaurant.IsActive,
                 restaurant.Name,
                 restaurant.Description,
                 restaurant.Email.Value,
