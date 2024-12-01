@@ -1,6 +1,7 @@
 ﻿using Gravy.Domain.Enums;
 using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
+using Gravy.Domain.Shared;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
@@ -112,7 +113,7 @@ public sealed class Restaurant : AggregateRoot
     /// <summary>
     /// Adds a new menu item to the restaurant.
     /// </summary>
-    public void AddMenuItem(
+    public Result<MenuItem> AddMenuItem(
         string name, 
         string description, 
         decimal price, 
@@ -121,13 +122,15 @@ public sealed class Restaurant : AggregateRoot
         var menuItem = new MenuItem(Guid.NewGuid(), Id, name, description, price, category, true);
         _menuItems.Add(menuItem);
 
-        //RaiseDomainEvent(new MenuItemAddedDomainEvent(
-        //    Guid.NewGuid(), 
-        //    Id, 
-        //    menuItemId, 
-        //    name, 
-        //    price, 
-        //    category));
+        RaiseDomainEvent(new MenuItemAddedDomainEvent(
+            Guid.NewGuid(),
+            Id,
+            menuItem.Id,
+            name,
+            price,
+            category));
+
+        return menuItem;
     }
 
     /// <summary>

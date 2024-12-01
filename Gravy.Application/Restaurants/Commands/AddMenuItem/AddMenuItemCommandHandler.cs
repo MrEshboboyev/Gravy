@@ -1,4 +1,5 @@
 ﻿using Gravy.Application.Abstractions.Messaging;
+using Gravy.Domain.Entities;
 using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
@@ -6,10 +7,12 @@ using Gravy.Domain.Shared;
 namespace Gravy.Application.Restaurants.Commands.AddMenuItem;
 
 internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurantRepository,
+    IMenuItemRepository menuItemRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<AddMenuItemCommand>
 {
     private readonly IRestaurantRepository _restaurantRepository = restaurantRepository;
+    private readonly IMenuItemRepository _menuItemRepository = menuItemRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Result> Handle(AddMenuItemCommand request, CancellationToken cancellationToken)
@@ -24,24 +27,16 @@ internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurant
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
 
-        restaurant.AddMenuItem(
-            Guid.NewGuid(),
+        Result<MenuItem> menuItem = restaurant.AddMenuItem(
             name,
             description,
             price,
             category);
 
-        try
-        {
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-            return Result.Failure(
-                DomainErrors.Restaurant.Concurrency);
-        }
+        _menuItemRepository.Add(menuItem.Value);
 
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         return Result.Success();
     }
 }
