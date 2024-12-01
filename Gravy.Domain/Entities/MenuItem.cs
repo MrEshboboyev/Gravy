@@ -46,11 +46,17 @@ public sealed class MenuItem : Entity
     /// <summary>
     /// Updates the menu item's details.
     /// </summary>
-    public void UpdateDetails(string name, string description, decimal price, bool isAvailable)
+    public void UpdateDetails(
+        string name, 
+        string description, 
+        decimal price, 
+        Category category, 
+        bool isAvailable)
     {
         Name = name;
         Description = description;
         Price = price;
+        Category = category;
         IsAvailable = isAvailable;
         ModifiedOnUtc = DateTime.UtcNow;
     }

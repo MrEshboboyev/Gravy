@@ -97,7 +97,6 @@ public sealed class Restaurant : AggregateRoot
             Name));
     }
 
-
     /// <summary>
     /// Marks the restaurant as active.
     /// </summary>
@@ -111,7 +110,6 @@ public sealed class Restaurant : AggregateRoot
             Id,
             Name));
     }
-
 
     /// <summary>
     /// Marks the restaurant as inactive.
@@ -171,5 +169,37 @@ public sealed class Restaurant : AggregateRoot
             menuItemId));
 
         return Result.Success();
+    }
+
+    public Result<MenuItem> UpdateMenuItem(
+        Guid menuItemId, 
+        string name, 
+        string description, 
+        decimal price, 
+        Category category, 
+        bool isAvailable)
+    {
+        // Find the menu item in the aggregate
+        var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId);
+        if (menuItem is null)
+        {
+            return Result.Failure<MenuItem>(
+                DomainErrors.Restaurant.MenuItemNotFound(Id, menuItemId));
+        }
+
+        // Update menu item details
+        menuItem.UpdateDetails(name, description, price, category, isAvailable);
+
+        // Optional: Raise domain event for tracking changes
+        RaiseDomainEvent(new MenuItemUpdatedDomainEvent(
+            Guid.NewGuid(),
+            Id,
+            menuItem.Id,
+            name,
+            price,
+            category,
+            isAvailable));
+
+        return menuItem;
     }
 }

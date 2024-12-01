@@ -3,9 +3,11 @@ using Gravy.Application.Restaurants.Commands.AddMenuItem;
 using Gravy.Application.Restaurants.Commands.CreateRestaurant;
 using Gravy.Application.Restaurants.Commands.DeactivateRestaurant;
 using Gravy.Application.Restaurants.Commands.RemoveMenuItem;
+using Gravy.Application.Restaurants.Commands.UpdateMenuItem;
 using Gravy.Application.Restaurants.Commands.UpdateRestaurant;
 using Gravy.Application.Restaurants.Queries.GetRestaurantById;
 using Gravy.Application.Restaurants.Queries.SearchRestaurantsByName;
+using Gravy.Domain.Enums;
 using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Restaurants;
@@ -69,6 +71,56 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
            result.Value);
     }
 
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateRestaurant(
+      Guid id,
+      [FromBody] UpdateRestaurantRequest request,
+      CancellationToken cancellationToken)
+    {
+        var command = new UpdateRestaurantCommand(
+            id,
+            request.Name,
+            request.Description,
+            request.Email,
+            request.PhoneNumber,
+            request.Address);
+
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/activate")]
+    public async Task<IActionResult> ActivateRestaurant(Guid id, CancellationToken cancellationToken)
+    {
+        var command = new ActivateRestaurantCommand(id);
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/deactivate")]
+    public async Task<IActionResult> DeactivateRestaurant(Guid id, CancellationToken cancellationToken)
+    {
+        var command = new DeactivateRestaurantCommand(id);
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+
     [HttpPost("{restaurantId:guid}/menu-items")]
     public async Task<IActionResult> AddMenuItem(
         Guid restaurantId,
@@ -107,46 +159,23 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         return NoContent();
     }
 
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateRestaurant(
-        Guid id,
-        [FromBody] UpdateRestaurantRequest request,
+
+    [HttpPut("{restaurantId:guid}/menu-items/{menuItemId:guid}")]
+    public async Task<IActionResult> UpdateMenuItem(
+        Guid restaurantId,
+        Guid menuItemId,
+        [FromBody] UpdateMenuItemRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateRestaurantCommand(
-            id,
+        var command = new UpdateMenuItemCommand(
+            restaurantId,
+            menuItemId,
             request.Name,
             request.Description,
-            request.Email,
-            request.PhoneNumber,
-            request.Address);
+            request.Price,
+            request.Category,
+            request.IsAvailable);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
-    }
-
-    [HttpPut("{id:guid}/activate")]
-    public async Task<IActionResult> ActivateRestaurant(Guid id, CancellationToken cancellationToken)
-    {
-        var command = new ActivateRestaurantCommand(id);
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
-    }
-
-    [HttpPut("{id:guid}/deactivate")]
-    public async Task<IActionResult> DeactivateRestaurant(Guid id, CancellationToken cancellationToken)
-    {
-        var command = new DeactivateRestaurantCommand(id);
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
         {

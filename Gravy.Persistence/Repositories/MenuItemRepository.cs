@@ -9,4 +9,7 @@ public sealed class MenuItemRepository(ApplicationDbContext dbContext) : IMenuIt
 
     public void Add(MenuItem menuItem) =>
         _dbContext.Set<MenuItem>().Add(menuItem);
+
+    public void Update(MenuItem menuItem) =>
+        _dbContext.Set<MenuItem>().Update(menuItem);
 }
