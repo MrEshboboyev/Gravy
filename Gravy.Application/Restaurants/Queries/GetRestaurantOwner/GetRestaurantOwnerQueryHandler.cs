@@ -59,7 +59,7 @@ internal sealed class GetRestaurantOwnerQueryHandler(
             )).ToList()
         );
 
-        var ownerFullName = $"{owner.FirstName} {owner.LastName}";
+        var ownerFullName = $"{owner.FirstName.Value} {owner.LastName.Value}";
 
         var response = new RestaurantOwnerResponse(
             owner.Email.Value,

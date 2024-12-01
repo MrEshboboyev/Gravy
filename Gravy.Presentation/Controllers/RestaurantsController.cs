@@ -5,7 +5,9 @@ using Gravy.Application.Restaurants.Commands.DeactivateRestaurant;
 using Gravy.Application.Restaurants.Commands.RemoveMenuItem;
 using Gravy.Application.Restaurants.Commands.UpdateMenuItem;
 using Gravy.Application.Restaurants.Commands.UpdateRestaurant;
+using Gravy.Application.Restaurants.Queries.GetMenuItemsByCategory;
 using Gravy.Application.Restaurants.Queries.GetRestaurantById;
+using Gravy.Application.Restaurants.Queries.GetRestaurantOwner;
 using Gravy.Application.Restaurants.Queries.SearchRestaurantsByName;
 using Gravy.Domain.Enums;
 using Gravy.Domain.Shared;
@@ -22,6 +24,7 @@ namespace Gravy.Presentation.Controllers;
 [Route("api/restaurants")]
 public sealed class RestaurantsController(ISender sender) : ApiController(sender)
 {
+    #region Restaurant
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
@@ -119,7 +122,31 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
 
         return NoContent();
     }
+    #endregion
 
+    #region MenuItem
+    [AllowAnonymous]
+    [HttpGet("{restaurantId:guid}/menu-items")]
+    public async Task<IActionResult> GetMenuItemsByCategory(
+        Guid restaurantId,
+        [FromQuery] Category category, 
+        CancellationToken cancellationToken)
+    {
+        var query = new GetMenuItemsByCategoryQuery(restaurantId, category);
+        Result<MenuItemListResponse> response = await Sender.Send(query, cancellationToken);
+        return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("{restaurantId:guid}/owner")]
+    public async Task<IActionResult> GetRestaurantOwner(
+        Guid restaurantId,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetRestaurantOwnerQuery(restaurantId);
+        Result<RestaurantOwnerResponse> response = await Sender.Send(query, cancellationToken);
+        return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
+    }
 
     [HttpPost("{restaurantId:guid}/menu-items")]
     public async Task<IActionResult> AddMenuItem(
@@ -184,4 +211,5 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
 
         return NoContent();
     }
+    #endregion
 }
