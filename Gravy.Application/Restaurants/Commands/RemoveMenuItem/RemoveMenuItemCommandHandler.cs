@@ -23,7 +23,13 @@ internal sealed class RemoveMenuItemCommandHandler(IRestaurantRepository restaur
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
 
-        restaurant.RemoveMenuItem(menuItemId);
+        // handle result errors 
+        var removeResult = restaurant.RemoveMenuItem(menuItemId);
+        if (removeResult.IsFailure)
+        {
+            return Result.Failure(
+                removeResult.Error);
+        }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

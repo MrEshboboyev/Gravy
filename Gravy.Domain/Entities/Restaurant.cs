@@ -1,4 +1,5 @@
 ﻿using Gravy.Domain.Enums;
+using Gravy.Domain.Errors;
 using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 using Gravy.Domain.Shared;
@@ -136,10 +137,15 @@ public sealed class Restaurant : AggregateRoot
     /// <summary>
     /// Removes a menu item from the restaurant's menu.
     /// </summary>
-    public void RemoveMenuItem(Guid menuItemId)
+    public Result RemoveMenuItem(Guid menuItemId)
     {
-        var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId) 
-            ?? throw new InvalidOperationException("Menu item not found.");
+        var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId);
+        if (menuItem is null)
+        {
+            return Result.Failure(
+                DomainErrors.Restaurant.MenuItemNotFound(Id, menuItemId));
+        }
+
         _menuItems.Remove(menuItem);
         ModifiedOnUtc = DateTime.UtcNow;
 
@@ -147,5 +153,7 @@ public sealed class Restaurant : AggregateRoot
             Guid.NewGuid(), 
             Id, 
             menuItemId));
+
+        return Result.Success();
     }
 }

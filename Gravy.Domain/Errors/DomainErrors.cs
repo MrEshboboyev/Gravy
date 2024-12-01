@@ -32,6 +32,12 @@ public static class DomainErrors
                 "Restaurant.NotFound",
                 $"The restaurant with the identifier {id} was not found.");
 
+        public static readonly Func<Guid, Guid, Error> MenuItemNotFound =
+            (restaurantId, menuItemId) => new(
+                "Restaurant.MenuItemNotFound", 
+                $"The menu item with the identifier {menuItemId} in the restaurant " +
+                $"with the identifier {restaurantId} was not found.");
+
         public static readonly Func<string, Error> NoRestaurantsFound = searchTerm => new(
                 "Restaurant.NoRestaurantsFound",
                 $"No restaurants were found matching this {searchTerm}.");
