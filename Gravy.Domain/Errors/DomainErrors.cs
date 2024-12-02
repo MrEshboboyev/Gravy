@@ -7,6 +7,7 @@ namespace Gravy.Domain.Errors;
 /// </summary>
 public static class DomainErrors
 {
+    #region User Related
     public static class User
     {
         public static readonly Error EmailAlreadyInUse = new(
@@ -25,6 +26,32 @@ public static class DomainErrors
                "User.InvalidCredentials",
                "The provided credentials are invalid");
     }
+
+    public static class Customer
+    {
+        public static readonly Func<Guid, Error> NotFound = id => new(
+                "Customer.NotFound",
+                $"The customer with the identifier {id} was not found.");
+
+        public static readonly Func<Guid, Guid, Error> AlreadyExist = (customerId, userId) => new(
+                "Customer.AlreadyExist",
+                $"The customer details with the identifier {customerId} " +
+                    $"already exist for this user with Id {userId}.");
+    }
+
+    public static class DeliveryPerson
+    {
+        public static readonly Func<Guid, Error> NotFound = id => new(
+                "DeliveryPerson.NotFound",
+                $"The delivery person with the identifier {id} was not found.");
+
+        public static readonly Func<Guid, Guid, Error> AlreadyExist = (deliveryPersonId, userId) 
+            => new( 
+                "DeliveryPerson.AlreadyExist",
+                $"The delivery person details with the identifier {deliveryPersonId} " +
+                    $"already exist for this user with Id {userId}.");
+    }
+    #endregion
 
     public static class Restaurant
     {

@@ -1,4 +1,5 @@
-﻿using Gravy.Domain.Events;
+﻿using Gravy.Domain.Errors;
+using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 using Gravy.Domain.Shared;
 using Gravy.Domain.ValueObjects;
@@ -10,6 +11,9 @@ namespace Gravy.Domain.Entities;
 /// </summary>
 public sealed class User : AggregateRoot, IAuditableEntity
 {
+    private Customer _customerDetails;
+    private DeliveryPerson _deliveryPersonDetails;
+
     private User(Guid id, Email email, string passwordHash, FirstName firstName, LastName lastName)
      : base(id)
     {
@@ -33,8 +37,8 @@ public sealed class User : AggregateRoot, IAuditableEntity
     public string PasswordHash { get; private set; }
     public FirstName FirstName { get; private set; }
     public LastName LastName { get; private set; }
-    public Customer? CustomerDetails { get; private set; }
-    public DeliveryPerson? DeliveryPersonDetails { get; private set; }
+    public Customer? CustomerDetails => _customerDetails;
+    public DeliveryPerson? DeliveryPersonDetails => _deliveryPersonDetails;
     public ICollection<Role> Roles { get; private set; } = [];
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
@@ -126,16 +130,21 @@ public sealed class User : AggregateRoot, IAuditableEntity
     /// </summary>
     public Result<Customer> AddCustomerDetails(DeliveryAddress deliveryAddress)
     {
-        var customer = new Customer(Guid.NewGuid(), deliveryAddress);
-        CustomerDetails = customer;
+        if (_customerDetails is not null)
+        {
+            return Result.Failure<Customer>(
+                DomainErrors.Customer.AlreadyExist(_customerDetails.Id, Id));
+        }
+
+        _customerDetails = new Customer(Guid.NewGuid(), deliveryAddress);
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new CustomerLinkedToUserDomainEvent(
             Guid.NewGuid(), 
             Id, 
-            customer.Id));
+            _customerDetails.Id));
 
-        return customer;
+        return _customerDetails;
     }
 
     /// <summary>
@@ -143,16 +152,21 @@ public sealed class User : AggregateRoot, IAuditableEntity
     /// </summary>
     public Result<DeliveryPerson> AddDeliveryPersonDetails(Vehicle vehicle)
     {
-        var deliveryPerson = new DeliveryPerson(Guid.NewGuid(), vehicle);
-        DeliveryPersonDetails = deliveryPerson;
+        if (_deliveryPersonDetails is not null)
+        {
+            return Result.Failure<DeliveryPerson>(
+                DomainErrors.DeliveryPerson.AlreadyExist(_deliveryPersonDetails.Id, Id));
+        }
+
+        _deliveryPersonDetails = new DeliveryPerson(Guid.NewGuid(), vehicle);
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new DeliveryPersonLinkedToUserDomainEvent(
             Guid.NewGuid(), 
             Id, 
-            deliveryPerson.Id));
+            _deliveryPersonDetails.Id));
 
-        return deliveryPerson;
+        return _deliveryPersonDetails;
     }
 }
 
