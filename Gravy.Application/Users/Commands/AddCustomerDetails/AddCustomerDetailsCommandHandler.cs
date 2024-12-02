@@ -2,6 +2,7 @@
 using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
+using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Application.Users.Commands.AddCustomerDetails;
 
@@ -17,7 +18,7 @@ internal sealed class AddCustomerDetailsCommandHandler(IUserRepository userRepos
     public async Task<Result> Handle(AddCustomerDetailsCommand request, 
         CancellationToken cancellationToken)
     {
-        var (userId, deliveryAddrees) = request;
+        var (userId, street, city, state, postalCode) = request;
 
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
 
@@ -25,9 +26,12 @@ internal sealed class AddCustomerDetailsCommandHandler(IUserRepository userRepos
         {
             return Result.Failure(
                 DomainErrors.User.NotFound(userId));
-        }    
+        }
 
-        var customerResult = user.AddCustomerDetails(deliveryAddrees);
+        Result<DeliveryAddress> deliveryAddressResult = DeliveryAddress.Create(street, city,
+            state, postalCode);
+
+        var customerResult = user.AddCustomerDetails(deliveryAddressResult.Value);
 
         if (customerResult.IsFailure)
         {
