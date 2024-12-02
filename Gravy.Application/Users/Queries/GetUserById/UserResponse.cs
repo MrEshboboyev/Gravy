@@ -4,4 +4,6 @@ public sealed record UserResponse(
     Guid Id,
     string Email,
     string FirstName,
-    string LastName);
+    string LastName,
+    CustomerDetailsResponse? CustomerDetails,
+    DeliveryPersonDetailsResponse? DeliveryPersonDetails);
