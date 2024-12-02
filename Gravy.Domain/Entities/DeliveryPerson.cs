@@ -7,29 +7,31 @@ namespace Gravy.Domain.Entities;
 /// <summary>
 /// Represents a delivery person's specific details in the system.
 /// </summary>
-public sealed class DeliveryPerson : IAuditableEntity
+public sealed class DeliveryPerson : Entity
 {
     // Constructor
-    private DeliveryPerson(Guid id, Vehicle vehicle)
+    internal DeliveryPerson(
+        Guid id, 
+        Vehicle vehicle) 
+        : base(id)
     {
-        Id = id;
         Vehicle = vehicle;
     }
 
     private DeliveryPerson() { }
 
     // Properties
-    public Guid Id { get; private set; }
     public Vehicle Vehicle { get; private set; }
     public ICollection<Guid> AssignedDeliveries { get; private set; } = [];
-    public DateTime CreatedOnUtc { get; set; }
-    public DateTime? ModifiedOnUtc { get; set; }
+    public DateTime CreatedOnUtc { get; private set; }
+    public DateTime? ModifiedOnUtc { get; private set; }
 
     /// <summary>
-    /// Factory method to create a delivery person instance.
+    /// Updates the delivery person's details.
     /// </summary>
-    public static DeliveryPerson Create(Guid id, Vehicle vehicle)
+    public void UpdateDetails(Vehicle newVehicle)
     {
-        return new DeliveryPerson(id, vehicle);
+        Vehicle = newVehicle;
+        ModifiedOnUtc = DateTime.UtcNow;
     }
 }

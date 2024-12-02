@@ -1,5 +1,6 @@
 ﻿using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
+using Gravy.Domain.Shared;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
@@ -123,8 +124,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
     /// <summary>
     /// Links customer-specific details to the user.
     /// </summary>
-    public void AddCustomerDetails(Customer customer)
+    public Result<Customer> AddCustomerDetails(DeliveryAddress deliveryAddress)
     {
+        var customer = new Customer(Guid.NewGuid(), deliveryAddress);
         CustomerDetails = customer;
         ModifiedOnUtc = DateTime.UtcNow;
 
@@ -132,13 +134,16 @@ public sealed class User : AggregateRoot, IAuditableEntity
             Guid.NewGuid(), 
             Id, 
             customer.Id));
+
+        return customer;
     }
 
     /// <summary>
     /// Links delivery-person-specific details to the user.
     /// </summary>
-    public void AddDeliveryPersonDetails(DeliveryPerson deliveryPerson)
+    public Result<DeliveryPerson> AddDeliveryPersonDetails(Vehicle vehicle)
     {
+        var deliveryPerson = new DeliveryPerson(Guid.NewGuid(), vehicle);
         DeliveryPersonDetails = deliveryPerson;
         ModifiedOnUtc = DateTime.UtcNow;
 
@@ -146,6 +151,8 @@ public sealed class User : AggregateRoot, IAuditableEntity
             Guid.NewGuid(), 
             Id, 
             deliveryPerson.Id));
+
+        return deliveryPerson;
     }
 }
 
