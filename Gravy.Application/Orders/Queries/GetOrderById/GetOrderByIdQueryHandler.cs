@@ -22,10 +22,38 @@ internal sealed class GetOrderByIdQueryHandler(IOrderRepository orderRepository)
                 DomainErrors.Order.NotFound(query.OrderId));
         }
 
+        #region Prepare Response
         var deliveryAddressObject = order.DeliveryAddress;
 
         string deliveryAddress = $"{deliveryAddressObject.Street}/{deliveryAddressObject.City}/" +
             $"{deliveryAddressObject.State}/{deliveryAddressObject.PostalCode}";
+
+        var orderItemsResponse = order.OrderItems
+                .Select(orderItem => new OrderItemResponse(
+                    orderItem.Id,
+                    orderItem.MenuItemId,
+                    orderItem.Quantity,
+                    orderItem.Price,
+                    orderItem.CreatedOnUtc))
+                .ToList();
+
+        var deliveryResponse = order.Delivery is not null ? new DeliveryResponse(
+                order.Delivery.Id,
+                order.Delivery.DeliveryPersonId,
+                order.Delivery.PickUpTime,
+                order.Delivery.EstimatedDeliveryTime,
+                order.Delivery.ActualDeliveryTime,
+                order.Delivery.DeliveryStatus,
+                order.Delivery.CreatedOnUtc) : null;
+
+        var paymentResponse = order.Payment is not null ? new PaymentResponse(
+                order.Payment.Id,
+                order.Payment.Amount,
+                order.Payment.Method,
+                order.Payment.Status,
+                order.Payment.TransactionId,
+                order.Payment.CreatedOnUtc) : null;
+        #endregion
 
         var response = new OrderResponse(
             order.Id,
@@ -36,30 +64,9 @@ internal sealed class GetOrderByIdQueryHandler(IOrderRepository orderRepository)
             order.PlacedAt,
             order.DeliveredAt,
             order.CreatedOnUtc,
-            order
-                .OrderItems.Select(orderItem => new OrderItemResponse(
-                    orderItem.Id,
-                    orderItem.MenuItemId,
-                    orderItem.Quantity,
-                    orderItem.Price,
-                    orderItem.CreatedOnUtc))
-                .ToList(),
-            new DeliveryResponse(
-                order.Delivery.Id,
-                order.Delivery.DeliveryPersonId,
-                order.Delivery.PickUpTime,
-                order.Delivery.EstimatedDeliveryTime,
-                order.Delivery.ActualDeliveryTime,
-                order.Delivery.DeliveryStatus,
-                order.Delivery.CreatedOnUtc),
-            new PaymentResponse(
-                order.Payment.Id,
-                order.Payment.Amount,
-                order.Payment.Method,
-                order.Payment.Status,
-                order.Payment.TransactionId,
-                order.Payment.CreatedOnUtc)
-            );
+            orderItemsResponse,
+            deliveryResponse,
+            paymentResponse);
 
         return response;
     }

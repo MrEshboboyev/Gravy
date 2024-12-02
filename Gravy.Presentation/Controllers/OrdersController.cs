@@ -9,11 +9,13 @@ using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Orders;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Gravy.Presentation.Controllers;
 
+[Authorize]
 [Route("api/orders")]
 public sealed class OrdersController(ISender sender) : ApiController(sender)
 {

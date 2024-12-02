@@ -12,5 +12,5 @@ public sealed record OrderResponse(
     DateTime? DeliveredAt,
     DateTime CreatedOnUtc,
     IReadOnlyCollection<OrderItemResponse> OrderItemDetails,
-    DeliveryResponse DeliveryDetails,
-    PaymentResponse PaymentDetails);
+    DeliveryResponse? DeliveryDetails,
+    PaymentResponse? PaymentDetails);
