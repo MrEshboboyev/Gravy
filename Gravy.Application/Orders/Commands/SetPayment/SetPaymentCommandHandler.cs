@@ -1,4 +1,5 @@
 ﻿using Gravy.Application.Abstractions.Messaging;
+using Gravy.Domain.Entities;
 using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
@@ -6,9 +7,11 @@ using Gravy.Domain.Shared;
 namespace Gravy.Application.Orders.Commands.SetPayment;
 
 internal sealed class SetPaymentCommandHandler(IOrderRepository orderRepository,
+    IPaymentRepository paymentRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<SetPaymentCommand>
 {
     private readonly IOrderRepository _orderRepository = orderRepository;
+    private readonly IPaymentRepository _paymentRepository = paymentRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Result> Handle(SetPaymentCommand request, CancellationToken cancellationToken)
@@ -23,11 +26,17 @@ internal sealed class SetPaymentCommandHandler(IOrderRepository orderRepository,
                 DomainErrors.Order.NotFound(orderId));
         }
 
-        order.SetPayment(
-            Guid.NewGuid(), 
+        var paymentResult = order.SetPayment(
             amount, 
             method, 
             transactionId);
+
+        if (paymentResult.IsFailure)
+        {
+            return Result.Failure(paymentResult.Error);
+        }
+
+        _paymentRepository.Add(paymentResult.Value);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

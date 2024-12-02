@@ -149,6 +149,10 @@ public static class DomainErrors
         public static readonly Error TransactionIdEmpty = new(
             "Payment.TransactionIdEmpty", 
             "The transaction ID cannot be empty.");
+
+        public static readonly Func<Guid, Error> AlreadySet = id => new(
+            "Payment.AlreadySet",
+            $"The payment already set to this order. Setted payment Id : {id}.");
     }
 
     public static class Money

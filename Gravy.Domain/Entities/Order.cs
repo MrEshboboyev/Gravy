@@ -1,6 +1,8 @@
 ﻿using Gravy.Domain.Enums;
+using Gravy.Domain.Errors;
 using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
+using Gravy.Domain.Shared;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
@@ -106,21 +108,26 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// <summary>
     /// Sets the payment for the order.
     /// </summary>
-    public void SetPayment(Guid paymentId, decimal amount, PaymentMethod method, string transactionId)
+    public Result<Payment> SetPayment(decimal amount, PaymentMethod method, string transactionId)
     {
         if (_payment != null)
-            throw new InvalidOperationException("Payment is already set for this order.");
+        {
+            return Result.Failure<Payment>(
+                DomainErrors.Payment.AlreadySet(_payment.Id));
+        }
 
-        _payment = Payment.Create(paymentId, Id, amount, method, transactionId);
+        _payment = Payment.Create(Guid.NewGuid(), Id, amount, method, transactionId);
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new PaymentSetDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
-            paymentId,
+            _payment.Id,
             amount,
             method,
             transactionId));
+
+        return _payment;
     }
 
     /// <summary>
