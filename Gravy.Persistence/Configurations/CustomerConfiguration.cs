@@ -20,6 +20,13 @@ internal sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         // Configure the primary key
         builder.HasKey(x => x.Id);
 
+        // Configure relationships
+        builder
+            .HasOne<User>()
+            .WithOne(u => u.CustomerDetails)
+            .HasForeignKey<Customer>(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade); // Delete Customer when User is deleted
+
         // Configure the DefaultDeliveryAddress as an owned type
         builder.OwnsOne(x => x.DefaultDeliveryAddress, addressBuilder =>
         {

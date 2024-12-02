@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using Gravy.Domain.Entities;
-using Gravy.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Gravy.Persistence.Configurations;
@@ -19,6 +18,13 @@ internal sealed class DeliveryPersonConfiguration : IEntityTypeConfiguration<Del
 
         // Configure the primary key
         builder.HasKey(x => x.Id);
+
+        // Configure relationships
+        builder
+            .HasOne<User>()
+            .WithOne(u => u.DeliveryPersonDetails)
+            .HasForeignKey<DeliveryPerson>(d => d.UserId)
+            .OnDelete(DeleteBehavior.Cascade); // Delete DeliveryPerson when User is deleted
 
         // Configure the Vehicle as an owned type
         builder.OwnsOne(x => x.Vehicle, vehicleBuilder =>

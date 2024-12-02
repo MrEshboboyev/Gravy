@@ -1,7 +1,5 @@
-﻿using Gravy.Domain.Enums;
-using Gravy.Domain.Primitives;
+﻿using Gravy.Domain.Primitives;
 using Gravy.Domain.ValueObjects;
-using System.Xml.Linq;
 
 namespace Gravy.Domain.Entities;
 
@@ -13,15 +11,18 @@ public sealed class Customer : Entity
     // Constructor
     internal Customer(
         Guid id, 
+        Guid userId, 
         DeliveryAddress defaultDeliveryAddress) 
         : base(id)
     {
+        UserId = userId;
         DefaultDeliveryAddress = defaultDeliveryAddress;
     }
 
     private Customer() { }
 
     // Properties
+    public Guid UserId { get; private set; }
     public DeliveryAddress DefaultDeliveryAddress { get; private set; }
     public ICollection<Guid> FavoriteRestaurants { get; private set; } = [];
     public DateTime CreatedOnUtc { get; private set; }

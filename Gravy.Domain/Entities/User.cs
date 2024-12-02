@@ -37,41 +37,11 @@ public sealed class User : AggregateRoot, IAuditableEntity
     public string PasswordHash { get; private set; }
     public FirstName FirstName { get; private set; }
     public LastName LastName { get; private set; }
-    public Customer? CustomerDetails => _customerDetails;
-    public DeliveryPerson? DeliveryPersonDetails => _deliveryPersonDetails;
+    public Customer CustomerDetails => _customerDetails;
+    public DeliveryPerson DeliveryPersonDetails => _deliveryPersonDetails;
     public ICollection<Role> Roles { get; private set; } = [];
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
-
-    ///// <summary> 
-    ///// Creates a new user instance. 
-    ///// </summary>
-    //public static async Task<User> CreateAsync(
-    //    Guid id,
-    //    Email email,
-    //    string passwordHash,
-    //    FirstName firstName,
-    //    LastName lastName,
-    //    IRoleRepository roleRepository,
-    //    CancellationToken cancellationToken
-    //    )
-    //{
-    //    var user = new User(
-    //        id,
-    //        email,
-    //        passwordHash,
-    //        firstName,
-    //        lastName);
-
-    //    user.RaiseDomainEvent(new UserRegisteredDomainEvent(
-    //        Guid.NewGuid(),
-    //        user.Id));
-
-    //    var registeredRole = await roleRepository.GetByNameAsync("Registered", cancellationToken);
-    //    user.AssignRole(registeredRole);    
-
-    //    return user;
-    //}
 
     /// <summary>
     /// Factory method to create a new user.
@@ -136,7 +106,7 @@ public sealed class User : AggregateRoot, IAuditableEntity
                 DomainErrors.Customer.AlreadyExist(_customerDetails.Id, Id));
         }
 
-        _customerDetails = new Customer(Guid.NewGuid(), deliveryAddress);
+        _customerDetails = new Customer(Guid.NewGuid(), Id, deliveryAddress);
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new CustomerLinkedToUserDomainEvent(
@@ -158,7 +128,7 @@ public sealed class User : AggregateRoot, IAuditableEntity
                 DomainErrors.DeliveryPerson.AlreadyExist(_deliveryPersonDetails.Id, Id));
         }
 
-        _deliveryPersonDetails = new DeliveryPerson(Guid.NewGuid(), vehicle);
+        _deliveryPersonDetails = new DeliveryPerson(Guid.NewGuid(), Id, vehicle);
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new DeliveryPersonLinkedToUserDomainEvent(

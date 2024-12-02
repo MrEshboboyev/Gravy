@@ -19,6 +19,19 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         // Configure the primary key
         builder.HasKey(x => x.Id);
 
+        // Configure relationships
+        builder
+            .HasOne(u => u.CustomerDetails)
+            .WithOne()
+            .HasForeignKey<Customer>(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade); // Cascade deletion of Customer
+
+        builder
+            .HasOne(u => u.DeliveryPersonDetails)
+            .WithOne()
+            .HasForeignKey<DeliveryPerson>(d => d.UserId)
+            .OnDelete(DeleteBehavior.Cascade); // Cascade deletion of DeliveryPerson
+
         // Configure property conversions and constraints
         builder
             .Property(x => x.Email)

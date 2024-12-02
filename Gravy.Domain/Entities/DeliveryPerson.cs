@@ -12,15 +12,18 @@ public sealed class DeliveryPerson : Entity
     // Constructor
     internal DeliveryPerson(
         Guid id, 
+        Guid userId, 
         Vehicle vehicle) 
         : base(id)
     {
+        UserId = userId;
         Vehicle = vehicle;
     }
 
     private DeliveryPerson() { }
 
     // Properties
+    public Guid UserId { get; private set; }
     public Vehicle Vehicle { get; private set; }
     public ICollection<Guid> AssignedDeliveries { get; private set; } = [];
     public DateTime CreatedOnUtc { get; private set; }
