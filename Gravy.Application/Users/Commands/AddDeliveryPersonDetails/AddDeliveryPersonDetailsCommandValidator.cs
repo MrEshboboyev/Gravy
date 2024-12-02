@@ -8,6 +8,8 @@ public sealed class AddDeliveryPersonDetailsCommandValidator : AbstractValidator
     {
         RuleFor(deliveryPerson => deliveryPerson.UserId).NotEmpty();
 
-        RuleFor(deliveryPerson => deliveryPerson.Vehicle).NotEmpty();
+        RuleFor(deliveryPerson => deliveryPerson.Type).NotEmpty();
+
+        RuleFor(deliveryPerson => deliveryPerson.LicensePlate).NotEmpty();
     }
 }

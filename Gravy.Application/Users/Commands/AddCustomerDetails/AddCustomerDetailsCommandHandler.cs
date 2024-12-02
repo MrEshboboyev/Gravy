@@ -20,7 +20,7 @@ internal sealed class AddCustomerDetailsCommandHandler(IUserRepository userRepos
     {
         var (userId, street, city, state, postalCode) = request;
 
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var user = await _userRepository.GetByIdWithCustomerDetailsAsync(userId, cancellationToken);
 
         if (user is null)
         {

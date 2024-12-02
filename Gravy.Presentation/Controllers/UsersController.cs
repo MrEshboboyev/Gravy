@@ -1,5 +1,6 @@
 ﻿using Gravy.Application.Restaurants.Commands.AddMenuItem;
 using Gravy.Application.Users.Commands.AddCustomerDetails;
+using Gravy.Application.Users.Commands.AddDeliveryPersonDetails;
 using Gravy.Application.Users.Commands.CreateUser;
 using Gravy.Application.Users.Commands.Login;
 using Gravy.Application.Users.Queries.GetUserById;
@@ -22,7 +23,7 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-    [HasPermission(Permission.ReadUser)]
+    //[HasPermission(Permission.ReadUser)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetUserById(Guid id, CancellationToken cancellationToken)
     {
@@ -87,6 +88,26 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
             request.City,
             request.State,
             request.PostalCode);
+
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost("add-delivery-person-details")]
+    public async Task<IActionResult> AddDeliveryPersonDetails(
+        [FromBody] AddDeliveryPersonDetailsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new AddDeliveryPersonDetailsCommand(
+            GetUserId(),
+            request.Type,
+            request.LicensePlate);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
