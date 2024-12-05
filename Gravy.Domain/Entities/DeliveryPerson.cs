@@ -28,6 +28,7 @@ public sealed class DeliveryPerson : Entity
     public ICollection<Guid> AssignedDeliveries { get; private set; } = [];
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? ModifiedOnUtc { get; private set; }
+    public bool IsAvailable { get; private set; } = true; // Default to available
 
     /// <summary>
     /// Updates the delivery person's details.
@@ -35,6 +36,12 @@ public sealed class DeliveryPerson : Entity
     public void UpdateDetails(Vehicle newVehicle)
     {
         Vehicle = newVehicle;
+        ModifiedOnUtc = DateTime.UtcNow;
+    }
+
+    public void SetAvailability(bool isAvailable)
+    {
+        IsAvailable = isAvailable;
         ModifiedOnUtc = DateTime.UtcNow;
     }
 }

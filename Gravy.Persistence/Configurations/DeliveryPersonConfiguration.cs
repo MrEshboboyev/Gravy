@@ -50,6 +50,11 @@ internal sealed class DeliveryPersonConfiguration : IEntityTypeConfiguration<Del
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())), // Compute hash
                 c => c.ToList())); // Snapshot for tracking
 
+        // Map the new IsAvailable property
+        builder.Property(x => x.IsAvailable)
+            .IsRequired()
+            .HasDefaultValue(true); // Default value: true
+
         // Add audit properties
         builder.Property(x => x.CreatedOnUtc).IsRequired();
         builder.Property(x => x.ModifiedOnUtc).IsRequired(false);
