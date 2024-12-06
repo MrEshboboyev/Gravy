@@ -153,7 +153,8 @@ public sealed class User : AggregateRoot, IAuditableEntity
 
     #region Availabilities
     public Result<DeliveryPersonAvailability> AddDeliveryPersonAvailability(
-        DateTime startTimeUtc, DateTime endTimeUtc)
+        DateTime startTimeUtc,
+        DateTime endTimeUtc)
     {
         // checking delivery person details exist
         if (DeliveryPersonDetails is null)
@@ -220,6 +221,39 @@ public sealed class User : AggregateRoot, IAuditableEntity
             updateAvailabilityResult.Value.Id));
 
         return updateAvailabilityResult;
+    }
+
+    public Result DeleteDeliveryPersonAvailability(
+        Guid availabilityId)
+    {
+        // checking delivery person details exist
+        if (DeliveryPersonDetails is null)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                DomainErrors.User.DeliveryPersonDetailsNotExist(Id));
+        }
+
+        #region delete availability
+        var deleteAvailabilityResult = DeliveryPersonDetails.DeleteAvailability(
+            availabilityId);
+
+        if (deleteAvailabilityResult.IsFailure)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                deleteAvailabilityResult.Error);
+        }
+        #endregion
+
+        // update modified time for user
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        // add event
+        RaiseDomainEvent(new DeliveryPersonAvailabilityDeletedDomainEvent(
+            Guid.NewGuid(),
+            DeliveryPersonDetails.Id,
+            availabilityId));
+
+        return Result.Success();
     }
     #endregion
     #endregion

@@ -62,6 +62,7 @@ public sealed class DeliveryPerson : Entity
     #endregion
 
     #region Availability methods (Add/Update/Delete)
+    #region Add/Update
     public Result<DeliveryPersonAvailability> AddAvailability(
     DateTime startTimeUtc,
     DateTime endTimeUtc)
@@ -140,5 +141,27 @@ public sealed class DeliveryPerson : Entity
 
         return Result.Success<DeliveryPersonAvailability>(null);
     }
+    #endregion
+
+    #region Delete
+    public Result DeleteAvailability(
+        Guid availabilityId)
+    {
+        #region get availability
+        var availability = _availabilities.Find(a => a.Id == availabilityId);
+
+        if (availability is null)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                DomainErrors.DeliveryPersonAvailability.NotFound(availabilityId));
+        }
+        #endregion
+
+        // remove availability
+        _availabilities.Remove(availability);
+
+        return Result.Success();
+    }
+    #endregion
     #endregion
 }

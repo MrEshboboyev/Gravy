@@ -1,4 +1,5 @@
 ﻿using Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.AddAvailability;
+using Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.DeleteAvailability;
 using Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.UpdateAvailability;
 using Gravy.Application.Users.Queries.DeliveryPersons.GetAllDeliveryPersons;
 using Gravy.Application.Users.Queries.DeliveryPersons.GetDeliveryPersonAvailabilities;
@@ -67,6 +68,24 @@ public sealed class DeliveryPersonsController(ISender sender) : ApiController(se
             availabilityId,
             request.StartTimeUtc,
             request.EndTimeUtc);
+
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [HttpDelete("availabilities/{availabilityId:guid}")]
+    public async Task<IActionResult> DeleteAvailiability(
+        Guid availabilityId,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteAvailabilityCommand(
+            GetUserId(),
+            availabilityId);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
