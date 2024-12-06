@@ -25,6 +25,13 @@ public static class DomainErrors
         public static readonly Error InvalidCredentials = new(
                "User.InvalidCredentials",
                "The provided credentials are invalid");
+
+        #region Delivery Person
+        public static readonly Func<Guid, Error> DeliveryPersonDetailsNotExist = id => new(
+                "User.DeliveryPersonNotExist",
+                $"The delivery person details not exist for this user with the identifier {id}." +
+            $"Please, adding delivery person details for this user!");
+        #endregion
     }
 
     public static class Customer

@@ -1,5 +1,6 @@
 ﻿using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
+using Gravy.Domain.Shared;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
@@ -9,6 +10,8 @@ namespace Gravy.Domain.Entities;
 /// </summary>
 public sealed class DeliveryPerson : Entity
 {
+    private readonly List<DeliveryPersonAvailability> _availabilities = [];
+
     // Constructor
     internal DeliveryPerson(
         Guid id, 
@@ -29,6 +32,8 @@ public sealed class DeliveryPerson : Entity
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? ModifiedOnUtc { get; private set; }
     public bool IsAvailable { get; private set; } = true; // Default to available
+    public IReadOnlyCollection<DeliveryPersonAvailability> Availabilities => 
+        _availabilities.AsReadOnly();
 
     /// <summary>
     /// Updates the delivery person's details.
@@ -43,5 +48,20 @@ public sealed class DeliveryPerson : Entity
     {
         IsAvailable = isAvailable;
         ModifiedOnUtc = DateTime.UtcNow;
+    }
+
+    public DeliveryPersonAvailability AddAvailability(DateTime startTimeUtc, DateTime endTimeUtc)
+    {
+        var newAvailability = new DeliveryPersonAvailability(
+            Guid.NewGuid(), Id, startTimeUtc, endTimeUtc);
+
+        _availabilities.Add(newAvailability);
+
+        return newAvailability;
+    }
+
+    public bool IsAvailableAt(DateTime targetTimeUtc)
+    {
+        return _availabilities.Any(av => av.IsAvailableFor(targetTimeUtc));
     }
 }

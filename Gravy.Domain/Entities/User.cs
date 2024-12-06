@@ -117,6 +117,7 @@ public sealed class User : AggregateRoot, IAuditableEntity
         return _customerDetails;
     }
 
+    #region Delivery Person
     /// <summary>
     /// Links delivery-person-specific details to the user.
     /// </summary>
@@ -138,5 +139,28 @@ public sealed class User : AggregateRoot, IAuditableEntity
 
         return _deliveryPersonDetails;
     }
+
+    public Result<DeliveryPersonAvailability> AddDeliveryPersonAvailability(DateTime startTimeUtc, DateTime endTimeUtc)
+    {
+        if (DeliveryPersonDetails == null)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                DomainErrors.User.DeliveryPersonDetailsNotExist(Id));
+        }
+
+        var deliveryPersonAvailability = DeliveryPersonDetails
+            .AddAvailability(startTimeUtc, endTimeUtc);
+
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        // add event
+        RaiseDomainEvent(new AvailabilityAddedToDeliveryPersonDomainEvent(
+            Guid.NewGuid(),
+            DeliveryPersonDetails.Id,
+            deliveryPersonAvailability.Id));
+
+        return deliveryPersonAvailability;
+    }
+    #endregion
 }
 
