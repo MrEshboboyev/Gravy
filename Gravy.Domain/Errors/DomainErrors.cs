@@ -68,6 +68,12 @@ public static class DomainErrors
                 $"The availability period from {startTimeUtc} to {endTimeUtc} is invalid. " +
                 $"Start time must be in the future, " +
                 $"and end time must be after start time.");
+
+        public static readonly Func<DateTime, DateTime, Error> OverlappingAvailabilityPeriod = 
+            (startTimeUtc, endTimeUtc) => new(
+                "DeliveryPersonAvailability.OverlappingAvailabilityPeriod", 
+                $"The availability period from {startTimeUtc} to {endTimeUtc} " +
+                $"overlaps with an existing availability period.");
     }
 
     public static class Restaurant

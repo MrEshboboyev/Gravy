@@ -38,7 +38,7 @@ public sealed class DeliveryPersonsController(ISender sender) : ApiController(se
 
     [HttpPost("availabilities")]
     public async Task<IActionResult> CreateAvailiability(
-        [FromBody] CreateAvailiabilityRequest request,
+        [FromBody] CreateAvailabilityRequest request,
         CancellationToken cancellationToken)
     {
         var command = new AddDeliveryPersonAvailabilityCommand(

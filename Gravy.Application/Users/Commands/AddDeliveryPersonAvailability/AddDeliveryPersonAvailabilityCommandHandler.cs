@@ -34,6 +34,19 @@ internal sealed class AddDeliveryPersonAvailabilityCommandHandler(
         startTimeUtc = DateTime.SpecifyKind(startTimeUtc, DateTimeKind.Utc); 
         endTimeUtc = DateTime.SpecifyKind(endTimeUtc, DateTimeKind.Utc);
 
+        // Check for overlapping availability
+        var overlappingEntries = await _deliveryPersonAvailabilityRepository.GetOverlappingAvailabilities(
+            user.DeliveryPersonDetails.Id,
+            startTimeUtc,
+            endTimeUtc);
+
+        if (overlappingEntries.Any())
+        {
+            return Result.Failure(
+                DomainErrors.DeliveryPersonAvailability
+                .OverlappingAvailabilityPeriod(startTimeUtc, endTimeUtc));
+        }
+
         var availabilityResult = user.AddDeliveryPersonAvailability(startTimeUtc,
             endTimeUtc);
 
