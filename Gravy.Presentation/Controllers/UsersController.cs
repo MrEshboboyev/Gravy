@@ -1,12 +1,9 @@
-﻿using Gravy.Application.Restaurants.Commands.AddMenuItem;
-using Gravy.Application.Users.Commands.AddCustomerDetails;
-using Gravy.Application.Users.Commands.AddDeliveryPersonDetails;
-using Gravy.Application.Users.Commands.CreateUser;
+﻿using Gravy.Application.Users.Commands.CreateUser;
+using Gravy.Application.Users.Commands.Customers.AddCustomerDetails;
+using Gravy.Application.Users.Commands.DeliveryPersons.AddDeliveryPersonDetails;
 using Gravy.Application.Users.Commands.Login;
 using Gravy.Application.Users.Queries.GetUserById;
-using Gravy.Domain.Enums;
 using Gravy.Domain.Shared;
-using Gravy.Infrastructure.Authentication;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Users;
 using MediatR;

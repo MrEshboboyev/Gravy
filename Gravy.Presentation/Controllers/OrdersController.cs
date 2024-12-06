@@ -1,9 +1,9 @@
-﻿using Gravy.Application.Orders.Commands.AddOrderItem;
-using Gravy.Application.Orders.Commands.AssignDelivery;
-using Gravy.Application.Orders.Commands.CompleteDelivery;
-using Gravy.Application.Orders.Commands.CompletePayment;
-using Gravy.Application.Orders.Commands.CreateOrder;
-using Gravy.Application.Orders.Commands.SetPayment;
+﻿using Gravy.Application.Orders.Commands.CreateOrder;
+using Gravy.Application.Orders.Commands.Deliviries.AssignDelivery;
+using Gravy.Application.Orders.Commands.Deliviries.CompleteDelivery;
+using Gravy.Application.Orders.Commands.OrderItems.AddOrderItem;
+using Gravy.Application.Orders.Commands.Payments.CompletePayment;
+using Gravy.Application.Orders.Commands.Payments.SetPayment;
 using Gravy.Application.Orders.Queries.GetOrderById;
 using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;

@@ -1,4 +1,4 @@
-﻿using Gravy.Application.Users.Queries.GetAllCustomers;
+﻿using Gravy.Application.Users.Queries.Customers.GetAllCustomers;
 using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using MediatR;

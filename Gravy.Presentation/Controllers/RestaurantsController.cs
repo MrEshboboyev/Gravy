@@ -1,13 +1,13 @@
 ﻿using Gravy.Application.Restaurants.Commands.ActivateRestaurant;
-using Gravy.Application.Restaurants.Commands.AddMenuItem;
 using Gravy.Application.Restaurants.Commands.CreateRestaurant;
 using Gravy.Application.Restaurants.Commands.DeactivateRestaurant;
-using Gravy.Application.Restaurants.Commands.RemoveMenuItem;
-using Gravy.Application.Restaurants.Commands.UpdateMenuItem;
+using Gravy.Application.Restaurants.Commands.MenuItems.AddMenuItem;
+using Gravy.Application.Restaurants.Commands.MenuItems.RemoveMenuItem;
+using Gravy.Application.Restaurants.Commands.MenuItems.UpdateMenuItem;
 using Gravy.Application.Restaurants.Commands.UpdateRestaurant;
-using Gravy.Application.Restaurants.Queries.GetMenuItemsByCategory;
 using Gravy.Application.Restaurants.Queries.GetRestaurantById;
 using Gravy.Application.Restaurants.Queries.GetRestaurantOwner;
+using Gravy.Application.Restaurants.Queries.MenuItems.GetMenuItemsByCategory;
 using Gravy.Application.Restaurants.Queries.SearchRestaurantsByName;
 using Gravy.Domain.Enums;
 using Gravy.Domain.Shared;

@@ -1,6 +1,6 @@
-﻿using Gravy.Application.Users.Commands.AddDeliveryPersonAvailability;
-using Gravy.Application.Users.Queries.GetAllDeliveryPersons;
-using Gravy.Application.Users.Queries.GetDeliveryPersonAvailabilities;
+﻿using Gravy.Application.Users.Commands.DeliveryPersons.AddDeliveryPersonAvailability;
+using Gravy.Application.Users.Queries.DeliveryPersons.GetAllDeliveryPersons;
+using Gravy.Application.Users.Queries.DeliveryPersons.GetDeliveryPersonAvailabilities;
 using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.DeliveryPersons;
