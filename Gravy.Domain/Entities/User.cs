@@ -143,10 +143,18 @@ public sealed class User : AggregateRoot, IAuditableEntity
     public Result<DeliveryPersonAvailability> AddDeliveryPersonAvailability(
         DateTime startTimeUtc, DateTime endTimeUtc)
     {
-        if (DeliveryPersonDetails == null)
+        if (DeliveryPersonDetails is null)
         {
             return Result.Failure<DeliveryPersonAvailability>(
                 DomainErrors.User.DeliveryPersonDetailsNotExist(Id));
+        }
+
+
+        if (startTimeUtc < DateTime.UtcNow || endTimeUtc < startTimeUtc)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                DomainErrors.DeliveryPersonAvailability.
+                InvalidAvailabilityPeriod(startTimeUtc, endTimeUtc));
         }
 
         var deliveryPersonAvailability = DeliveryPersonDetails

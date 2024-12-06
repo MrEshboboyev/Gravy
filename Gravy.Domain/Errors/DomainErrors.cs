@@ -28,7 +28,7 @@ public static class DomainErrors
 
         #region Delivery Person
         public static readonly Func<Guid, Error> DeliveryPersonDetailsNotExist = id => new(
-                "User.DeliveryPersonNotExist",
+                "User.DeliveryPersonDetailsNotExist",
                 $"The delivery person details not exist for this user with the identifier {id}." +
             $"Please, adding delivery person details for this user!");
         #endregion
@@ -59,6 +59,16 @@ public static class DomainErrors
                     $"already exist for this user with Id {userId}.");
     }
     #endregion
+
+    public static class DeliveryPersonAvailability
+    {
+        public static readonly Func<DateTime, DateTime, Error> 
+            InvalidAvailabilityPeriod = (startTimeUtc, endTimeUtc) => new(
+                "DeliveryPersonAvailability.InvalidAvailabilityPeriod", 
+                $"The availability period from {startTimeUtc} to {endTimeUtc} is invalid. " +
+                $"Start time must be in the future, " +
+                $"and end time must be after start time.");
+    }
 
     public static class Restaurant
     {

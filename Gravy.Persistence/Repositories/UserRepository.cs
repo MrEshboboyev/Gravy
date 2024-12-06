@@ -56,6 +56,7 @@ public sealed class UserRepository(ApplicationDbContext dbContext) : IUserReposi
         await _dbContext
             .Set<User>()
             .Include(u => u.DeliveryPersonDetails)
+                .ThenInclude(dp => dp.Availabilities)
             .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     #endregion
 }

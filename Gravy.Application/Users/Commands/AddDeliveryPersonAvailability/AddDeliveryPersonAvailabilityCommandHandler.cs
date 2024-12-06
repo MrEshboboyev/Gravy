@@ -30,6 +30,10 @@ internal sealed class AddDeliveryPersonAvailabilityCommandHandler(
                 DomainErrors.User.NotFound(userId));
         }
 
+        // fix this converting coming soon
+        startTimeUtc = DateTime.SpecifyKind(startTimeUtc, DateTimeKind.Utc); 
+        endTimeUtc = DateTime.SpecifyKind(endTimeUtc, DateTimeKind.Utc);
+
         var availabilityResult = user.AddDeliveryPersonAvailability(startTimeUtc,
             endTimeUtc);
 

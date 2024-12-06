@@ -11,9 +11,5 @@ public sealed class AddDeliveryPersonAvailabilityCommandValidator : AbstractVali
         RuleFor(deliveryPerson => deliveryPerson.StartTimeUtc).NotEmpty();
 
         RuleFor(deliveryPerson => deliveryPerson.EndTimeUtc).NotEmpty();
-
-        RuleFor(deliveryPerson => deliveryPerson)
-            .Must(deliveryPerson => deliveryPerson.StartTimeUtc < deliveryPerson.EndTimeUtc)
-            .WithMessage("StartTimeUtc must be less than EndTimeUtc.");
     }
 }

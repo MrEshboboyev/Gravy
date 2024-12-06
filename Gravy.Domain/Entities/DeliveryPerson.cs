@@ -1,4 +1,5 @@
-﻿using Gravy.Domain.Events;
+﻿using Gravy.Domain.Errors;
+using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 using Gravy.Domain.Shared;
 using Gravy.Domain.ValueObjects;

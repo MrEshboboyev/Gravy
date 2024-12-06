@@ -8,8 +8,7 @@ namespace Gravy.Persistence.Configurations;
 /// <summary>
 /// Configures the DeliveryPersonAvailability entity for Entity Framework Core.
 /// </summary>
-internal sealed class DeliveryPersonAvailabilityConfiguration :
-    IEntityTypeConfiguration<DeliveryPersonAvailability>
+internal sealed class DeliveryPersonAvailabilityConfiguration : IEntityTypeConfiguration<DeliveryPersonAvailability>
 {
     public void Configure(EntityTypeBuilder<DeliveryPersonAvailability> builder)
     {
@@ -19,10 +18,13 @@ internal sealed class DeliveryPersonAvailabilityConfiguration :
         // Configure the primary key
         builder.HasKey(x => x.Id);
 
+        builder.Property(x => x.DeliveryPersonId)
+            .IsRequired();
+
         // Map the foreign key relationship
         builder
             .HasOne<DeliveryPerson>() // Each availability belongs to a DeliveryPerson
-            .WithMany() // A delivery person can have multiple availability periods
+            .WithMany(dp => dp.Availabilities) // A delivery person can have multiple availability periods
             .HasForeignKey(x => x.DeliveryPersonId)
             .OnDelete(DeleteBehavior.Cascade); // Cascade delete availabilities when DeliveryPerson is deleted
 

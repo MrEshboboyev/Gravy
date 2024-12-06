@@ -58,5 +58,10 @@ internal sealed class DeliveryPersonConfiguration : IEntityTypeConfiguration<Del
         // Add audit properties
         builder.Property(x => x.CreatedOnUtc).IsRequired();
         builder.Property(x => x.ModifiedOnUtc).IsRequired(false);
+
+        builder
+            .HasMany(d => d.Availabilities)
+            .WithOne()
+            .HasForeignKey(p => p.DeliveryPersonId);
     }
 }

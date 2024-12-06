@@ -396,7 +396,7 @@ namespace Gravy.Persistence.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("RolePermission");
+                    b.ToTable("RolePermission", (string)null);
 
                     b.HasData(
                         new
@@ -496,7 +496,7 @@ namespace Gravy.Persistence.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("RoleUser");
+                    b.ToTable("RoleUser", (string)null);
                 });
 
             modelBuilder.Entity("Gravy.Domain.Entities.Customer", b =>
@@ -538,7 +538,7 @@ namespace Gravy.Persistence.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers");
+                            b1.ToTable("Customers", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -583,7 +583,7 @@ namespace Gravy.Persistence.Migrations
 
                             b1.HasKey("DeliveryPersonId");
 
-                            b1.ToTable("DeliveryPersons");
+                            b1.ToTable("DeliveryPersons", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("DeliveryPersonId");
@@ -639,7 +639,7 @@ namespace Gravy.Persistence.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("Orders");
+                            b1.ToTable("Orders", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
@@ -680,7 +680,7 @@ namespace Gravy.Persistence.Migrations
 
                             b1.HasKey("RestaurantId");
 
-                            b1.ToTable("Restaurants");
+                            b1.ToTable("Restaurants", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("RestaurantId");
@@ -699,7 +699,7 @@ namespace Gravy.Persistence.Migrations
 
                             b1.HasKey("RestaurantId");
 
-                            b1.ToTable("Restaurants");
+                            b1.ToTable("Restaurants", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("RestaurantId");
