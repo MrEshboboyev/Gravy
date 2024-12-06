@@ -7,7 +7,7 @@ namespace Gravy.Domain.Entities;
 /// </summary>
 public sealed class DeliveryPersonAvailability : Entity
 {
-    // Constructor
+    #region Constructors
     internal DeliveryPersonAvailability(
         Guid id,
         Guid deliveryPersonId, 
@@ -21,12 +21,15 @@ public sealed class DeliveryPersonAvailability : Entity
     }
 
     private DeliveryPersonAvailability() { }
+    #endregion
 
-    // Properties
+    #region Properties
     public Guid DeliveryPersonId { get; private set; }
     public DateTime StartTimeUtc { get; private set; }
     public DateTime EndTimeUtc { get; private set; }
+    #endregion
 
+    #region Own methods
     /// <summary>
     /// Checks if the availability overlaps with a given time range.
     /// </summary>
@@ -34,4 +37,11 @@ public sealed class DeliveryPersonAvailability : Entity
     {
         return targetTimeUtc >= StartTimeUtc && targetTimeUtc <= EndTimeUtc;
     }
+
+    public void UpdateDetails(DateTime startTimeUtc, DateTime endTimeUtc)
+    {
+        StartTimeUtc = startTimeUtc;
+        EndTimeUtc = endTimeUtc;
+    }
+    #endregion
 }

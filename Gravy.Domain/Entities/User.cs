@@ -11,9 +11,12 @@ namespace Gravy.Domain.Entities;
 /// </summary>
 public sealed class User : AggregateRoot, IAuditableEntity
 {
+    #region Private fields
     private Customer _customerDetails;
     private DeliveryPerson _deliveryPersonDetails;
+    #endregion
 
+    #region Constructors
     private User(Guid id, Email email, string passwordHash, FirstName firstName, LastName lastName)
      : base(id)
     {
@@ -31,8 +34,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
     private User()
     {
     }
+    #endregion
 
-    // Properties
+    #region Properties
     public Email Email { get; private set; }
     public string PasswordHash { get; private set; }
     public FirstName FirstName { get; private set; }
@@ -42,7 +46,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
     public ICollection<Role> Roles { get; private set; } = [];
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
+    #endregion
 
+    #region Own methods
     /// <summary>
     /// Factory method to create a new user.
     /// </summary>
@@ -77,7 +83,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
                 lastName.Value));
         }
     }
+    #endregion
 
+    #region Role Related methods
     /// <summary>
     /// Assigns a role to the user.
     /// </summary>
@@ -94,7 +102,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
                 role.Id));
         }
     }
+    #endregion
 
+    #region Customer Related methods
     /// <summary>
     /// Links customer-specific details to the user.
     /// </summary>
@@ -116,8 +126,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
 
         return _customerDetails;
     }
+    #endregion
 
-    #region Delivery Person
+    #region Delivery Person related methods
     /// <summary>
     /// Links delivery-person-specific details to the user.
     /// </summary>
@@ -140,36 +151,77 @@ public sealed class User : AggregateRoot, IAuditableEntity
         return _deliveryPersonDetails;
     }
 
+    #region Availabilities
     public Result<DeliveryPersonAvailability> AddDeliveryPersonAvailability(
         DateTime startTimeUtc, DateTime endTimeUtc)
     {
+        // checking delivery person details exist
         if (DeliveryPersonDetails is null)
         {
             return Result.Failure<DeliveryPersonAvailability>(
                 DomainErrors.User.DeliveryPersonDetailsNotExist(Id));
         }
 
-
-        if (startTimeUtc < DateTime.UtcNow || endTimeUtc < startTimeUtc)
-        {
-            return Result.Failure<DeliveryPersonAvailability>(
-                DomainErrors.DeliveryPersonAvailability.
-                InvalidAvailabilityPeriod(startTimeUtc, endTimeUtc));
-        }
-
-        var deliveryPersonAvailability = DeliveryPersonDetails
+        #region adding availability
+        var addingAvailabilityResult = DeliveryPersonDetails
             .AddAvailability(startTimeUtc, endTimeUtc);
 
+        if (addingAvailabilityResult.IsFailure)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                addingAvailabilityResult.Error);
+        }
+        #endregion
+
+        // update modified time for user
         ModifiedOnUtc = DateTime.UtcNow;
 
         // add event
         RaiseDomainEvent(new AvailabilityAddedToDeliveryPersonDomainEvent(
             Guid.NewGuid(),
             DeliveryPersonDetails.Id,
-            deliveryPersonAvailability.Id));
+            addingAvailabilityResult.Value.Id));
 
-        return deliveryPersonAvailability;
+        return addingAvailabilityResult;
     }
+
+    public Result<DeliveryPersonAvailability> UpdateDeliveryPersonAvailability(
+        Guid availabilityId,
+        DateTime startTimeUtc, 
+        DateTime endTimeUtc)
+    {
+        // checking delivery person details exist
+        if (DeliveryPersonDetails is null)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                DomainErrors.User.DeliveryPersonDetailsNotExist(Id));
+        }
+
+        #region update availability
+        var updateAvailabilityResult = DeliveryPersonDetails.UpdateAvailability(
+            availabilityId,
+            startTimeUtc, 
+            endTimeUtc);
+
+        if (updateAvailabilityResult.IsFailure)
+        {
+            return Result.Failure<DeliveryPersonAvailability>(
+                updateAvailabilityResult.Error);
+        }
+        #endregion
+
+        // update modified time for user
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        // add event
+        RaiseDomainEvent(new DeliveryPersonAvailabilityUpdatedDomainEvent(
+            Guid.NewGuid(),
+            DeliveryPersonDetails.Id,
+            updateAvailabilityResult.Value.Id));
+
+        return updateAvailabilityResult;
+    }
+    #endregion
     #endregion
 }
 

@@ -62,6 +62,10 @@ public static class DomainErrors
 
     public static class DeliveryPersonAvailability
     {
+        public static readonly Func<Guid, Error> NotFound = id => new(
+                "DeliveryPersonAvailability.NotFound",
+                $"The delivery person availability with the identifier {id} was not found.");
+
         public static readonly Func<DateTime, DateTime, Error> 
             InvalidAvailabilityPeriod = (startTimeUtc, endTimeUtc) => new(
                 "DeliveryPersonAvailability.InvalidAvailabilityPeriod", 

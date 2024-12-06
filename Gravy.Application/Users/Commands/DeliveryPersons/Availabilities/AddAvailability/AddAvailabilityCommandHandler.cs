@@ -3,20 +3,20 @@ using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
 
-namespace Gravy.Application.Users.Commands.DeliveryPersons.AddDeliveryPersonAvailability;
+namespace Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.AddAvailability;
 
-internal sealed class AddDeliveryPersonAvailabilityCommandHandler(
+internal sealed class AddAvailabilityCommandHandler(
     IUserRepository userRepository,
     IDeliveryPersonAvailabilityRepository deliveryPersonAvailabilityRepository,
     IUnitOfWork unitOfWork)
-    : ICommandHandler<AddDeliveryPersonAvailabilityCommand>
+    : ICommandHandler<AddAvailabilityCommand>
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IDeliveryPersonAvailabilityRepository _deliveryPersonAvailabilityRepository =
         deliveryPersonAvailabilityRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(AddDeliveryPersonAvailabilityCommand request,
+    public async Task<Result> Handle(AddAvailabilityCommand request,
         CancellationToken cancellationToken)
     {
         var (userId, startTimeUtc, endTimeUtc) = request;

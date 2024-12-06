@@ -1,9 +1,10 @@
-﻿using Gravy.Application.Users.Commands.DeliveryPersons.AddDeliveryPersonAvailability;
+﻿using Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.AddAvailability;
+using Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.UpdateAvailability;
 using Gravy.Application.Users.Queries.DeliveryPersons.GetAllDeliveryPersons;
 using Gravy.Application.Users.Queries.DeliveryPersons.GetDeliveryPersonAvailabilities;
 using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
-using Gravy.Presentation.Contracts.DeliveryPersons;
+using Gravy.Presentation.Contracts.DeliveryPersons.Availabilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,8 +42,29 @@ public sealed class DeliveryPersonsController(ISender sender) : ApiController(se
         [FromBody] CreateAvailabilityRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new AddDeliveryPersonAvailabilityCommand(
+        var command = new AddAvailabilityCommand(
             GetUserId(),
+            request.StartTimeUtc,
+            request.EndTimeUtc);
+
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("availabilities/{availabilityId:guid}")]
+    public async Task<IActionResult> UpdateAvailiability(
+        Guid availabilityId,
+        [FromBody] UpdateAvailabilityRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateAvailabilityCommand(
+            GetUserId(),
+            availabilityId,
             request.StartTimeUtc,
             request.EndTimeUtc);
 
