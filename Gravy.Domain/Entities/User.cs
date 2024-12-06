@@ -140,7 +140,8 @@ public sealed class User : AggregateRoot, IAuditableEntity
         return _deliveryPersonDetails;
     }
 
-    public Result<DeliveryPersonAvailability> AddDeliveryPersonAvailability(DateTime startTimeUtc, DateTime endTimeUtc)
+    public Result<DeliveryPersonAvailability> AddDeliveryPersonAvailability(
+        DateTime startTimeUtc, DateTime endTimeUtc)
     {
         if (DeliveryPersonDetails == null)
         {
