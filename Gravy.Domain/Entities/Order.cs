@@ -13,10 +13,13 @@ namespace Gravy.Domain.Entities;
 /// </summary>
 public sealed class Order : AggregateRoot, IAuditableEntity
 {
+    #region Private fields
     private readonly List<OrderItem> _orderItems = [];
     private Delivery _delivery;
     private Payment _payment;
+    #endregion
 
+    #region Constructors
     private Order(Guid id, 
         Guid customerId, 
         Guid restaurantId, 
@@ -36,8 +39,9 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     }
 
     private Order(){ }
+    #endregion
 
-    // Properties
+    #region Properties
     public Guid CustomerId { get; private set; }
     public Guid RestaurantId { get; private set; }
     public DeliveryAddress DeliveryAddress { get; private set; }
@@ -50,7 +54,9 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
     public Delivery Delivery => _delivery;
     public Payment Payment => _payment;
+    #endregion
 
+    #region Factory methods
     /// <summary>
     /// Factory method to create a new order.
     /// </summary>
@@ -66,13 +72,24 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             restaurantId, 
             deliveryAddress);
     }
+    #endregion
 
+    #region Order-Item related
     /// <summary>
     /// Adds an item to the order.
     /// </summary>
-    public void AddOrderItem(Guid menuItemId, int quantity, decimal price)
+    public void AddOrderItem(
+        Guid menuItemId, 
+        int quantity, 
+        decimal price)
     {
-        var orderItem = OrderItem.Create(Guid.NewGuid(), Id, menuItemId, quantity, price);
+        var orderItem = new OrderItem(
+            Guid.NewGuid(), 
+            Id, 
+            menuItemId, 
+            quantity, 
+            price);
+
         _orderItems.Add(orderItem);
         ModifiedOnUtc = DateTime.UtcNow;
 
@@ -84,39 +101,89 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             quantity,
             price));
     }
+    #endregion
 
-
+    #region Delivery related
     /// <summary>
     /// Assigns a delivery to the order.
     /// </summary>
-    public void AssignDelivery(Guid deliveryId, Guid deliveryPersonId, TimeSpan estimatedDeliveryTime)
+    public Result<Delivery> AssignDelivery(
+        Guid deliveryPersonId, 
+        TimeSpan estimatedDeliveryTime)
     {
-        if (_delivery != null)
-            throw new InvalidOperationException("Delivery is already assigned to this order.");
+        if (_delivery is not null)
+        {
+            return Result.Failure<Delivery>(
+                DomainErrors.Delivery.AlreadySet(_delivery.Id));
+        }
+        
+        _delivery = new Delivery(
+            Guid.NewGuid(), 
+            Id, 
+            deliveryPersonId, 
+            estimatedDeliveryTime);
 
-        _delivery = Delivery.Create(deliveryId, Id, deliveryPersonId, estimatedDeliveryTime);
         Status = OrderStatus.OnTheWay;
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new DeliveryAssignedDomainEvent(
             Guid.NewGuid(), 
-            deliveryId, 
+            _delivery.Id, 
             deliveryPersonId, 
             DateTime.UtcNow));
+
+        return _delivery;
     }
 
     /// <summary>
+    /// Marks the delivery as completed and updates the order status.
+    /// </summary>
+    public Result<Delivery> CompleteDelivery()
+    {
+        if (_delivery is null)
+        {
+            return Result.Failure<Delivery>(
+                DomainErrors.Delivery.NotAssigned(Id));
+        }
+
+        _delivery.MarkAsDelivered();
+
+        Status = OrderStatus.Delivered;
+        DeliveredAt = DateTime.UtcNow;
+
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new OrderDeliveredDomainEvent(
+            Guid.NewGuid(),
+            Id,
+            DeliveredAt.Value));
+
+        return _delivery;
+    }
+    #endregion
+
+    #region Payment related
+    /// <summary>
     /// Sets the payment for the order.
     /// </summary>
-    public Result<Payment> SetPayment(decimal amount, PaymentMethod method, string transactionId)
+    public Result<Payment> SetPayment(
+        decimal amount, 
+        PaymentMethod method, 
+        string transactionId)
     {
-        if (_payment != null)
+        if (_payment is not null)
         {
             return Result.Failure<Payment>(
                 DomainErrors.Payment.AlreadySet(_payment.Id));
         }
 
-        _payment = Payment.Create(Guid.NewGuid(), Id, amount, method, transactionId);
+        _payment = new Payment(
+            Guid.NewGuid(),
+            Id, 
+            amount, 
+            method, 
+            transactionId);
+
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new PaymentSetDomainEvent(
@@ -133,36 +200,24 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// <summary>
     /// Marks the payment as completed
     /// </summary>
-    public void CompletePayment()
+    public Result<Payment> CompletePayment()
     {
-        if (_payment == null)
-            throw new InvalidOperationException("No delivery is setted to this order.");
+        if (_payment is null)
+        {
+            return Result.Failure<Payment>(
+                DomainErrors.Payment.AlreadySet(_payment.Id));
+        }
 
         _payment.MarkAsCompleted();
+
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new PaymentCompletedDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
             DateTime.UtcNow));
+
+        return _payment;
     }
-
-    /// <summary>
-    /// Marks the delivery as completed and updates the order status.
-    /// </summary>
-    public void CompleteDelivery()
-    {
-        if (_delivery == null)
-            throw new InvalidOperationException("No delivery is assigned to this order.");
-
-        _delivery.MarkAsDelivered();
-        Status = OrderStatus.Delivered;
-        DeliveredAt = DateTime.UtcNow;
-        ModifiedOnUtc = DateTime.UtcNow;
-
-        RaiseDomainEvent(new OrderDeliveredDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
-            DeliveredAt.Value));
-    }
+    #endregion
 }

@@ -106,6 +106,7 @@ public static class DomainErrors
                 $"DbUpdateConcurrencyException");
     }
 
+    #region Order related
     public static class Order
     {
         public static readonly Func<Guid, Error> NotFound = id => new(
@@ -116,6 +117,37 @@ public static class DomainErrors
                 "Order.NotExist",
                 $"There is no orders");
     }
+
+    public static class Delivery
+    {
+        public static readonly Func<Guid, Error> NotAssigned = orderId => new(
+            "Delivery.NotAssigned", 
+            $"The delivery is not assigned to this order. Order Id: {orderId}.");
+
+        public static readonly Func<Guid, Error> AlreadySet = id => new(
+            "Delivery.AlreadySet",
+            $"The delivery already set to this order. Setted delivery Id : {id}.");
+    }
+
+    public static class Payment
+    {
+        public static readonly Error InvalidAmount = new(
+            "Payment.InvalidAmount",
+            "The payment amount must be greater than zero.");
+
+        public static readonly Error TransactionIdEmpty = new(
+            "Payment.TransactionIdEmpty",
+            "The transaction ID cannot be empty.");
+
+        public static readonly Func<Guid, Error> AlreadySet = id => new(
+            "Payment.AlreadySet",
+            $"The payment already set to this order. Setted payment Id : {id}.");
+
+        public static readonly Func<Guid, Error> NotAssigned = orderId => new(
+            "Payment.NotAssigned",
+            $"The payment is not assigned to this order. Order Id: {orderId}.");
+    }
+    #endregion
 
     public static class Email
     {
@@ -192,21 +224,6 @@ public static class DomainErrors
         public static readonly Error LicensePlateEmpty = new(
             "Vehicle.LicensePlateEmpty",
             "License plate cannot be empty.");
-    }
-
-    public static class Payment
-    {
-        public static readonly Error InvalidAmount = new(
-            "Payment.InvalidAmount", 
-            "The payment amount must be greater than zero.");
-        
-        public static readonly Error TransactionIdEmpty = new(
-            "Payment.TransactionIdEmpty", 
-            "The transaction ID cannot be empty.");
-
-        public static readonly Func<Guid, Error> AlreadySet = id => new(
-            "Payment.AlreadySet",
-            $"The payment already set to this order. Setted payment Id : {id}.");
     }
 
     public static class Money

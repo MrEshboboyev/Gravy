@@ -7,13 +7,16 @@ namespace Gravy.Domain.Entities;
 /// Represents payment details for an order.
 /// Part of the Order Aggregate.
 /// </summary>
-public sealed class Payment : IAuditableEntity
+public sealed class Payment : Entity
 {
-    // Constructor
-    private Payment(Guid id, Guid orderId, decimal amount, PaymentMethod method,
-        string transactionId)
+    #region Constructors
+    internal Payment(
+        Guid id, 
+        Guid orderId, 
+        decimal amount, 
+        PaymentMethod method,
+        string transactionId) : base(id)
     {
-        Id = id;
         OrderId = orderId;
         Amount = amount;
         Method = method;
@@ -22,29 +25,19 @@ public sealed class Payment : IAuditableEntity
     }
 
     private Payment() { }
+    #endregion
 
-    // Properties
-    public Guid Id { get; private set; }
+    #region Properties
     public Guid OrderId { get; private set; }
     public decimal Amount { get; private set; }
     public PaymentMethod Method { get; private set; }
     public PaymentStatus Status { get; private set; }
     public string TransactionId { get; private set; }
-    public DateTime CreatedOnUtc { get; set; }
-    public DateTime? ModifiedOnUtc { get; set; }
+    public DateTime CreatedOnUtc { get; private set; }
+    public DateTime? ModifiedOnUtc { get; private set; }
+    #endregion
 
-    /// <summary>
-    /// Factory method to create a payment.
-    /// </summary>
-    public static Payment Create(Guid id, 
-        Guid orderId, 
-        decimal amount, 
-        PaymentMethod method, 
-        string transactionId)
-    {
-        return new Payment(id, orderId, amount, method, transactionId);
-    }
-
+    #region Own methods
     /// <summary>
     /// Marks the payment as completed.
     /// </summary>
@@ -62,4 +55,5 @@ public sealed class Payment : IAuditableEntity
         Status = PaymentStatus.Failed;
         ModifiedOnUtc = DateTime.UtcNow;
     }
+    #endregion
 }

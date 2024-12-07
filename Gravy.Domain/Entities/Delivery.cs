@@ -7,13 +7,15 @@ namespace Gravy.Domain.Entities;
 /// Represents delivery details for an order.
 /// Part of the Order Aggregate.
 /// </summary>
-public sealed class Delivery : IAuditableEntity
+public sealed class Delivery : Entity
 {
-    // Constructor
-    private Delivery(Guid id, Guid orderId, Guid deliveryPersonId, 
-        TimeSpan estimatedDeliveryTime) 
+    #region Constructors
+    internal Delivery(
+        Guid id, 
+        Guid orderId, 
+        Guid deliveryPersonId, 
+        TimeSpan estimatedDeliveryTime) : base(id)
     {
-        Id = id;
         OrderId = orderId;
         DeliveryPersonId = deliveryPersonId;
         EstimatedDeliveryTime = estimatedDeliveryTime;
@@ -23,29 +25,20 @@ public sealed class Delivery : IAuditableEntity
     private Delivery()
     {
     }
+    #endregion
 
-    // Properties
-    public Guid Id { get; private set; }
+    #region Properties
     public Guid OrderId { get; private set; }
     public Guid DeliveryPersonId { get; private set; }
     public DateTime? PickUpTime { get; private set; }
     public TimeSpan EstimatedDeliveryTime { get; private set; }
     public DateTime? ActualDeliveryTime { get; private set; }
     public DeliveryStatus DeliveryStatus { get; private set; }
-    public DateTime CreatedOnUtc { get; set; }
-    public DateTime? ModifiedOnUtc { get; set; }
+    public DateTime CreatedOnUtc { get; private set; }
+    public DateTime? ModifiedOnUtc { get; private set; }
+    #endregion
 
-    /// <summary>
-    /// Factory method to create a delivery.
-    /// </summary>
-    public static Delivery Create(Guid id, 
-        Guid orderId, 
-        Guid deliveryPersonId, 
-        TimeSpan estimatedDeliveryTime)
-    {
-        return new Delivery(id, orderId, deliveryPersonId, estimatedDeliveryTime);
-    }
-
+    #region Own methods
     /// <summary>
     /// Marks the delivery as completed.
     /// </summary>
@@ -55,5 +48,6 @@ public sealed class Delivery : IAuditableEntity
         ActualDeliveryTime = DateTime.UtcNow;
         ModifiedOnUtc = DateTime.UtcNow;
     }
+    #endregion
 }
 

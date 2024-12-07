@@ -6,39 +6,48 @@ namespace Gravy.Domain.Entities;
 /// Represents an individual item in an order.
 /// Part of the Order Aggregate.
 /// </summary>
-public sealed class OrderItem : IAuditableEntity
+public sealed class OrderItem : Entity
 {
-    private OrderItem(Guid id, Guid orderId, Guid menuItemId, int quantity, decimal price)
+    #region Constructors
+    internal OrderItem(
+        Guid id, 
+        Guid orderId, 
+        Guid menuItemId, 
+        int quantity, 
+        decimal price) : base(id)
     {
-        Id = id;
         OrderId = orderId;
         MenuItemId = menuItemId;
         Quantity = quantity;
         Price = price;
+        CreatedOnUtc = DateTime.UtcNow;
     }
 
     private OrderItem()
     {
     }
+    #endregion
 
-    // Properties
-    public Guid Id { get; private set; }
+    #region Properties
     public Guid OrderId { get; private set; }
     public Guid MenuItemId { get; private set; }
     public int Quantity { get; private set; }
     public decimal Price { get; private set; }
-    public DateTime CreatedOnUtc { get; set; }
-    public DateTime? ModifiedOnUtc { get; set; }
+    public DateTime CreatedOnUtc { get; private set; }
+    public DateTime? ModifiedOnUtc { get; private set; }
+    #endregion
 
+    #region Own methods
     /// <summary>
-    /// Factory method to create an order item.
+    /// Updates the order item's details.
     /// </summary>
-    public static OrderItem Create(Guid id, 
-        Guid orderId, 
-        Guid menuItemId, 
+    public void UpdateDetails(
         int quantity, 
         decimal price)
     {
-        return new OrderItem(id, orderId, menuItemId, quantity, price);
+        Quantity = quantity;
+        Price = price;
+        ModifiedOnUtc = DateTime.UtcNow;
     }
+    #endregion
 }

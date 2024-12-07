@@ -13,11 +13,19 @@ namespace Gravy.Domain.Entities;
 /// </summary>
 public sealed class Restaurant : AggregateRoot
 {
+    #region Private fields
     private readonly List<MenuItem> _menuItems = [];
+    #endregion
 
-    // Constructor
-    private Restaurant(Guid id, string name, string description, Email email, string phoneNumber,
-        Address address, Guid ownerId, OpeningHours openingHours) : base(id)
+    #region Constructor
+    private Restaurant(Guid id,
+        string name,
+        string description, 
+        Email email, 
+        string phoneNumber,
+        Address address, 
+        Guid ownerId, 
+        OpeningHours openingHours) : base(id)
     {
         Name = name;
         Description = description;
@@ -37,8 +45,9 @@ public sealed class Restaurant : AggregateRoot
     private Restaurant()
     {
     }
+    #endregion
 
-    // Properties
+    #region Properties
     public Guid OwnerId { get; private set; } // Reference to the User entity
     public string Name { get; private set; }
     public string Description { get; private set; }
@@ -50,7 +59,9 @@ public sealed class Restaurant : AggregateRoot
     public IReadOnlyCollection<MenuItem> MenuItems => _menuItems.AsReadOnly();
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? ModifiedOnUtc { get; private set; }
+    #endregion
 
+    #region Factory methods
     /// <summary>
     /// Factory method to create a new restaurant.
     /// </summary>
@@ -74,7 +85,9 @@ public sealed class Restaurant : AggregateRoot
             ownerId,
             openingHours);
     }
+    #endregion
 
+    #region Own Methods
     /// <summary>
     /// Updates the restaurant's details.
     /// </summary>
@@ -124,7 +137,9 @@ public sealed class Restaurant : AggregateRoot
             Id, 
             Name));
     }
+    #endregion
 
+    #region Menu-Item Related
     /// <summary>
     /// Adds a new menu item to the restaurant.
     /// </summary>
@@ -202,4 +217,5 @@ public sealed class Restaurant : AggregateRoot
 
         return menuItem;
     }
+    #endregion
 }

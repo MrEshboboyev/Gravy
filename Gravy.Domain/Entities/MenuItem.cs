@@ -9,7 +9,7 @@ namespace Gravy.Domain.Entities;
 /// </summary>
 public sealed class MenuItem : Entity
 {
-    // Constructor
+    #region Constructor
     internal MenuItem(
         Guid id, 
         Guid restaurantId, 
@@ -32,8 +32,9 @@ public sealed class MenuItem : Entity
     private MenuItem()
     {
     }
+    #endregion
 
-    // Properties
+    #region Properties
     public Guid RestaurantId { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
@@ -42,7 +43,9 @@ public sealed class MenuItem : Entity
     public bool IsAvailable { get; private set; }
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? ModifiedOnUtc { get; private set; }
+    #endregion
 
+    #region Own methods
     /// <summary>
     /// Updates the menu item's details.
     /// </summary>
@@ -60,5 +63,6 @@ public sealed class MenuItem : Entity
         IsAvailable = isAvailable;
         ModifiedOnUtc = DateTime.UtcNow;
     }
+    #endregion
 }
 
