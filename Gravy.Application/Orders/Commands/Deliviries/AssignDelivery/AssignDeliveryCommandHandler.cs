@@ -24,7 +24,6 @@ internal sealed class AssignDeliveryCommandHandler(IOrderRepository orderReposit
         }
 
         order.AssignDelivery(
-            Guid.NewGuid(),
             deliveryPersonId,
             estimatedDeliveryTime);
 
