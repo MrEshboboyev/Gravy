@@ -7,10 +7,6 @@ public sealed class AssignDeliveryCommandValidator : AbstractValidator<AssignDel
     public AssignDeliveryCommandValidator()
     {
         RuleFor(delivery => delivery.OrderId).NotEmpty();
-
-        RuleFor(delivery => delivery.DeliveryPersonId).NotEmpty();
-
-        RuleFor(delivery => delivery.EstimatedDeliveryTime).NotEmpty();
     }
 }
 

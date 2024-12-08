@@ -120,6 +120,10 @@ public static class DomainErrors
 
     public static class Delivery
     {
+        public static readonly Func<Guid, Error> NotFound = orderId => new(
+            "Delivery.NotFound",
+            $"The delivery is not found to this order. Order Id: {orderId}.");
+
         public static readonly Func<Guid, Error> NotAssigned = orderId => new(
             "Delivery.NotAssigned", 
             $"The delivery is not assigned to this order. Order Id: {orderId}.");
@@ -127,6 +131,10 @@ public static class DomainErrors
         public static readonly Func<Guid, Error> AlreadySet = id => new(
             "Delivery.AlreadySet",
             $"The delivery already set to this order. Setted delivery Id : {id}.");
+
+        public static readonly Error NoAvailableDeliveryPerson = new(
+            "Delivery.NoAvailableDeliveryPerson", 
+            "No available delivery person for the delivery.");
     }
 
     public static class Payment

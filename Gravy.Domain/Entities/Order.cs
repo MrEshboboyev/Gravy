@@ -138,11 +138,12 @@ public sealed class Order : AggregateRoot, IAuditableEntity
                 DomainErrors.Delivery.AlreadySet(_delivery.Id));
         }
         
-        _delivery = new Delivery(
-            Guid.NewGuid(), 
-            Id, 
-            deliveryPersonId, 
-            estimatedDeliveryTime);
+        // Assign the delivery person
+        var assignResult = _delivery.AssignDeliveryPerson(deliveryPersonId);
+        if (assignResult.IsFailure)
+        {
+            return Result.Failure<Delivery>(assignResult.Error);
+        }
 
         Status = OrderStatus.OnTheWay;
         ModifiedOnUtc = DateTime.UtcNow;

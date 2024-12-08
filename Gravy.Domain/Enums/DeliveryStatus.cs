@@ -5,8 +5,9 @@
 /// </summary>
 public enum DeliveryStatus
 {
-    Assigned = 10,
-    PickedUp = 20, 
-    Delivered = 30,
-    Failed = 40
+    Pending = 10,
+    Assigned = 20,
+    PickedUp = 30, 
+    Delivered = 40,
+    Failed = 50
 }
