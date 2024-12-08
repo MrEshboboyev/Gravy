@@ -18,7 +18,7 @@ internal sealed class AddDeliveryPersonDetailsCommandHandler(IUserRepository use
     public async Task<Result> Handle(AddDeliveryPersonDetailsCommand request,
         CancellationToken cancellationToken)
     {
-        var (userId, type, licensePlate) = request;
+        var (userId, type, licensePlate, latitude, longitude) = request;
 
         var user = await _userRepository.GetByIdWithDeliveryPersonDetailsAsync(userId, cancellationToken);
 
@@ -29,8 +29,11 @@ internal sealed class AddDeliveryPersonDetailsCommandHandler(IUserRepository use
         }
 
         Result<Vehicle> vehicleResult = Vehicle.Create(type, licensePlate);
+        Result<Location> locationResult = Location.Create(latitude, longitude);
 
-        var deliveryPersonResult = user.AddDeliveryPersonDetails(vehicleResult.Value);
+        var deliveryPersonResult = user.AddDeliveryPersonDetails(
+            vehicleResult.Value,
+            locationResult.Value);
 
         if (deliveryPersonResult.IsFailure)
         {

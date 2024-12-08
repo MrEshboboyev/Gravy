@@ -18,11 +18,13 @@ public sealed class DeliveryPerson : Entity
     internal DeliveryPerson(
         Guid id, 
         Guid userId, 
-        Vehicle vehicle) 
+        Vehicle vehicle,
+        Location homeLocation) 
         : base(id)
     {
         UserId = userId;
         Vehicle = vehicle;
+        HomeLocation = homeLocation;
     }
 
     private DeliveryPerson() { }
@@ -31,6 +33,7 @@ public sealed class DeliveryPerson : Entity
     #region Properties
     public Guid UserId { get; private set; }
     public Vehicle Vehicle { get; private set; }
+    public Location HomeLocation { get; private set; }
     public ICollection<Guid> AssignedDeliveries { get; private set; } = [];
     public DateTime CreatedOnUtc { get; private set; }
     public DateTime? ModifiedOnUtc { get; private set; }
@@ -43,21 +46,47 @@ public sealed class DeliveryPerson : Entity
     /// <summary>
     /// Updates the delivery person's details.
     /// </summary>
-    public void UpdateDetails(Vehicle newVehicle)
+    public void UpdateDetails(
+        Vehicle newVehicle,
+        Location newLocation)
     {
         Vehicle = newVehicle;
+        HomeLocation = newLocation;
         ModifiedOnUtc = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// Sets the availability status of the delivery person.
+    /// </summary>
     public void SetAvailability(bool isAvailable)
     {
         IsAvailable = isAvailable;
         ModifiedOnUtc = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// Checks if the delivery person is available at a specific time.
+    /// </summary>
     public bool IsAvailableAt(DateTime targetTimeUtc)
     {
         return _availabilities.Any(av => av.IsAvailableFor(targetTimeUtc));
+    }
+
+    /// <summary>
+    /// Checks if the delivery person is available for a delivery at a specific location.
+    /// </summary>
+    public bool IsAvailableForDelivery(Location deliveryLocation)
+    {
+        return IsAvailable && HomeLocation
+            .CalculateDistance(deliveryLocation) <= Vehicle.MaxDeliveryRadius;
+    }
+
+    /// <summary>
+    /// Calculates the distance from the delivery person's home location to the specified delivery location.
+    /// </summary>
+    public double DistanceTo(Location deliveryLocation)
+    {
+        return HomeLocation.CalculateDistance(deliveryLocation);
     }
     #endregion
 

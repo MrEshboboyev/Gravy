@@ -8,4 +8,5 @@ public sealed record CreateOrderCommand(
     string Street, 
     string City, 
     string State, 
-    string PostalCode) : ICommand<Guid>;
+    double Latitude,
+    double Longitude) : ICommand<Guid>;

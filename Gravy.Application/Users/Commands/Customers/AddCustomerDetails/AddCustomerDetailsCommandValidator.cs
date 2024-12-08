@@ -14,7 +14,9 @@ public sealed class AddCustomerDetailsCommandValidator : AbstractValidator<AddCu
 
         RuleFor(c => c.State).NotEmpty();
 
-        RuleFor(c => c.PostalCode).NotEmpty();
+        RuleFor(c => c.Latitude).NotEmpty();
+
+        RuleFor(c => c.Longitude).NotEmpty();
     }
 }
 

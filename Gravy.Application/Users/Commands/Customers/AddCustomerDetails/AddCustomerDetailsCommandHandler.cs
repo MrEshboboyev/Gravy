@@ -18,9 +18,10 @@ internal sealed class AddCustomerDetailsCommandHandler(IUserRepository userRepos
     public async Task<Result> Handle(AddCustomerDetailsCommand request,
         CancellationToken cancellationToken)
     {
-        var (userId, street, city, state, postalCode) = request;
+        var (userId, street, city, state, latitude, longitude) = request;
 
-        var user = await _userRepository.GetByIdWithCustomerDetailsAsync(userId, cancellationToken);
+        var user = await _userRepository.GetByIdWithCustomerDetailsAsync(userId, 
+            cancellationToken);
 
         if (user is null)
         {
@@ -28,8 +29,12 @@ internal sealed class AddCustomerDetailsCommandHandler(IUserRepository userRepos
                 DomainErrors.User.NotFound(userId));
         }
 
-        Result<DeliveryAddress> deliveryAddressResult = DeliveryAddress.Create(street, city,
-            state, postalCode);
+        Result<DeliveryAddress> deliveryAddressResult = DeliveryAddress.Create(
+            street, 
+            city,
+            state, 
+            latitude, 
+            longitude);
 
         var customerResult = user.AddCustomerDetails(deliveryAddressResult.Value);
 

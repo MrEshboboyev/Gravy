@@ -25,8 +25,10 @@ internal sealed class GetOrderByIdQueryHandler(IOrderRepository orderRepository)
         #region Prepare Response
         var deliveryAddressObject = order.DeliveryAddress;
 
-        string deliveryAddress = $"{deliveryAddressObject.Street}/{deliveryAddressObject.City}/" +
-            $"{deliveryAddressObject.State}/{deliveryAddressObject.PostalCode}";
+        string deliveryAddress = 
+            $"{deliveryAddressObject.Street}/" +
+            $"{deliveryAddressObject.City}/" +
+            $"{deliveryAddressObject.State}";
 
         var orderItemsResponse = order.OrderItems
                 .Select(orderItem => new OrderItemResponse(

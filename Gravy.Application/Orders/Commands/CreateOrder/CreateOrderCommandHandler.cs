@@ -20,7 +20,8 @@ internal sealed class CreateOrderCommandHandler(
     public async Task<Result<Guid>> Handle(CreateOrderCommand request, 
         CancellationToken cancellationToken)
     {
-        var (customerId, restaurantId, street, city, state, postalCode) = request;
+        var (customerId, restaurantId, street, city, state, latitude, longitude)
+            = request;
 
         // checking restaurant exists
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, 
@@ -36,7 +37,8 @@ internal sealed class CreateOrderCommandHandler(
             street, 
             city, 
             state, 
-            postalCode);
+            latitude, 
+            longitude);
         #endregion
 
         var order = Order.Create(

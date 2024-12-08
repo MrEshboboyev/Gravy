@@ -33,7 +33,6 @@ internal sealed class GetAllCustomersQueryHandler(
     static string PrepareDeliveryAddress(DeliveryAddress deliveryAddress) =>
                $"{deliveryAddress.Street}/" +
                $"{deliveryAddress.City}/" +
-               $"{deliveryAddress.State}/" +
-               $"{deliveryAddress.PostalCode}";
+               $"{deliveryAddress.State}";
 }
 

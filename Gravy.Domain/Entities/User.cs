@@ -132,7 +132,9 @@ public sealed class User : AggregateRoot, IAuditableEntity
     /// <summary>
     /// Links delivery-person-specific details to the user.
     /// </summary>
-    public Result<DeliveryPerson> AddDeliveryPersonDetails(Vehicle vehicle)
+    public Result<DeliveryPerson> AddDeliveryPersonDetails(
+        Vehicle vehicle,
+        Location location)
     {
         if (_deliveryPersonDetails is not null)
         {
@@ -140,7 +142,11 @@ public sealed class User : AggregateRoot, IAuditableEntity
                 DomainErrors.DeliveryPerson.AlreadyExist(_deliveryPersonDetails.Id, Id));
         }
 
-        _deliveryPersonDetails = new DeliveryPerson(Guid.NewGuid(), Id, vehicle);
+        _deliveryPersonDetails = new DeliveryPerson(
+            Guid.NewGuid(), 
+            Id, 
+            vehicle,
+            location);
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new DeliveryPersonLinkedToUserDomainEvent(

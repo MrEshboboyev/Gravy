@@ -9,49 +9,62 @@ namespace Gravy.Domain.ValueObjects;
 /// </summary>
 public sealed class DeliveryAddress : ValueObject
 {
-    private DeliveryAddress(string street, string city, string state, string postalCode)
+    private DeliveryAddress(
+        string street, 
+        string city, 
+        string state,
+        Location location)
     {
         Street = street;
         City = city;
         State = state;
-        PostalCode = postalCode;
+        Location = location;
     }
 
     public string Street { get; }
     public string City { get; }
     public string State { get; }
-    public string PostalCode { get; }
+    public Location Location { get; } // Contains latitude and longitude
 
     /// <summary>
     /// Factory method to create a DeliveryAddress.
     /// </summary>
-    public static Result<DeliveryAddress> Create(string street, string city, string state, string postalCode)
+    public static Result<DeliveryAddress> Create(
+        string street, 
+        string city, 
+        string state, 
+        double latitude,
+        double longitude)
     {
         if (string.IsNullOrWhiteSpace(street))
         {
-            return Result.Failure<DeliveryAddress>(DomainErrors.DeliveryAddress.StreetEmpty);
+            return Result.Failure<DeliveryAddress>(
+                DomainErrors.DeliveryAddress.StreetEmpty);
         }
         if (string.IsNullOrWhiteSpace(city))
         {
-            return Result.Failure<DeliveryAddress>(DomainErrors.DeliveryAddress.CityEmpty);
+            return Result.Failure<DeliveryAddress>(
+                DomainErrors.DeliveryAddress.CityEmpty);
         }
         if (string.IsNullOrWhiteSpace(state))
         {
-            return Result.Failure<DeliveryAddress>(DomainErrors.DeliveryAddress.StateEmpty);
-        }
-        if (string.IsNullOrWhiteSpace(postalCode))
-        {
-            return Result.Failure<DeliveryAddress>(DomainErrors.DeliveryAddress.PostalCodeEmpty);
+            return Result.Failure<DeliveryAddress>(
+                DomainErrors.DeliveryAddress.StateEmpty);
         }
 
-        return new DeliveryAddress(street, city, state, postalCode);
+        // errors handled in Location value object
+        var locationResult = Location.Create(latitude, longitude);
+
+        return new DeliveryAddress(street, city, state, locationResult.Value);
     }
+
+    public Location ToLocation() => Location;
 
     public override IEnumerable<object> GetAtomicValues()
     {
         yield return Street;
         yield return City;
         yield return State;
-        yield return PostalCode;
+        yield return Location;
     }
 }

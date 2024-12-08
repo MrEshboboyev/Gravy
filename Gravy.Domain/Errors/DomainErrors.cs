@@ -52,8 +52,8 @@ public static class DomainErrors
                 "DeliveryPerson.NotFound",
                 $"The delivery person with the identifier {id} was not found.");
 
-        public static readonly Func<Guid, Guid, Error> AlreadyExist = (deliveryPersonId, userId) 
-            => new( 
+        public static readonly Func<Guid, Guid, Error> AlreadyExist = (deliveryPersonId, userId)
+            => new(
                 "DeliveryPerson.AlreadyExist",
                 $"The delivery person details with the identifier {deliveryPersonId} " +
                     $"already exist for this user with Id {userId}.");
@@ -66,16 +66,16 @@ public static class DomainErrors
                 "DeliveryPersonAvailability.NotFound",
                 $"The delivery person availability with the identifier {id} was not found.");
 
-        public static readonly Func<DateTime, DateTime, Error> 
+        public static readonly Func<DateTime, DateTime, Error>
             InvalidAvailabilityPeriod = (startTimeUtc, endTimeUtc) => new(
-                "DeliveryPersonAvailability.InvalidAvailabilityPeriod", 
+                "DeliveryPersonAvailability.InvalidAvailabilityPeriod",
                 $"The availability period from {startTimeUtc} to {endTimeUtc} is invalid. " +
                 $"Start time must be in the future, " +
                 $"and end time must be after start time.");
 
-        public static readonly Func<DateTime, DateTime, Error> OverlappingAvailabilityPeriod = 
+        public static readonly Func<DateTime, DateTime, Error> OverlappingAvailabilityPeriod =
             (startTimeUtc, endTimeUtc) => new(
-                "DeliveryPersonAvailability.OverlappingAvailabilityPeriod", 
+                "DeliveryPersonAvailability.OverlappingAvailabilityPeriod",
                 $"The availability period from {startTimeUtc} to {endTimeUtc} " +
                 $"overlaps with an existing availability period.");
     }
@@ -88,7 +88,7 @@ public static class DomainErrors
 
         public static readonly Func<Guid, Guid, Error> MenuItemNotFound =
             (restaurantId, menuItemId) => new(
-                "Restaurant.MenuItemNotFound", 
+                "Restaurant.MenuItemNotFound",
                 $"The menu item with the identifier {menuItemId} in the restaurant " +
                 $"with the identifier {restaurantId} was not found.");
 
@@ -125,7 +125,7 @@ public static class DomainErrors
             $"The delivery is not found to this order. Order Id: {orderId}.");
 
         public static readonly Func<Guid, Error> NotAssigned = orderId => new(
-            "Delivery.NotAssigned", 
+            "Delivery.NotAssigned",
             $"The delivery is not assigned to this order. Order Id: {orderId}.");
 
         public static readonly Func<Guid, Error> AlreadySet = id => new(
@@ -133,7 +133,7 @@ public static class DomainErrors
             $"The delivery already set to this order. Setted delivery Id : {id}.");
 
         public static readonly Error NoAvailableDeliveryPerson = new(
-            "Delivery.NoAvailableDeliveryPerson", 
+            "Delivery.NoAvailableDeliveryPerson",
             "No available delivery person for the delivery.");
     }
 
@@ -232,17 +232,32 @@ public static class DomainErrors
         public static readonly Error LicensePlateEmpty = new(
             "Vehicle.LicensePlateEmpty",
             "License plate cannot be empty.");
+
+        public static Error InvalidType(string type) => new(
+            "Vehicle.InvalidType", 
+            $"The vehicle type '{type}' is invalid. Please provide a valid vehicle type.");
     }
 
     public static class Money
     {
         public static readonly Error InvalidAmount = new(
-            "Money.InvalidAmount", 
+            "Money.InvalidAmount",
             "The monetary amount must be greater than zero.");
-        
+
         public static readonly Error CurrencyEmpty = new(
-            "Money.CurrencyEmpty", 
+            "Money.CurrencyEmpty",
             "The currency cannot be empty.");
+    }
+
+    public static class Location
+    {
+        public static readonly Error InvalidLatitude = new(
+            "Location.InvalidLatitude",
+            "Latitude must be between -90 and 90 degrees.");
+
+        public static readonly Error InvalidLongitude = new(
+            "Location.InvalidLongitude",
+            "Longitude must be between -180 and 180 degrees.");
     }
 }
 

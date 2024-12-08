@@ -34,8 +34,7 @@ internal sealed class GetUserByIdQueryHandler(IUserRepository userRepository)
             var deliveryAddressObject = user.CustomerDetails.DefaultDeliveryAddress;
             string customerDefaultDeliveryAddress = $"{deliveryAddressObject.Street}/" +
                                                     $"{deliveryAddressObject.City}/" +
-                                                    $"{deliveryAddressObject.State}/" +
-                                                    $"{deliveryAddressObject.PostalCode}";
+                                                    $"{deliveryAddressObject.State}";
 
             customerDetailsResponse = new CustomerDetailsResponse(
                 user.CustomerDetails.Id,

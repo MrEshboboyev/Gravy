@@ -6,4 +6,6 @@ namespace Gravy.Application.Users.Commands.DeliveryPersons.AddDeliveryPersonDeta
 public sealed record AddDeliveryPersonDetailsCommand(
     Guid UserId,
     string Type,
-    string LicensePlate) : ICommand;
+    string LicensePlate, 
+    double Latitude,
+    double Longtitude) : ICommand;

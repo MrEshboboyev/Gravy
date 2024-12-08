@@ -7,5 +7,6 @@ public sealed record AddCustomerDetailsCommand(
     string Street,
     string City,
     string State,
-    string PostalCode) : ICommand;
+    double Latitude,
+    double Longitude) : ICommand;
 
