@@ -104,6 +104,27 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     #endregion
 
     #region Delivery related
+    public Result<Delivery> CreateDelivery()
+    {
+        if (_delivery is not null)
+        {
+            return Result.Failure<Delivery>(
+                DomainErrors.Delivery.AlreadySet(_delivery.Id));
+        }
+
+        _delivery = new Delivery(
+            Guid.NewGuid(),
+            Id);
+
+        RaiseDomainEvent(new DeliveryCreatedDomainEvent(
+            Guid.NewGuid(),
+            Id,
+            _delivery.Id, 
+            DateTime.UtcNow));
+
+        return _delivery;
+    }
+
     /// <summary>
     /// Assigns a delivery to the order.
     /// </summary>
@@ -207,6 +228,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
 
         return Result.Success(_payment);
     }
+
 
     /// <summary>
     /// Marks the payment as completed

@@ -4,7 +4,7 @@ namespace Gravy.Application.Orders.Queries.GetOrderById;
 
 public sealed record DeliveryResponse(
     Guid DeliveryId,
-    Guid DeliveryPersonId,
+    Guid? DeliveryPersonId,
     DateTime? PickUpTime,
     TimeSpan EstimatedDeliveryTime,
     DateTime? ActualDeliveryTime,

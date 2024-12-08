@@ -26,8 +26,7 @@ internal sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Configure properties
-        builder.Property(x => x.DeliveryPersonId)
-            .IsRequired();
+        builder.Property(x => x.DeliveryPersonId);
 
         builder.Property(x => x.PickUpTime);
 

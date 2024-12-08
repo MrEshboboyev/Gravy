@@ -12,14 +12,10 @@ public sealed class Delivery : Entity
     #region Constructors
     internal Delivery(
         Guid id, 
-        Guid orderId, 
-        Guid deliveryPersonId, 
-        TimeSpan estimatedDeliveryTime) : base(id)
+        Guid orderId) : base(id)
     {
         OrderId = orderId;
-        DeliveryPersonId = deliveryPersonId;
-        EstimatedDeliveryTime = estimatedDeliveryTime;
-        DeliveryStatus = DeliveryStatus.Assigned;
+        DeliveryStatus = DeliveryStatus.Pending;
     }
 
     private Delivery()
@@ -29,7 +25,7 @@ public sealed class Delivery : Entity
 
     #region Properties
     public Guid OrderId { get; private set; }
-    public Guid DeliveryPersonId { get; private set; }
+    public Guid? DeliveryPersonId { get; private set; }
     public DateTime? PickUpTime { get; private set; }
     public TimeSpan EstimatedDeliveryTime { get; private set; }
     public DateTime? ActualDeliveryTime { get; private set; }
