@@ -171,12 +171,21 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         PaymentMethod method, 
         string transactionId)
     {
+        // Ensure a payment has not already been set
         if (_payment is not null)
         {
             return Result.Failure<Payment>(
                 DomainErrors.Payment.AlreadySet(_payment.Id));
         }
 
+        // Validate the transaction ID
+        if (string.IsNullOrWhiteSpace(transactionId))
+        {
+            return Result.Failure<Payment>(
+                DomainErrors.Payment.TransactionIdEmpty);
+        }
+
+        // Create the payment object
         _payment = new Payment(
             Guid.NewGuid(),
             Id, 
@@ -184,8 +193,10 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             method, 
             transactionId);
 
+        // Update the order's modified timestamp
         ModifiedOnUtc = DateTime.UtcNow;
 
+        // Raise a domain event for setting the payment
         RaiseDomainEvent(new PaymentSetDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
@@ -194,7 +205,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             method,
             transactionId));
 
-        return _payment;
+        return Result.Success(_payment);
     }
 
     /// <summary>
