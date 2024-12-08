@@ -1,4 +1,4 @@
-﻿using Gravy.Persistence.Constants;
+﻿using Gravy.Persistence.Outbox.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,7 +12,7 @@ internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outb
     public void Configure(EntityTypeBuilder<OutboxMessage> builder)
     {
         // Map to the OutboxMessages table
-        builder.ToTable(TableNames.OutboxMessages);
+        builder.ToTable(OutboxTableNames.OutboxMessages);
 
         // Configure the primary key
         builder.HasKey(x => x.Id);
