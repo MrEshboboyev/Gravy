@@ -6,7 +6,8 @@ using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Application.Users.Commands.Customers.AddCustomerDetails;
 
-internal sealed class AddCustomerDetailsCommandHandler(IUserRepository userRepository,
+internal sealed class AddCustomerDetailsCommandHandler(
+    IUserRepository userRepository,
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<AddCustomerDetailsCommand>
@@ -20,33 +21,43 @@ internal sealed class AddCustomerDetailsCommandHandler(IUserRepository userRepos
     {
         var (userId, street, city, state, latitude, longitude) = request;
 
+        #region Get User with Customer Details
         var user = await _userRepository.GetByIdWithCustomerDetailsAsync(userId, 
             cancellationToken);
-
         if (user is null)
         {
             return Result.Failure(
                 DomainErrors.User.NotFound(userId));
         }
+        #endregion
 
+        #region Prepare Delivery Address
         Result<DeliveryAddress> deliveryAddressResult = DeliveryAddress.Create(
             street, 
             city,
             state, 
             latitude, 
             longitude);
+        if (deliveryAddressResult.IsFailure)
+        {
+            return Result.Failure(
+                deliveryAddressResult.Error);
+        }
+        #endregion
 
+        #region Add Customer details to User
         var customerResult = user.AddCustomerDetails(deliveryAddressResult.Value);
-
         if (customerResult.IsFailure)
         {
             return Result.Failure(
                 customerResult.Error);
         }
+        #endregion
 
+        #region Add and Update database
         _customerRepository.Add(customerResult.Value);
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

@@ -6,7 +6,8 @@ using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Application.Users.Commands.DeliveryPersons.AddDeliveryPersonDetails;
 
-internal sealed class AddDeliveryPersonDetailsCommandHandler(IUserRepository userRepository,
+internal sealed class AddDeliveryPersonDetailsCommandHandler(
+    IUserRepository userRepository,
     IDeliveryPersonRepository deliveryPersonRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<AddDeliveryPersonDetailsCommand>
@@ -20,30 +21,48 @@ internal sealed class AddDeliveryPersonDetailsCommandHandler(IUserRepository use
     {
         var (userId, type, licensePlate, latitude, longitude) = request;
 
+        #region Get User with Delivery Person Details
         var user = await _userRepository.GetByIdWithDeliveryPersonDetailsAsync(userId, cancellationToken);
-
         if (user is null)
         {
             return Result.Failure(
                 DomainErrors.User.NotFound(userId));
         }
+        #endregion
 
+        #region Prepare Vehicle
         Result<Vehicle> vehicleResult = Vehicle.Create(type, licensePlate);
-        Result<Location> locationResult = Location.Create(latitude, longitude);
+        if (vehicleResult.IsFailure)
+        {
+            return Result.Failure(
+                vehicleResult.Error);
+        }
+        #endregion
 
+        #region Prepare Location
+        Result<Location> locationResult = Location.Create(latitude, longitude);
+        if (locationResult.IsFailure)
+        {
+            return Result.Failure(
+                locationResult.Error);
+        }
+        #endregion
+
+        #region Add Delivery Person details to User
         var deliveryPersonResult = user.AddDeliveryPersonDetails(
             vehicleResult.Value,
             locationResult.Value);
-
         if (deliveryPersonResult.IsFailure)
         {
             return Result.Failure(
                 deliveryPersonResult.Error);
         }
+        #endregion
 
+        #region Add and Update database
         _deliveryPersonRepository.Add(deliveryPersonResult.Value);
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

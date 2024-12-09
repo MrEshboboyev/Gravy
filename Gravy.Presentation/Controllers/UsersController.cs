@@ -6,6 +6,7 @@ using Gravy.Application.Users.Queries.GetUserById;
 using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Users;
+using Gravy.Presentation.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,19 +73,24 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
     }
     #endregion
 
+    #region Customer related
     [Authorize]
     [HttpPost("add-customer-details")]
     public async Task<IActionResult> AddCustomerDetails(
         [FromBody] AddCustomerDetailsRequest request,
         CancellationToken cancellationToken)
     {
+        // Generate random location in Tashkent for testing if not provided
+        double latitude = LocationHelpers.GetRandomLatitude();
+        double longitude = LocationHelpers.GetRandomLongitude();
+
         var command = new AddCustomerDetailsCommand(
             GetUserId(),
             request.Street,
             request.City,
             request.State,
-            request.Latitude,
-            request.Longitude);
+            latitude,
+            longitude);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
@@ -94,19 +100,25 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
 
         return NoContent();
     }
+    #endregion
 
+    #region Delivery Person related
     [Authorize]
     [HttpPost("add-delivery-person-details")]
     public async Task<IActionResult> AddDeliveryPersonDetails(
-        [FromBody] AddDeliveryPersonDetailsRequest request,
-        CancellationToken cancellationToken)
+    [FromBody] AddDeliveryPersonDetailsRequest request,
+    CancellationToken cancellationToken)
     {
+        // Generate random location in Tashkent for testing if not provided
+        double latitude = LocationHelpers.GetRandomLatitude();
+        double longitude = LocationHelpers.GetRandomLongitude();
+
         var command = new AddDeliveryPersonDetailsCommand(
             GetUserId(),
             request.Type,
             request.LicensePlate,
-            request.Latitude,
-            request.Longitude);
+            latitude,
+            longitude);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
@@ -116,4 +128,5 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
 
         return NoContent();
     }
+    #endregion
 }
