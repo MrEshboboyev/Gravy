@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Gravy.Application.Behaviors;
+using Gravy.Application.Services.Deliveries;
 using Gravy.Infrastructure.Idempotence;
 using MediatR;
 
@@ -20,5 +21,7 @@ public class ApplicationServiceInstaller : IServiceInstaller
         services.AddValidatorsFromAssembly(
             Application.AssemblyReference.Assembly,
             includeInternalTypes: true);
+
+        services.AddScoped<IDeliveryPersonSelector, DeliveryPersonSelector>();
     }
 }
