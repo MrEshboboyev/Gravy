@@ -4,4 +4,6 @@ namespace Gravy.Presentation.Contracts.Users;
 
 public sealed record AddDeliveryPersonDetailsRequest(
     string Type,
-    string LicensePlate);
+    string LicensePlate, 
+    double Latitude,
+    double Longitude);

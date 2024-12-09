@@ -28,6 +28,8 @@ public sealed class Vehicle : ValueObject
         MaxDeliveryRadius = maxDeliveryRadius;
     }
 
+    private Vehicle() { }
+
     public string Type { get; }
     public string LicensePlate { get; }
     public double MaxDeliveryRadius { get; } // Radius in kilometers

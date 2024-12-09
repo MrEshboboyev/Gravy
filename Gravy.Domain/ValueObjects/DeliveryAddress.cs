@@ -21,6 +21,9 @@ public sealed class DeliveryAddress : ValueObject
         Location = location;
     }
 
+    // Parameterless constructor for EF Core
+    private DeliveryAddress() { }
+
     public string Street { get; }
     public string City { get; }
     public string State { get; }

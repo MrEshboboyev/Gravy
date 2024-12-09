@@ -129,15 +129,16 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// Assigns a delivery to the order.
     /// </summary>
     public Result<Delivery> AssignDelivery(
-        Guid deliveryPersonId, 
-        TimeSpan estimatedDeliveryTime)
+    Guid deliveryPersonId,
+    TimeSpan estimatedDeliveryTime)
     {
-        if (_delivery is not null)
+        // Ensure a delivery exists
+        if (_delivery is null)
         {
             return Result.Failure<Delivery>(
-                DomainErrors.Delivery.AlreadySet(_delivery.Id));
+                DomainErrors.Delivery.NotFound(Id));
         }
-        
+
         // Assign the delivery person
         var assignResult = _delivery.AssignDeliveryPerson(deliveryPersonId);
         if (assignResult.IsFailure)
@@ -145,16 +146,18 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             return Result.Failure<Delivery>(assignResult.Error);
         }
 
+        // Update order status and timestamp
         Status = OrderStatus.OnTheWay;
         ModifiedOnUtc = DateTime.UtcNow;
 
+        // Raise a domain event
         RaiseDomainEvent(new DeliveryAssignedDomainEvent(
-            Guid.NewGuid(), 
-            _delivery.Id, 
-            deliveryPersonId, 
+            Guid.NewGuid(),
+            _delivery.Id,
+            deliveryPersonId,
             DateTime.UtcNow));
 
-        return _delivery;
+        return Result.Success(_delivery);
     }
 
     /// <summary>
@@ -189,9 +192,9 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// Sets the payment for the order.
     /// </summary>
     public Result<Payment> SetPayment(
-        decimal amount, 
-        PaymentMethod method, 
-        string transactionId)
+    decimal amount,
+    PaymentMethod method,
+    string transactionId)
     {
         // Ensure a payment has not already been set
         if (_payment is not null)
@@ -210,9 +213,9 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         // Create the payment object
         _payment = new Payment(
             Guid.NewGuid(),
-            Id, 
-            amount, 
-            method, 
+            Id,
+            amount,
+            method,
             transactionId);
 
         // Update the order's modified timestamp

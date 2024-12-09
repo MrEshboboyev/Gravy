@@ -1,4 +1,5 @@
 ﻿using Gravy.Domain.Entities;
+using Gravy.Domain.ValueObjects;
 using Gravy.Persistence.Orders.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -53,12 +54,31 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.DeliveredAt);
 
         // Configure value objects (DeliveryAddress)
-        builder.OwnsOne(x => x.DeliveryAddress, address =>
+        builder.OwnsOne(x => x.DeliveryAddress, addressBuilder =>
         {
-            address.Property(a => a.Street).IsRequired().HasMaxLength(100);
-            address.Property(a => a.City).IsRequired().HasMaxLength(50);
-            address.Property(a => a.State).IsRequired().HasMaxLength(50);
-            address.Property(a => a.PostalCode).IsRequired().HasMaxLength(10);
+            addressBuilder.Property(a => a.Street)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            addressBuilder.Property(a => a.City)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            addressBuilder.Property(a => a.State)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            // Configure Location as a sub-object
+            addressBuilder.OwnsOne(a => a.Location, locationBuilder =>
+            {
+                locationBuilder.Property(l => l.Latitude)
+                    .HasColumnName("Latitude")
+                    .IsRequired();
+
+                locationBuilder.Property(l => l.Longitude)
+                    .HasColumnName("Longitude")
+                    .IsRequired();
+            });
         });
     }
 }

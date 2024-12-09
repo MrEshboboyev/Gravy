@@ -40,6 +40,18 @@ internal sealed class DeliveryPersonConfiguration : IEntityTypeConfiguration<Del
                 .IsRequired();
         });
 
+        // Configure Location as an owned type
+        builder.OwnsOne(x => x.HomeLocation, locationBuilder =>
+        {
+            locationBuilder.Property(x => x.Latitude)
+                .HasColumnName("HomeLatitude")
+                .IsRequired();
+
+            locationBuilder.Property(x => x.Longitude)
+                .HasColumnName("HomeLongitude")
+                .IsRequired();
+        });
+
         // Configure AssignedDeliveries with value converter and comparer
         builder.Property(x => x.AssignedDeliveries)
             .HasConversion(

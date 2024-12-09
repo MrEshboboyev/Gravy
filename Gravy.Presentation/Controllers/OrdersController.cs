@@ -70,7 +70,8 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
             request.Street,
             request.City,
             request.State,
-            request.PostalCode);
+            request.Latitude,
+            request.Longitude);
 
         Result<Guid> result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
@@ -140,7 +141,9 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var command = new AssignDeliveryCommand(orderId);
+
         Result result = await Sender.Send(command, cancellationToken);
+        
         if (result.IsFailure)
         {
             return HandleFailure(result);

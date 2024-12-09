@@ -1,5 +1,6 @@
 ﻿using Gravy.Domain.Enums;
 using Gravy.Domain.Primitives;
+using Gravy.Domain.Shared;
 
 namespace Gravy.Domain.Entities;
 
@@ -35,6 +36,15 @@ public sealed class Delivery : Entity
     #endregion
 
     #region Own methods
+    public Result AssignDeliveryPerson(Guid deliveryPersonId)
+    {
+        DeliveryPersonId = deliveryPersonId;
+        DeliveryStatus = DeliveryStatus.Assigned;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
     /// <summary>
     /// Marks the delivery as completed.
     /// </summary>

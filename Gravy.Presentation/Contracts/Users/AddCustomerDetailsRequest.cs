@@ -6,4 +6,5 @@ public sealed record AddCustomerDetailsRequest(
     string Street,
     string City,
     string State,
-    string PostalCode);
+    double Latitude,
+    double Longitude);

@@ -44,10 +44,17 @@ internal sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
                 .HasMaxLength(50)
                 .IsRequired();
 
-            addressBuilder.Property(x => x.PostalCode)
-                .HasColumnName("PostalCode")
-                .HasMaxLength(20)
-                .IsRequired();
+            // Configure Location as a sub-object
+            addressBuilder.OwnsOne(x => x.Location, locationBuilder =>
+            {
+                locationBuilder.Property(x => x.Latitude)
+                    .HasColumnName("Latitude")
+                    .IsRequired();
+
+                locationBuilder.Property(x => x.Longitude)
+                    .HasColumnName("Longitude")
+                    .IsRequired();
+            });
         });
 
         // Configure FavoriteRestaurants with value converter and comparer

@@ -83,7 +83,8 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
             request.Street,
             request.City,
             request.State,
-            request.PostalCode);
+            request.Latitude,
+            request.Longitude);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
@@ -103,7 +104,9 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
         var command = new AddDeliveryPersonDetailsCommand(
             GetUserId(),
             request.Type,
-            request.LicensePlate);
+            request.LicensePlate,
+            request.Latitude,
+            request.Longitude);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)
