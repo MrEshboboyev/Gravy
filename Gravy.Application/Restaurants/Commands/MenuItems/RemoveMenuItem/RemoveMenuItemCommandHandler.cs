@@ -15,23 +15,28 @@ internal sealed class RemoveMenuItemCommandHandler(IRestaurantRepository restaur
     {
         var (restaurantId, menuItemId) = request;
 
-        // checking restaurant exists
-        var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, cancellationToken);
+        #region Get Restaurant 
+        var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId,
+            cancellationToken);
         if (restaurant is null)
         {
             return Result.Failure(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+        #endregion
 
-        // handle result errors 
-        var removeResult = restaurant.RemoveMenuItem(menuItemId);
-        if (removeResult.IsFailure)
+        #region Remove Menu Item from this Restaurant
+        var removeMenuItemResult = restaurant.RemoveMenuItem(menuItemId);
+        if (removeMenuItemResult.IsFailure)
         {
             return Result.Failure(
-                removeResult.Error);
+                removeMenuItemResult.Error);
         }
+        #endregion
 
+        #region Update database
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

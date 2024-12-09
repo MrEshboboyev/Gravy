@@ -5,27 +5,36 @@ using Gravy.Domain.Shared;
 
 namespace Gravy.Application.Orders.Commands.Deliviries.CompleteDelivery;
 
-internal sealed class CompleteDeliveryCommandHandler(IOrderRepository orderRepository,
+internal sealed class CompleteDeliveryCommandHandler(
+    IOrderRepository orderRepository,
     IUnitOfWork unitOfWork) : ICommandHandler<CompleteDeliveryCommand>
 {
     private readonly IOrderRepository _orderRepository = orderRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(CompleteDeliveryCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CompleteDeliveryCommand request, 
+        CancellationToken cancellationToken)
     {
         var orderId = request.OrderId;
 
-        // checking order exists
-        var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken);
+        #region Get Order
+        var order = await _orderRepository.GetByIdAsync(
+            request.OrderId,
+            cancellationToken);
         if (order is null)
         {
-            return Result.Failure(
-                DomainErrors.Order.NotFound(orderId));
+            return Result.Failure<Guid>(
+                DomainErrors.Order.NotFound(request.OrderId));
         }
+        #endregion
 
+        #region Complete this Delivery
         order.CompleteDelivery();
+        #endregion
 
+        #region Update database
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success(order);
     }

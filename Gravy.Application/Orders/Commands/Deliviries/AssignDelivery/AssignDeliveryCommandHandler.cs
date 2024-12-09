@@ -20,14 +20,15 @@ internal sealed class AssignDeliveryCommandHandler(
     public async Task<Result> Handle(AssignDeliveryCommand request, 
         CancellationToken cancellationToken)
     {
+        #region Get Order
         var order = await _orderRepository.GetByIdAsync(request.OrderId, 
             cancellationToken);
-
         if (order is null)
         {
             return Result.Failure(
                 DomainErrors.Order.NotFound(request.OrderId));
         }
+        #endregion
 
         #region Select Delivery Person
         var deliveryPerson = await _deliveryPersonSelector
@@ -55,7 +56,9 @@ internal sealed class AssignDeliveryCommandHandler(
         }
         #endregion
 
+        #region Update database
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

@@ -19,15 +19,18 @@ internal sealed class SetPaymentCommandHandler(
     {
         var (orderId, amount, method, transactionId) = request;
 
-        // Validate order existence
-        var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken);
+        #region Get Order
+        var order = await _orderRepository.GetByIdAsync(
+            request.OrderId,
+            cancellationToken);
         if (order is null)
         {
-            return Result.Failure(
-                DomainErrors.Order.NotFound(orderId));
+            return Result.Failure<Guid>(
+                DomainErrors.Order.NotFound(request.OrderId));
         }
+        #endregion
 
-        // Set payment in the order
+        #region Set payment in the order
         var paymentResult = order.SetPayment(
             amount, 
             method, 
@@ -36,12 +39,15 @@ internal sealed class SetPaymentCommandHandler(
         {
             return Result.Failure(paymentResult.Error);
         }
+        #endregion
 
+        #region Add and Update database
         // Persist payment entity to repository
         _paymentRepository.Add(paymentResult.Value);
 
         // Save changes atomically
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

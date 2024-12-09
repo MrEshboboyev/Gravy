@@ -23,7 +23,7 @@ internal sealed class CreateOrderCommandHandler(
         var (customerId, restaurantId, street, city, state, latitude, longitude)
             = request;
 
-        // checking restaurant exists
+        #region Get Restaurant
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, 
             cancellationToken);
         if (restaurant is null)
@@ -31,8 +31,9 @@ internal sealed class CreateOrderCommandHandler(
             return Result.Failure<Guid>(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+        #endregion
 
-        #region Prepare ValueObjects
+        #region Prepare Delivery Address for this Order
         Result<DeliveryAddress> deliveryAddressResult = DeliveryAddress.Create(
             street, 
             city, 
@@ -41,16 +42,19 @@ internal sealed class CreateOrderCommandHandler(
             longitude);
         #endregion
 
+        #region Create Order
         var order = Order.Create(
             Guid.NewGuid(),
             customerId,
             restaurantId,
             deliveryAddressResult.Value);
+        #endregion
 
+        #region Add and Update database
         _orderRepository.Add(order);
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
-        return order.Id;
+        return Result.Success(order.Id);
     }
 }

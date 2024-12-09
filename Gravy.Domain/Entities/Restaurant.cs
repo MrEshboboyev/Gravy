@@ -149,7 +149,14 @@ public sealed class Restaurant : AggregateRoot
         decimal price, 
         Category category)
     {
-        var menuItem = new MenuItem(Guid.NewGuid(), Id, name, description, price, category, true);
+        var menuItem = new MenuItem(
+            Guid.NewGuid(), 
+            Id, 
+            name, 
+            description, 
+            price, 
+            category, 
+            true);
         _menuItems.Add(menuItem);
 
         RaiseDomainEvent(new MenuItemAddedDomainEvent(

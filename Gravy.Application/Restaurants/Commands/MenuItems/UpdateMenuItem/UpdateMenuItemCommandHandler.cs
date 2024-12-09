@@ -17,33 +17,38 @@ public sealed class UpdateMenuItemCommandHandler(
 
     public async Task<Result> Handle(UpdateMenuItemCommand request, CancellationToken cancellationToken)
     {
-        var (restaurantId, menuItemId, name, description, price, category, isAvailable) = request;
+        var (restaurantId, menuItemId, name, description, price, 
+            category, isAvailable) = request;
 
-        // Fetch the restaurant aggregate
-        var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, cancellationToken);
+        #region Get Restaurant 
+        var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId,
+            cancellationToken);
         if (restaurant is null)
         {
-            return Result.Failure(DomainErrors.Restaurant.NotFound(restaurantId));
+            return Result.Failure(
+                DomainErrors.Restaurant.NotFound(restaurantId));
         }
+        #endregion
 
-        // Update the menu item via the aggregate root
-        Result<MenuItem> updatedMenuItem = restaurant.UpdateMenuItem(
+        #region Update Menu Item in Restaurant
+        Result<MenuItem> updatedMenuItemResult = restaurant.UpdateMenuItem(
             menuItemId,
             name,
             description,
             price,
             category,
             isAvailable);
-        if (updatedMenuItem.IsFailure)
+        if (updatedMenuItemResult.IsFailure)
         {
             return Result.Failure(
-                updatedMenuItem.Error);
+                updatedMenuItemResult.Error);
         }
+        #endregion
 
-        _menuItemRepository.Update(updatedMenuItem.Value);
-
-        // Save changes via Unit of Work
+        #region Update database
+        _menuItemRepository.Update(updatedMenuItemResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

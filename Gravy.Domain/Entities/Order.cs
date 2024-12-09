@@ -78,7 +78,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// <summary>
     /// Adds an item to the order.
     /// </summary>
-    public void AddOrderItem(
+    public Result<OrderItem> AddOrderItem(
         Guid menuItemId, 
         int quantity, 
         decimal price)
@@ -100,6 +100,8 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             menuItemId,
             quantity,
             price));
+
+        return orderItem;   
     }
     #endregion
 

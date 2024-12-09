@@ -19,23 +19,33 @@ internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurant
     {
         var (restaurantId, name, description, price, category) = request;
 
-        // checking restaurant exists
-        var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, cancellationToken);
+        #region Get Restaurant 
+        var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, 
+            cancellationToken);
         if (restaurant is null)
         {
             return Result.Failure(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+        #endregion
 
-        Result<MenuItem> menuItem = restaurant.AddMenuItem(
+        #region Add Menu Item to this Restaurant
+        Result<MenuItem> addMenuItemResult = restaurant.AddMenuItem(
             name,
             description,
             price,
             category);
+        if (addMenuItemResult.IsFailure)
+        {
+            return Result.Failure(
+                addMenuItemResult.Error);
+        }
+        #endregion
 
-        _menuItemRepository.Add(menuItem.Value);
-
+        #region Add menu item and Update database
+        _menuItemRepository.Add(addMenuItemResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

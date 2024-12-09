@@ -24,10 +24,11 @@ namespace Gravy.Presentation.Controllers;
 [Route("api/restaurants")]
 public sealed class RestaurantsController(ISender sender) : ApiController(sender)
 {
-    #region Restaurant
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
+    #region Restaurant
+    #region Get
     [AllowAnonymous]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetRestaurantById(Guid id, CancellationToken cancellationToken)
@@ -47,7 +48,9 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         Result<RestaurantListResponse> response = await Sender.Send(query, cancellationToken);
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
+    #endregion
 
+    #region Create/Update
     [HttpPost]
     public async Task<IActionResult> CreateRestaurant(
         [FromBody] CreateRestaurantRequest request,
@@ -96,9 +99,12 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
 
         return NoContent();
     }
+    #endregion
 
+    #region Activate/Deactivate
     [HttpPut("{id:guid}/activate")]
-    public async Task<IActionResult> ActivateRestaurant(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> ActivateRestaurant(Guid id, 
+        CancellationToken cancellationToken)
     {
         var command = new ActivateRestaurantCommand(id);
         Result result = await Sender.Send(command, cancellationToken);
@@ -111,7 +117,8 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
     }
 
     [HttpPut("{id:guid}/deactivate")]
-    public async Task<IActionResult> DeactivateRestaurant(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeactivateRestaurant(Guid id, 
+        CancellationToken cancellationToken)
     {
         var command = new DeactivateRestaurantCommand(id);
         Result result = await Sender.Send(command, cancellationToken);
@@ -123,8 +130,10 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         return NoContent();
     }
     #endregion
+    #endregion
 
-    #region MenuItem
+    #region MenuItem related
+    #region Get
     [AllowAnonymous]
     [HttpGet("{restaurantId:guid}/menu-items")]
     public async Task<IActionResult> GetMenuItemsByCategory(
@@ -147,7 +156,9 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         Result<RestaurantOwnerResponse> response = await Sender.Send(query, cancellationToken);
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
+    #endregion
 
+    #region Add/Update/Remove
     [HttpPost("{restaurantId:guid}/menu-items")]
     public async Task<IActionResult> AddMenuItem(
         Guid restaurantId,
@@ -186,7 +197,6 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         return NoContent();
     }
 
-
     [HttpPut("{restaurantId:guid}/menu-items/{menuItemId:guid}")]
     public async Task<IActionResult> UpdateMenuItem(
         Guid restaurantId,
@@ -211,5 +221,6 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
 
         return NoContent();
     }
+    #endregion
     #endregion
 }

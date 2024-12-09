@@ -6,11 +6,13 @@ using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Application.Restaurants.Commands.UpdateRestaurant;
 
-internal sealed class UpdateRestaurantCommandHandler(IRestaurantRepository restaurantRepository,
+internal sealed class UpdateRestaurantCommandHandler(
+    IRestaurantRepository restaurantRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<UpdateRestaurantCommand>
 {
-    private readonly IRestaurantRepository _restaurantRepository = restaurantRepository;
+    private readonly IRestaurantRepository _restaurantRepository = 
+        restaurantRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<Result> Handle(UpdateRestaurantCommand request,
@@ -18,27 +20,36 @@ internal sealed class UpdateRestaurantCommandHandler(IRestaurantRepository resta
     {
         var (restaurantId, name, description, email, phoneNumber, address) = request;
 
-        // checking restaurant exists
+        #region Get Restaurant 
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, cancellationToken);
         if (restaurant is null)
         {
             return Result.Failure(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+        #endregion
 
+        #region Prepare Email
         Result<Email> emailResult = Email.Create(email);
-        Result<Address> addressResult = Address.Create(address);
+        #endregion
 
+        #region Prepare Address
+        Result<Address> addressResult = Address.Create(address);
+        #endregion
+
+        #region Update Restaurant Details
         restaurant.UpdateDetails(
             name, 
             description, 
             emailResult.Value,
             phoneNumber,
             addressResult.Value);
+        #endregion
 
+        #region Update database
         _restaurantRepository.Update(restaurant);
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success();
     }

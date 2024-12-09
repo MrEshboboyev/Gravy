@@ -18,6 +18,7 @@ internal sealed class CreateDeliveryCommandHandler(
     public async Task<Result<Guid>> Handle(CreateDeliveryCommand request, 
         CancellationToken cancellationToken)
     {
+        #region Get Order
         var order = await _orderRepository.GetByIdAsync(
             request.OrderId, 
             cancellationToken);
@@ -26,18 +27,21 @@ internal sealed class CreateDeliveryCommandHandler(
             return Result.Failure<Guid>(
                 DomainErrors.Order.NotFound(request.OrderId));
         }
+        #endregion
 
+        #region Create Delivery for this Order
         var createDeliveryResult = order.CreateDelivery();
-
         if (createDeliveryResult.IsFailure)
         {
             return Result.Failure<Guid>(
                 createDeliveryResult.Error);
         }
+        #endregion
 
+        #region Add and Update database
         _deliveryRepository.Add(createDeliveryResult.Value);
-
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        #endregion
 
         return Result.Success(createDeliveryResult.Value.Id);
     }
