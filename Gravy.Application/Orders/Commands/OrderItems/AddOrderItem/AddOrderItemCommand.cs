@@ -5,6 +5,5 @@ namespace Gravy.Application.Orders.Commands.OrderItems.AddOrderItem;
 public sealed record AddOrderItemCommand(
     Guid OrderId,
     Guid MenuItemId,
-    int Quantity,
-    decimal Price) : ICommand;
+    int Quantity) : ICommand;
 

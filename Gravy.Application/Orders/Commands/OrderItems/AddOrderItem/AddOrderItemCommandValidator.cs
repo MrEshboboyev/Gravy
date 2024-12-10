@@ -11,8 +11,6 @@ public sealed class AddOrderItemCommandValidator : AbstractValidator<AddOrderIte
         RuleFor(orderItem => orderItem.MenuItemId).NotEmpty();
 
         RuleFor(orderItem => orderItem.Quantity).GreaterThanOrEqualTo(1);
-
-        RuleFor(orderItem => orderItem.Price).GreaterThan(0);
     }
 }
 

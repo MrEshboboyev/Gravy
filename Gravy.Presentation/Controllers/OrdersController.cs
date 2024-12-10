@@ -54,8 +54,7 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         var command = new AddOrderItemCommand(
             orderId,
             request.MenuItemId,
-            request.Quantity,
-            request.Price);
+            request.Quantity);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)

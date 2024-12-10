@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Gravy.Application.Behaviors;
 using Gravy.Application.Services.Deliveries;
+using Gravy.Application.Services.Orders;
 using Gravy.Infrastructure.Idempotence;
 using MediatR;
 
@@ -23,5 +24,6 @@ public class ApplicationServiceInstaller : IServiceInstaller
             includeInternalTypes: true);
 
         services.AddScoped<IDeliveryPersonSelector, DeliveryPersonSelector>();
+        services.AddScoped<IPricingService, PricingService>();
     }
 }

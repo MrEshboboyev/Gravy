@@ -11,10 +11,10 @@ public static class DomainErrors
     public static class General
     {
         public static readonly Func<string, Error> InvalidEnumValue = enumName => new(
-            $"{enumName}.InvalidValue", 
+            $"{enumName}.InvalidValue",
             $"The value provided for {enumName} is invalid.");
 
-        public static readonly Func<string, string, Error> DuplicateValue = 
+        public static readonly Func<string, string, Error> DuplicateValue =
             (entityName, value) => new(
                 $"{entityName}.DuplicateValue",
                 $"The value '{value}' already exists for {entityName}.");
@@ -124,8 +124,12 @@ public static class DomainErrors
     public static class MenuItem
     {
         public static readonly Error InvalidCategory = new(
-            "MenuItem.InvalidCategory", 
+            "MenuItem.InvalidCategory",
             "The category provided for the menu item is invalid.");
+
+        public static readonly Func<Guid, Error> NotFound = id => new(
+                "MenuItem.NotFound",
+                $"The Menu item with the identifier {id} was not found.");
     }
     #endregion
 
@@ -257,7 +261,7 @@ public static class DomainErrors
             "License plate cannot be empty.");
 
         public static Error InvalidType(string type) => new(
-            "Vehicle.InvalidType", 
+            "Vehicle.InvalidType",
             $"The vehicle type '{type}' is invalid. Please provide a valid vehicle type.");
     }
 
@@ -281,6 +285,13 @@ public static class DomainErrors
         public static readonly Error InvalidLongitude = new(
             "Location.InvalidLongitude",
             "Longitude must be between -180 and 180 degrees.");
+    }
+
+    public static class Price
+    {
+        public static readonly Error InvalidQuantity = new(
+            "Price.InvalidQuantity", 
+            "Quantity must be greater than zero.");
     }
 }
 

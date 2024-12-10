@@ -2,5 +2,4 @@
 
 public sealed record AddOrderItemRequest(
     Guid MenuItemId,
-    int Quantity,
-    decimal Price);
+    int Quantity);
