@@ -21,6 +21,9 @@ public sealed class OrderRepository(ApplicationDbContext dbContext) : IOrderRepo
             await _dbContext
                 .Set<Order>()
                 .Where(o => o.CustomerId == customerId)
+                .Include(o => o.OrderItems)
+                .Include(o => o.Payment)
+                .Include(o => o.Delivery)
                 .ToListAsync(cancellationToken);
 
     public async Task<List<Order>> GetByRestaurantIdAsync(Guid restaurantId,

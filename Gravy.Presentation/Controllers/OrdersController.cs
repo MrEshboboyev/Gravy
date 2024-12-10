@@ -15,6 +15,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Gravy.Application.Orders.Commands.OrderItems.UpdateOrderItem;
 
 namespace Gravy.Presentation.Controllers;
 
@@ -54,6 +55,27 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         var command = new AddOrderItemCommand(
             orderId,
             request.MenuItemId,
+            request.Quantity);
+
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [HttpPut("{orderId:guid}/items/{orderItemId:guid}")]
+    public async Task<IActionResult> UpdateOrderItem(
+        Guid orderId,
+        Guid orderItemId,
+        [FromBody] UpdateOrderItemRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateOrderItemCommand(
+            orderId,
+            orderItemId,
             request.Quantity);
 
         Result result = await Sender.Send(command, cancellationToken);

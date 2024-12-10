@@ -1,4 +1,5 @@
 ﻿using Gravy.Domain.Primitives;
+using Gravy.Domain.Shared;
 
 namespace Gravy.Domain.Entities;
 
@@ -41,13 +42,15 @@ public sealed class OrderItem : Entity
     /// <summary>
     /// Updates the order item's details.
     /// </summary>
-    public void UpdateDetails(
+    public Result UpdateDetails(
         int quantity, 
         decimal price)
     {
         Quantity = quantity;
         Price = price;
         ModifiedOnUtc = DateTime.UtcNow;
+
+        return Result.Success();
     }
     #endregion
 }

@@ -109,6 +109,48 @@ public sealed class Order : AggregateRoot, IAuditableEntity
 
         return orderItem;   
     }
+
+    /// <summary>
+    /// Update an item in the order.
+    /// </summary>
+    public Result<OrderItem> UpdateOrderItem(
+        Guid orderItemId,
+        int quantity,
+        decimal price)
+    {
+        #region Get this Order Item
+        var orderItem = _orderItems.Find(oi => oi.Id.Equals((orderItemId)));
+        if (orderItem is null)
+        {
+            return Result.Failure<OrderItem>(
+                DomainErrors.OrderItem.NotFound(orderItemId));
+        }
+        #endregion
+
+        #region Update this Order Item 
+        var updatedOrderDetailsResult = orderItem.UpdateDetails(quantity, price);
+        if (updatedOrderDetailsResult.IsFailure)
+        {
+            return Result.Failure<OrderItem>(
+                updatedOrderDetailsResult.Error);
+        }
+        #endregion
+
+        #region Update this Order
+        ModifiedOnUtc = DateTime.UtcNow;
+        #endregion
+
+        #region Domain Events
+        RaiseDomainEvent(new OrderItemUpdatedDomainEvent(
+            Guid.NewGuid(),
+            Id, // OrderId
+            orderItem.Id, // OrderItemId
+            quantity,
+            price));
+        #endregion
+
+        return Result.Success(orderItem);
+    }
     #endregion
 
     #region Delivery related

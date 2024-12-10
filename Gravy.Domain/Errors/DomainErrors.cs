@@ -145,6 +145,13 @@ public static class DomainErrors
                 $"There is no orders");
     }
 
+    public static class OrderItem
+    {
+        public static readonly Func<Guid, Error> NotFound = id => new(
+            "OrderItem.NotFound",
+            $"The Order Item with the identifier {id} was not found.");
+    }
+
     public static class Delivery
     {
         public static readonly Func<Guid, Error> NotFound = orderId => new(
