@@ -7,6 +7,20 @@ namespace Gravy.Domain.Errors;
 /// </summary>
 public static class DomainErrors
 {
+    #region General
+    public static class General
+    {
+        public static readonly Func<string, Error> InvalidEnumValue = enumName => new(
+            $"{enumName}.InvalidValue", 
+            $"The value provided for {enumName} is invalid.");
+
+        public static readonly Func<string, string, Error> DuplicateValue = 
+            (entityName, value) => new(
+                $"{entityName}.DuplicateValue",
+                $"The value '{value}' already exists for {entityName}.");
+    }
+    #endregion
+
     #region User Related
     public static class User
     {
@@ -80,6 +94,7 @@ public static class DomainErrors
                 $"overlaps with an existing availability period.");
     }
 
+    #region Restaurant related
     public static class Restaurant
     {
         public static readonly Func<Guid, Error> NotFound = id => new(
@@ -105,6 +120,14 @@ public static class DomainErrors
                 "Restaurant.Concurrency",
                 $"DbUpdateConcurrencyException");
     }
+
+    public static class MenuItem
+    {
+        public static readonly Error InvalidCategory = new(
+            "MenuItem.InvalidCategory", 
+            "The category provided for the menu item is invalid.");
+    }
+    #endregion
 
     #region Order related
     public static class Order

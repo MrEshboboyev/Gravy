@@ -3,6 +3,7 @@ using Gravy.Domain.Errors;
 using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 using Gravy.Domain.Shared;
+using Gravy.Domain.Validators;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
@@ -20,11 +21,11 @@ public sealed class Restaurant : AggregateRoot
     #region Constructor
     private Restaurant(Guid id,
         string name,
-        string description, 
-        Email email, 
+        string description,
+        Email email,
         string phoneNumber,
-        Address address, 
-        Guid ownerId, 
+        Address address,
+        Guid ownerId,
         OpeningHours openingHours) : base(id)
     {
         Name = name;
@@ -91,10 +92,10 @@ public sealed class Restaurant : AggregateRoot
     /// <summary>
     /// Updates the restaurant's details.
     /// </summary>
-    public void UpdateDetails(string name, 
-        string description, 
-        Email email, 
-        string phoneNumber, 
+    public void UpdateDetails(string name,
+        string description,
+        Email email,
+        string phoneNumber,
         Address address)
     {
         Name = name;
@@ -105,8 +106,8 @@ public sealed class Restaurant : AggregateRoot
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new RestaurantUpdatedDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
+            Guid.NewGuid(),
+            Id,
             Name));
     }
 
@@ -133,8 +134,8 @@ public sealed class Restaurant : AggregateRoot
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new RestaurantDeactivatedDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
+            Guid.NewGuid(),
+            Id,
             Name));
     }
     #endregion
@@ -144,21 +145,48 @@ public sealed class Restaurant : AggregateRoot
     /// Adds a new menu item to the restaurant.
     /// </summary>
     public Result<MenuItem> AddMenuItem(
-        string name, 
-        string description, 
-        decimal price, 
+        string name,
+        string description,
+        decimal price,
         Category category)
     {
-        var menuItem = new MenuItem(
-            Guid.NewGuid(), 
-            Id, 
-            name, 
-            description, 
-            price, 
-            category, 
-            true);
-        _menuItems.Add(menuItem);
+        #region Validation Structs
+        var categoryValidationResult = EnumValidator.Validate(category);
+        if (categoryValidationResult.IsFailure)
+        {
+            return Result.Failure<MenuItem>(
+                categoryValidationResult.Error);
+        }
+        #endregion
 
+        #region Validation Uniqueness
+        var uniquenessValidationResult = UniquenessValidator.Validate(
+            _menuItems,
+            m => m.Name, 
+            name);
+        if (uniquenessValidationResult.IsFailure)
+        {
+            return Result.Failure<MenuItem>(
+                uniquenessValidationResult.Error);
+        }
+        #endregion
+
+        #region Create MenuItem
+        var menuItem = new MenuItem(
+            Guid.NewGuid(),
+            Id,
+            name,
+            description,
+            price,
+            category,
+            true);
+        #endregion
+
+        #region Add new menuItem to _menuItems
+        _menuItems.Add(menuItem);
+        #endregion
+
+        #region Domain Events
         RaiseDomainEvent(new MenuItemAddedDomainEvent(
             Guid.NewGuid(),
             Id,
@@ -166,6 +194,7 @@ public sealed class Restaurant : AggregateRoot
             name,
             price,
             category));
+        #endregion
 
         return menuItem;
     }
@@ -186,33 +215,61 @@ public sealed class Restaurant : AggregateRoot
         ModifiedOnUtc = DateTime.UtcNow;
 
         RaiseDomainEvent(new MenuItemRemovedDomainEvent(
-            Guid.NewGuid(), 
-            Id, 
+            Guid.NewGuid(),
+            Id,
             menuItemId));
 
         return Result.Success();
     }
 
     public Result<MenuItem> UpdateMenuItem(
-        Guid menuItemId, 
-        string name, 
-        string description, 
-        decimal price, 
-        Category category, 
+        Guid menuItemId,
+        string name,
+        string description,
+        decimal price,
+        Category category,
         bool isAvailable)
     {
-        // Find the menu item in the aggregate
+        #region Validation Structs
+        var validationResult = EnumValidator.Validate(category);
+        if (validationResult.IsFailure)
+        {
+            return Result.Failure<MenuItem>(
+                validationResult.Error);
+        }
+        #endregion
+
+        #region Validation Uniqueness
+        var uniquenessValidationResult = UniquenessValidator.Validate(
+            _menuItems,
+            m => m.Name,
+            name);
+        if (uniquenessValidationResult.IsFailure)
+        {
+            return Result.Failure<MenuItem>(
+                uniquenessValidationResult.Error);
+        }
+        #endregion
+
+        #region Get MenuItem by Id
         var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId);
         if (menuItem is null)
         {
             return Result.Failure<MenuItem>(
                 DomainErrors.Restaurant.MenuItemNotFound(Id, menuItemId));
         }
+        #endregion
 
-        // Update menu item details
-        menuItem.UpdateDetails(name, description, price, category, isAvailable);
+        #region Update this menu item details
+        menuItem.UpdateDetails(
+            name, 
+            description, 
+            price, 
+            category, 
+            isAvailable);
+        #endregion
 
-        // Optional: Raise domain event for tracking changes
+        #region Domain Events 
         RaiseDomainEvent(new MenuItemUpdatedDomainEvent(
             Guid.NewGuid(),
             Id,
@@ -221,6 +278,7 @@ public sealed class Restaurant : AggregateRoot
             price,
             category,
             isAvailable));
+        #endregion
 
         return menuItem;
     }
