@@ -6,7 +6,7 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
 {
     public CreateOrderCommandValidator()
     {
-        RuleFor(order => order.CustomerId).NotEmpty();
+        RuleFor(order => order.UserId).NotEmpty();
 
         RuleFor(order => order.RestaurantId).NotEmpty();
         

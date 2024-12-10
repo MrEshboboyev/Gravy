@@ -6,9 +6,11 @@ using Gravy.Application.Orders.Commands.OrderItems.AddOrderItem;
 using Gravy.Application.Orders.Commands.Payments.CompletePayment;
 using Gravy.Application.Orders.Commands.Payments.SetPayment;
 using Gravy.Application.Orders.Queries.GetOrderById;
+using Gravy.Application.Orders.Queries.GetOrdersByCustomer;
 using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Orders;
+using Gravy.Presentation.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,14 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
     #region Get
+    [HttpGet]
+    public async Task<IActionResult> GetCustomerOrders(CancellationToken cancellationToken)
+    {
+        var query = new GetOrdersByCustomerQuery(GetUserId());
+        Result<OrderListResponse> response = await Sender.Send(query, cancellationToken);
+        return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetOrderById(Guid id, 
         CancellationToken cancellationToken)
@@ -64,14 +74,18 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         [FromBody] CreateOrderRequest request,
         CancellationToken cancellationToken)
     {
+        // Generate random location in Tashkent for testing if not provided
+        double latitude = LocationHelpers.GetRandomLatitude();
+        double longitude = LocationHelpers.GetRandomLongitude();
+
         var command = new CreateOrderCommand(
             GetUserId(),
             request.RestaurantId,
             request.Street,
             request.City,
             request.State,
-            request.Latitude,
-            request.Longitude);
+            latitude,
+            longitude);
 
         Result<Guid> result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)

@@ -17,8 +17,12 @@ public sealed class User : AggregateRoot, IAuditableEntity
     #endregion
 
     #region Constructors
-    private User(Guid id, Email email, string passwordHash, FirstName firstName, LastName lastName)
-     : base(id)
+    private User(
+        Guid id,
+        Email email, 
+        string passwordHash, 
+        FirstName firstName, 
+        LastName lastName) : base(id)
     {
         Email = email;
         PasswordHash = passwordHash;

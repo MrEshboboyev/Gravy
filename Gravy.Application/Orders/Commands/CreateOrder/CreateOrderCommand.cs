@@ -3,7 +3,7 @@
 namespace Gravy.Application.Orders.Commands.CreateOrder;
 
 public sealed record CreateOrderCommand(
-    Guid CustomerId,
+    Guid UserId,
     Guid RestaurantId,
     string Street, 
     string City, 

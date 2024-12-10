@@ -1,4 +1,5 @@
 ﻿using Gravy.Application.Abstractions.Messaging;
+using Gravy.Application.Orders.Queries.Common;
 using Gravy.Domain.Entities;
 using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
@@ -14,61 +15,19 @@ internal sealed class GetOrderByIdQueryHandler(IOrderRepository orderRepository)
     public async Task<Result<OrderResponse>> Handle(GetOrderByIdQuery query, 
         CancellationToken cancellationToken)
     {
-        Order order = await _orderRepository.GetByIdAsync(query.OrderId, cancellationToken);
-
+        #region Get Order By Id
+        Order order = await _orderRepository.GetByIdAsync(query.OrderId,
+            cancellationToken);
         if (order is null)
         {
             return Result.Failure<OrderResponse>(
                 DomainErrors.Order.NotFound(query.OrderId));
         }
-
-        #region Prepare Response
-        var deliveryAddressObject = order.DeliveryAddress;
-
-        string deliveryAddress = 
-            $"{deliveryAddressObject.Street}/" +
-            $"{deliveryAddressObject.City}/" +
-            $"{deliveryAddressObject.State}";
-
-        var orderItemsResponse = order.OrderItems
-                .Select(orderItem => new OrderItemResponse(
-                    orderItem.Id,
-                    orderItem.MenuItemId,
-                    orderItem.Quantity,
-                    orderItem.Price,
-                    orderItem.CreatedOnUtc))
-                .ToList();
-
-        var deliveryResponse = order.Delivery is not null ? new DeliveryResponse(
-                order.Delivery.Id,
-                order.Delivery.DeliveryPersonId,
-                order.Delivery.PickUpTime,
-                order.Delivery.EstimatedDeliveryTime,
-                order.Delivery.ActualDeliveryTime,
-                order.Delivery.DeliveryStatus,
-                order.Delivery.CreatedOnUtc) : null;
-
-        var paymentResponse = order.Payment is not null ? new PaymentResponse(
-                order.Payment.Id,
-                order.Payment.Amount,
-                order.Payment.Method,
-                order.Payment.Status,
-                order.Payment.TransactionId,
-                order.Payment.CreatedOnUtc) : null;
         #endregion
 
-        var response = new OrderResponse(
-            order.Id,
-            order.CustomerId,
-            order.RestaurantId,
-            deliveryAddress,
-            order.Status,
-            order.PlacedAt,
-            order.DeliveredAt,
-            order.CreatedOnUtc,
-            orderItemsResponse,
-            deliveryResponse,
-            paymentResponse);
+        #region Prepare OrderResponse
+        var response = OrderResponseFactory.Create(order);
+        #endregion
 
         return response;
     }

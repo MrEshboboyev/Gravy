@@ -19,6 +19,16 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
 {
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    
+    #region Get
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetCurrentUserById(CancellationToken cancellationToken)
+    {
+        var query = new GetUserByIdQuery(GetUserId());
+        Result<UserResponse> response = await Sender.Send(query, cancellationToken);
+        return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
+    }
 
     //[HasPermission(Permission.ReadUser)]
     [HttpGet("{id:guid}")]
@@ -28,6 +38,7 @@ public sealed class UsersController(ISender sender) : ApiController(sender)
         Result<UserResponse> response = await Sender.Send(query, cancellationToken);
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
+    #endregion
 
     #region Auth related endpoints
     [HttpPost("login")]
