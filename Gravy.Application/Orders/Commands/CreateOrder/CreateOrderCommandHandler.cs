@@ -22,8 +22,8 @@ internal sealed class CreateOrderCommandHandler(
     public async Task<Result<Guid>> Handle(CreateOrderCommand request, 
         CancellationToken cancellationToken)
     {
-        var (userId, restaurantId, street, city, state, latitude, longitude)
-            = request;
+        var (userId, restaurantId, street, city, state, 
+                latitude, longitude) = request;
 
         #region Get User with Customer Details
         var user = await _userRepository.GetByIdWithCustomerDetailsAsync(userId,

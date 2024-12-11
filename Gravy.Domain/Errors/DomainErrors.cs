@@ -189,6 +189,13 @@ public static class DomainErrors
             "Payment.NotAssigned",
             $"The payment is not assigned to this order. Order Id: {orderId}.");
     }
+
+    public static class Amount
+    {
+        public static readonly Func<Guid, Error> OrderNotFound = orderId => new(
+            "Amount.OrderNotFound", 
+            $"Order with ID '{orderId}' not found.");
+    }
     #endregion
 
     public static class Email
@@ -297,7 +304,7 @@ public static class DomainErrors
     public static class Price
     {
         public static readonly Error InvalidQuantity = new(
-            "Price.InvalidQuantity", 
+            "Price.InvalidQuantity",
             "Quantity must be greater than zero.");
     }
 }

@@ -147,19 +147,8 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         [FromBody] SetPaymentRequest request,
         CancellationToken cancellationToken)
     {
-        if (request.Amount <= 0)
-        {
-            return BadRequest("Amount must be greater than zero.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.TransactionId))
-        {
-            return BadRequest("Transaction ID must be provided.");
-        }
-
         var command = new SetPaymentCommand(
             orderId,
-            request.Amount,
             request.PaymentMethod,
             request.TransactionId);
 

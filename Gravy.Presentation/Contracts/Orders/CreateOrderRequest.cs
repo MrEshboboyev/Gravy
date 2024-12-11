@@ -1,5 +1,4 @@
-﻿
-namespace Gravy.Presentation.Contracts.Orders;
+﻿namespace Gravy.Presentation.Contracts.Orders;
 
 public sealed record CreateOrderRequest(
     Guid RestaurantId,

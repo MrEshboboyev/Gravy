@@ -2,6 +2,7 @@
 using Gravy.Application.Behaviors;
 using Gravy.Application.Services.Deliveries;
 using Gravy.Application.Services.Orders;
+using Gravy.Application.Services.Orders.Interfaces;
 using Gravy.Infrastructure.Idempotence;
 using MediatR;
 
@@ -25,5 +26,6 @@ public class ApplicationServiceInstaller : IServiceInstaller
 
         services.AddScoped<IDeliveryPersonSelector, DeliveryPersonSelector>();
         services.AddScoped<IPricingService, PricingService>();
+        services.AddScoped<IOrderPricingService, OrderPricingService>();
     }
 }

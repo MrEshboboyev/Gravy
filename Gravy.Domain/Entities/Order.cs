@@ -278,9 +278,9 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// Sets the payment for the order.
     /// </summary>
     public Result<Payment> SetPayment(
-    decimal amount,
-    PaymentMethod method,
-    string transactionId)
+        decimal amount,
+        PaymentMethod method,
+        string transactionId)
     {
         // Ensure a payment has not already been set
         if (_payment is not null)

@@ -10,8 +10,6 @@ public sealed class SetPaymentCommandValidator : AbstractValidator<SetPaymentCom
 
         RuleFor(payment => payment.Method).NotEmpty();
 
-        RuleFor(payment => payment.Amount).NotEmpty();
-
         RuleFor(payment => payment.TransactionId).NotEmpty();
     }
 }

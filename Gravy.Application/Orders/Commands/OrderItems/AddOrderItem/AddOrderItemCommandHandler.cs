@@ -1,5 +1,5 @@
 ﻿using Gravy.Application.Abstractions.Messaging;
-using Gravy.Application.Services.Orders;
+using Gravy.Application.Services.Orders.Interfaces;
 using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;

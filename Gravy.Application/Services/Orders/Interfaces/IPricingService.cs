@@ -1,6 +1,6 @@
 ﻿using Gravy.Domain.Shared;
 
-namespace Gravy.Application.Services.Orders;
+namespace Gravy.Application.Services.Orders.Interfaces;
 
 /// <summary>
 /// Service for calculating the final price of an order item.
