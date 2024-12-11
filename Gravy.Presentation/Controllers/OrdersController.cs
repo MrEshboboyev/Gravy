@@ -15,6 +15,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Gravy.Application.Orders.Commands.OrderItems.RemoveOrderItem;
 using Gravy.Application.Orders.Commands.OrderItems.UpdateOrderItem;
 
 namespace Gravy.Presentation.Controllers;
@@ -77,6 +78,25 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
             orderId,
             orderItemId,
             request.Quantity);
+
+        Result result = await Sender.Send(command, cancellationToken);
+        if (result.IsFailure)
+        {
+            return HandleFailure(result);
+        }
+
+        return NoContent();
+    }
+
+    [HttpDelete("{orderId:guid}/items/{orderItemId:guid}")]
+    public async Task<IActionResult> RemoveOrderItem(
+        Guid orderId,
+        Guid orderItemId,
+        CancellationToken cancellationToken)
+    {
+        var command = new RemoveOrderItemCommand(
+            orderId,
+            orderItemId);
 
         Result result = await Sender.Send(command, cancellationToken);
         if (result.IsFailure)

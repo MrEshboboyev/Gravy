@@ -151,6 +151,42 @@ public sealed class Order : AggregateRoot, IAuditableEntity
 
         return Result.Success(orderItem);
     }
+
+    /// <summary>
+    /// Remove an item from the order.
+    /// </summary>
+    public Result RemoveOrderItem(
+        Guid orderItemId)
+    {
+        #region Get this Order Item
+        var orderItem = _orderItems.Find(oi => oi.Id.Equals((orderItemId)));
+        if (orderItem is null)
+        {
+            return Result.Failure<OrderItem>(
+                DomainErrors.OrderItem.NotFound(orderItemId));
+        }
+        #endregion
+
+        #region Remove this Order Item
+
+        _orderItems.Remove(orderItem);
+
+        #endregion
+
+        #region Update this Order
+        ModifiedOnUtc = DateTime.UtcNow;
+        #endregion
+
+        #region Domain Events
+        RaiseDomainEvent(new OrderItemRemovedDomainEvent(
+            Guid.NewGuid(),
+            Id, // OrderId
+            orderItem.Id // OrderItemId
+            ));
+        #endregion
+
+        return Result.Success();
+    }
     #endregion
 
     #region Delivery related
