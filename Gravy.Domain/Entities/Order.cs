@@ -75,6 +75,24 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     }
     #endregion
 
+    #region Own Methods
+
+    /// <summary>
+    /// Locks the order to prevent further modifications.
+    /// </summary>
+    private void LockOrder()
+    {
+        IsLocked = true;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        // Raise a domain event if needed
+        RaiseDomainEvent(new OrderLockedDomainEvent(
+            Guid.NewGuid(),
+            Id));
+    }
+
+    #endregion
+
     #region Order-Item related
     /// <summary>
     /// Adds an item to the order.
@@ -85,6 +103,14 @@ public sealed class Order : AggregateRoot, IAuditableEntity
      
         decimal price)
     {
+        #region Check is Locked (fix this coming soon)
+        if (IsLocked)
+        {
+            return Result.Failure<OrderItem>(
+                DomainErrors.Order.OrderIsLocked);
+        }
+        #endregion
+
         #region Create the new Order Item
         var orderItem = new OrderItem(
             Guid.NewGuid(), 
@@ -120,6 +146,14 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         int quantity,
         decimal price)
     {
+        #region Check is Locked (fix this coming soon)
+        if (IsLocked)
+        {
+            return Result.Failure<OrderItem>(
+                DomainErrors.Order.OrderIsLocked);
+        }
+        #endregion
+
         #region Get this Order Item
         var orderItem = _orderItems.Find(oi => oi.Id.Equals((orderItemId)));
         if (orderItem is null)
@@ -160,6 +194,14 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public Result RemoveOrderItem(
         Guid orderItemId)
     {
+        #region Check is Locked (fix this coming soon)
+        if (IsLocked)
+        {
+            return Result.Failure<OrderItem>(
+                DomainErrors.Order.OrderIsLocked);
+        }
+        #endregion
+
         #region Get this Order Item
         var orderItem = _orderItems.Find(oi => oi.Id.Equals((orderItemId)));
         if (orderItem is null)
@@ -308,6 +350,10 @@ public sealed class Order : AggregateRoot, IAuditableEntity
 
         // Update the order's modified timestamp
         ModifiedOnUtc = DateTime.UtcNow;
+
+        #region Lock the Order
+        LockOrder();
+        #endregion
 
         // Raise a domain event for setting the payment
         RaiseDomainEvent(new PaymentSetDomainEvent(

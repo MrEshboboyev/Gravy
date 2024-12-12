@@ -143,6 +143,10 @@ public static class DomainErrors
         public static readonly Error NotExist = new(
                 "Order.NotExist",
                 $"There is no orders");
+
+        public static readonly Error OrderIsLocked = new(
+            "Order.OrderIsLocked", 
+            "The order is locked and cannot be modified.");
     }
 
     public static class OrderItem
