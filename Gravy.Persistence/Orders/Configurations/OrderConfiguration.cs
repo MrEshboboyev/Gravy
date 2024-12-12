@@ -1,5 +1,4 @@
 ﻿using Gravy.Domain.Entities;
-using Gravy.Domain.ValueObjects;
 using Gravy.Persistence.Orders.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -52,6 +51,9 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(x => x.ModifiedOnUtc);
 
         builder.Property(x => x.DeliveredAt);
+
+        builder.Property(x => x.IsLocked)
+            .IsRequired();
 
         // Configure value objects (DeliveryAddress)
         builder.OwnsOne(x => x.DeliveryAddress, addressBuilder =>

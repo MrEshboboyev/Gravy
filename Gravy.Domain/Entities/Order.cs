@@ -48,6 +48,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public OrderStatus Status { get; private set; }
     public DateTime PlacedAt { get; private set; }
     public DateTime? DeliveredAt { get; private set; }
+    public bool IsLocked { get; private set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
 
@@ -81,6 +82,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public Result<OrderItem> AddOrderItem(
         Guid menuItemId, 
         int quantity, 
+     
         decimal price)
     {
         #region Create the new Order Item
