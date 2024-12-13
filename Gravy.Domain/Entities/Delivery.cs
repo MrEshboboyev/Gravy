@@ -17,6 +17,7 @@ public sealed class Delivery : Entity
     {
         OrderId = orderId;
         DeliveryStatus = DeliveryStatus.Pending;
+        CreatedOnUtc = DateTime.UtcNow;
     }
 
     private Delivery()

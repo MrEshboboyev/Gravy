@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Gravy.Application.Orders.Commands.Deliviries.CreateDelivery;
+namespace Gravy.Application.Orders.Commands.Deliveries.CreateDelivery;
 
 public sealed class CreateDeliveryCommandValidator : 
     AbstractValidator<CreateDeliveryCommand>

@@ -172,11 +172,19 @@ public static class DomainErrors
 
         public static readonly Func<Guid, Error> AlreadySet = id => new(
             "Delivery.AlreadySet",
-            $"The delivery already set to this order. Setted delivery Id : {id}.");
+            $"The delivery already set to this order. Set delivery Id : {id}.");
 
         public static readonly Error NoAvailableDeliveryPerson = new(
             "Delivery.NoAvailableDeliveryPerson",
             "No available delivery person for the delivery.");
+
+        public static readonly Error PaymentNotSet = new(
+            "Delivery.PaymentNotSet", 
+            "The payment is not set for the delivery."); 
+        
+        public static readonly Error OrderNotLocked = new(
+            "Delivery.OrderNotLocked", 
+            "The order must be locked before proceeding with the delivery.");
     }
 
     public static class Payment

@@ -4,7 +4,7 @@ using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
 
-namespace Gravy.Application.Orders.Commands.Deliviries.AssignDelivery;
+namespace Gravy.Application.Orders.Commands.Deliveries.AssignDelivery;
 
 internal sealed class AssignDeliveryCommandHandler(
     IOrderRepository orderRepository, 

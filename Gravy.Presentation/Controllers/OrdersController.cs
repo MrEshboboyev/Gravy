@@ -1,7 +1,7 @@
 ﻿using Gravy.Application.Orders.Commands.CreateOrder;
-using Gravy.Application.Orders.Commands.Deliviries.AssignDelivery;
-using Gravy.Application.Orders.Commands.Deliviries.CompleteDelivery;
-using Gravy.Application.Orders.Commands.Deliviries.CreateDelivery;
+using Gravy.Application.Orders.Commands.Deliveries.AssignDelivery;
+using Gravy.Application.Orders.Commands.Deliveries.CompleteDelivery;
+using Gravy.Application.Orders.Commands.Deliveries.CreateDelivery;
 using Gravy.Application.Orders.Commands.OrderItems.AddOrderItem;
 using Gravy.Application.Orders.Commands.Payments.CompletePayment;
 using Gravy.Application.Orders.Commands.Payments.SetPayment;
@@ -185,13 +185,9 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
     {
         var command = new CreateDeliveryCommand(orderId);
 
-        Result<Guid> result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
+        var result = await Sender.Send(command, cancellationToken);
 
-        return Ok(result.Value);
+        return result.IsFailure ? HandleFailure(result) : Ok(result.Value);
     }
 
     // 4. Delivery Assigned: Delivery is assigned to a delivery person.

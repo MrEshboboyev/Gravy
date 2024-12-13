@@ -3,7 +3,7 @@ using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
 
-namespace Gravy.Application.Orders.Commands.Deliviries.CreateDelivery;
+namespace Gravy.Application.Orders.Commands.Deliveries.CreateDelivery;
 
 internal sealed class CreateDeliveryCommandHandler(
     IOrderRepository orderRepository, 
@@ -30,12 +30,14 @@ internal sealed class CreateDeliveryCommandHandler(
         #endregion
 
         #region Create Delivery for this Order
+
         var createDeliveryResult = order.CreateDelivery();
         if (createDeliveryResult.IsFailure)
         {
             return Result.Failure<Guid>(
                 createDeliveryResult.Error);
         }
+
         #endregion
 
         #region Add and Update database

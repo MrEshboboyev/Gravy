@@ -3,7 +3,7 @@ using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
 
-namespace Gravy.Application.Orders.Commands.Deliviries.CompleteDelivery;
+namespace Gravy.Application.Orders.Commands.Deliveries.CompleteDelivery;
 
 internal sealed class CompleteDeliveryCommandHandler(
     IOrderRepository orderRepository,

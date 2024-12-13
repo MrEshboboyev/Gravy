@@ -91,6 +91,23 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             Id));
     }
 
+    private void SetStatus(OrderStatus newStatus)
+    {
+        if (Status == newStatus)
+            return;
+
+        Status = newStatus;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        // Optionally raise a domain event when the status changes
+        RaiseDomainEvent(new OrderStatusChangedDomainEvent(
+            Guid.NewGuid(),
+            Id, 
+            newStatus, 
+            DateTime.UtcNow));
+    }
+
+
     #endregion
 
     #region Order-Item related
@@ -236,15 +253,47 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     #region Delivery related
     public Result<Delivery> CreateDelivery()
     {
+        #region Validation: Ensure payment exists and order is locked
+
+        if (_payment is null)
+        {
+            return Result.Failure<Delivery>(
+                DomainErrors.Delivery.PaymentNotSet);
+        }
+
+        if (!IsLocked)
+        {
+            return Result.Failure<Delivery>(
+                DomainErrors.Delivery.OrderNotLocked);
+        }
+
+        #endregion
+
+        #region Validation: Ensure delivery does not already exist
+
         if (_delivery is not null)
         {
             return Result.Failure<Delivery>(
                 DomainErrors.Delivery.AlreadySet(_delivery.Id));
         }
 
+        #endregion
+
+        #region Create new Delivery for this Order
+
         _delivery = new Delivery(
             Guid.NewGuid(),
             Id);
+
+        #endregion
+
+        #region Set Status to Preparing
+        
+        SetStatus(OrderStatus.Preparing);
+        
+        #endregion
+
+        #region Domain Events
 
         RaiseDomainEvent(new DeliveryCreatedDomainEvent(
             Guid.NewGuid(),
@@ -252,7 +301,9 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             _delivery.Id, 
             DateTime.UtcNow));
 
-        return _delivery;
+        #endregion
+
+        return Result.Success(_delivery);
     }
 
     /// <summary>
@@ -276,9 +327,11 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             return Result.Failure<Delivery>(assignResult.Error);
         }
 
-        // Update order status and timestamp
-        Status = OrderStatus.OnTheWay;
-        ModifiedOnUtc = DateTime.UtcNow;
+        #region Set Status to OnTheWay
+
+        SetStatus(OrderStatus.OnTheWay);
+
+        #endregion
 
         // Raise a domain event
         RaiseDomainEvent(new DeliveryAssignedDomainEvent(
@@ -302,11 +355,13 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         }
 
         _delivery.MarkAsDelivered();
-
-        Status = OrderStatus.Delivered;
         DeliveredAt = DateTime.UtcNow;
 
-        ModifiedOnUtc = DateTime.UtcNow;
+        #region Set Status to Delivered
+
+        SetStatus(OrderStatus.Delivered);
+
+        #endregion
 
         RaiseDomainEvent(new OrderDeliveredDomainEvent(
             Guid.NewGuid(),
@@ -348,8 +403,11 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             method,
             transactionId);
 
-        // Update the order's modified timestamp
-        ModifiedOnUtc = DateTime.UtcNow;
+        #region Set Status to Confirmed
+
+        SetStatus(OrderStatus.Confirmed);
+
+        #endregion
 
         #region Lock the Order
         LockOrder();

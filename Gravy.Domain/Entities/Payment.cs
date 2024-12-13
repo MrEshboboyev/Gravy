@@ -22,6 +22,7 @@ public sealed class Payment : Entity
         Method = method;
         TransactionId = transactionId;
         Status = PaymentStatus.Pending;
+        CreatedOnUtc = DateTime.UtcNow;
     }
 
     private Payment() { }
