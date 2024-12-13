@@ -15,6 +15,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Gravy.Application.Orders.Commands.DeleteOrder;
 using Gravy.Application.Orders.Commands.OrderItems.RemoveOrderItem;
 using Gravy.Application.Orders.Commands.OrderItems.UpdateOrderItem;
 
@@ -44,6 +45,21 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         Result<OrderResponse> response = await Sender.Send(query, cancellationToken);
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
+    #endregion
+
+    #region Delete Order
+
+    [HttpDelete("{orderId:guid}")]
+    public async Task<IActionResult> DeleteOrder(
+        Guid orderId,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteOrderCommand(orderId);
+
+        var result = await Sender.Send(command, cancellationToken);
+        return result.IsFailure ? HandleFailure(result) : NoContent();
+    }
+
     #endregion
 
     #region Order-Item related

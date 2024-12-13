@@ -147,6 +147,10 @@ public static class DomainErrors
         public static readonly Error OrderIsLocked = new(
             "Order.OrderIsLocked", 
             "The order is locked and cannot be modified.");
+
+        public static readonly Error NoOrderItems = new(
+            "Order.NoOrderItems", 
+            "The order must contain at least one item.");
     }
 
     public static class OrderItem

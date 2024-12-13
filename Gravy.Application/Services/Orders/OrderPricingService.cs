@@ -21,6 +21,12 @@ public class OrderPricingService(
                 DomainErrors.Order.NotFound(orderId));
         }
 
+        if (order.OrderItems.Count is 0)
+        {
+            return Result.Failure<decimal>(
+                DomainErrors.Order.NoOrderItems);
+        }
+
         // Calculate total amount by summing up the prices of the order items
         return order.OrderItems.Sum(item => item.Price);
     }

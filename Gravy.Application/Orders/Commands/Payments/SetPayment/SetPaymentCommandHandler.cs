@@ -61,6 +61,9 @@ internal sealed class SetPaymentCommandHandler(
         // Persist payment entity to repository
         _paymentRepository.Add(paymentResult.Value);
 
+        // update Order root for updating fields
+        _orderRepository.Update(order);
+
         // Save changes atomically
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         #endregion
