@@ -1,6 +1,6 @@
 ﻿namespace Gravy.Application.Users.Queries.DeliveryPersons.GetDeliveryPersonAvailabilities;
 
-public sealed record DeliveryPersonAvailabilityDetailsResponse(
+public sealed record DeliveryPersonAvailabilityResponse(
     Guid DeliveryPersonId,
     Guid AvailabilityId,
     DateTime StartTimeUtc,

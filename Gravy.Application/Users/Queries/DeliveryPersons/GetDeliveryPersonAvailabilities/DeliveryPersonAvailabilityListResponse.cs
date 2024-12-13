@@ -1,4 +1,4 @@
 ﻿namespace Gravy.Application.Users.Queries.DeliveryPersons.GetDeliveryPersonAvailabilities;
 
 public sealed record DeliveryPersonAvailabilityListResponse(
-    IReadOnlyCollection<DeliveryPersonAvailabilityDetailsResponse> DeliveryPersonAvailabilities);
+    IReadOnlyCollection<DeliveryPersonAvailabilityResponse> DeliveryPersonAvailabilities);

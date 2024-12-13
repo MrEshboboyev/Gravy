@@ -1,4 +1,5 @@
 ﻿using Gravy.Application.Abstractions.Messaging;
+using Gravy.Application.Users.Queries.Common;
 using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.Shared;
@@ -14,32 +15,42 @@ internal sealed class GetDeliveryPersonAvailabilitiesQueryHandler(
     public async Task<Result<DeliveryPersonAvailabilityListResponse>> Handle(
         GetDeliveryPersonAvailabilitiesQuery request, CancellationToken cancellationToken)
     {
-        // Fetch the user from the repository with delivery person details
+        #region Get User with delivery person details
+
         var user = await _userRepository.GetByIdWithDeliveryPersonDetailsAsync
             (request.UserId,
             cancellationToken);
-
-        // If user is not found, return a failure result
         if (user is null)
         {
             return Result.Failure<DeliveryPersonAvailabilityListResponse>(
                 DomainErrors.User.NotFound(request.UserId));
         }
 
-        #region Prepare Response
-        var availabilities = user.DeliveryPersonDetails.Availabilities;
         #endregion
+
+        #region Checking Delivery Person details for this user
+
+        if (user.DeliveryPersonDetails is null)
+        {
+            return Result.Failure<DeliveryPersonAvailabilityListResponse>(
+                DomainErrors.User.DeliveryPersonDetailsNotExist(user.Id));
+        }
+
+        #endregion
+
+        #region Prepare Response
+
+        var availabilities = user
+            .DeliveryPersonDetails.Availabilities;
 
         // Create and return the DeliveryPersonAvailabilityListResponse object
         var response = new DeliveryPersonAvailabilityListResponse(
-            availabilities.Select(
-                availability => new DeliveryPersonAvailabilityDetailsResponse(
-                    availability.DeliveryPersonId,
-                    availability.Id,
-                    availability.StartTimeUtc,
-                    availability.EndTimeUtc))
-            .ToList());
+            availabilities
+                .Select(DeliveryPersonAvailabilityResponseFactory.Create)
+                .ToList());
 
-        return response;
+        #endregion
+
+        return Result.Success(response);
     }
 }

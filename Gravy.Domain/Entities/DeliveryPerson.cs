@@ -25,6 +25,7 @@ public sealed class DeliveryPerson : Entity
         UserId = userId;
         Vehicle = vehicle;
         HomeLocation = homeLocation;
+        CreatedOnUtc = DateTime.UtcNow;
     }
 
     private DeliveryPerson() { }
