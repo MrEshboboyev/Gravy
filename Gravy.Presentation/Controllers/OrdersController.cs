@@ -198,14 +198,9 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
     {
         var command = new AssignDeliveryCommand(orderId);
 
-        Result result = await Sender.Send(command, cancellationToken);
+        var result = await Sender.Send(command, cancellationToken);
         
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     // 5. In Progress: Delivery is picked up by the delivery person.

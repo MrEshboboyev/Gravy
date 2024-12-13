@@ -1,6 +1,5 @@
 ﻿using Gravy.Domain.Entities;
 using Gravy.Domain.Repositories;
-using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Application.Services.Deliveries;
 
@@ -19,7 +18,7 @@ public sealed class DeliveryPersonSelector(IDeliveryPersonRepository
             .GetAllAsync(cancellationToken);
 
         // Extract Location from DeliveryAddress
-        Location deliveryLocation = order.DeliveryAddress.ToLocation();
+        var deliveryLocation = order.DeliveryAddress.ToLocation();
 
         // Filter delivery persons by distance to the order's delivery address
         var candidates = availableDeliveryPersons

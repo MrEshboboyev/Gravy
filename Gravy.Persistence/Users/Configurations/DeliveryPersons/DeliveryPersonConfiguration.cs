@@ -38,6 +38,10 @@ internal sealed class DeliveryPersonConfiguration : IEntityTypeConfiguration<Del
                 .HasColumnName("LicensePlate")
                 .HasMaxLength(20)
                 .IsRequired();
+
+            vehicleBuilder.Property(x => x.MaxDeliveryRadius)
+                .HasColumnName("MaxDeliveryRadius")
+                .IsRequired();
         });
 
         // Configure Location as an owned type
