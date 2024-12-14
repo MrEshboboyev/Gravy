@@ -185,6 +185,10 @@ public static class DomainErrors
         public static readonly Error OrderNotLocked = new(
             "Delivery.OrderNotLocked", 
             "The order must be locked before proceeding with the delivery.");
+
+        public static readonly Error DeliveryPersonAlreadyAssigned = new(
+            "Delivery.DeliveryPersonAlreadyAssigned",
+            "A delivery person has already been assigned to this delivery.");
     }
 
     public static class Payment

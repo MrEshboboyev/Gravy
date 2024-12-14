@@ -78,8 +78,8 @@ public sealed class DeliveryPerson : Entity
     /// </summary>
     public bool IsAvailableForDelivery(Location deliveryLocation)
     {
-        return IsAvailable && HomeLocation
-            .CalculateDistance(deliveryLocation) <= Vehicle.MaxDeliveryRadius;
+        return IsAvailable /*&& HomeLocation
+            .CalculateDistance(deliveryLocation) <= Vehicle.MaxDeliveryRadius*/;
     }
 
     /// <summary>

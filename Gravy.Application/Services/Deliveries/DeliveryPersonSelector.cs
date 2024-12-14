@@ -14,18 +14,42 @@ public sealed class DeliveryPersonSelector(IDeliveryPersonRepository
         CancellationToken cancellationToken)
     {
         // Fetch all available delivery persons
-        var availableDeliveryPersons = await _deliveryPersonRepository
+        var allDeliveryPersons = await _deliveryPersonRepository
             .GetAllAsync(cancellationToken);
 
         // Extract Location from DeliveryAddress
         var deliveryLocation = order.DeliveryAddress.ToLocation();
 
-        // Filter delivery persons by distance to the order's delivery address
-        var candidates = availableDeliveryPersons
-            .Where(dp => dp.IsAvailableForDelivery(deliveryLocation))
+        #region Get Available For Delivery Persons
+
+        var availablePersonsForDelivery = allDeliveryPersons
+            .Where(dp => dp.IsAvailableForDelivery(deliveryLocation));
+
+        #endregion
+
+        #region Checking isAvailable in this moment
+
+        var availableDeliveryPersonsAtTheMoment 
+            = availablePersonsForDelivery
+                .Where(dp => dp.IsAvailableAt(DateTime.UtcNow));
+
+        #endregion
+
+        #region Filter delivery persons by distance to the order's delivery address
+        
+        var candidates = availableDeliveryPersonsAtTheMoment
             .OrderBy(dp => dp.DistanceTo(deliveryLocation));
 
+        #endregion
+
+        var bestCandidate = candidates.FirstOrDefault();
+        if (bestCandidate is not null)
+        {
+            bestCandidate.SetAvailability(false);
+            _deliveryPersonRepository.Update(bestCandidate);
+        }
+
         // Return the closest candidate, if available
-        return candidates.FirstOrDefault();
+        return bestCandidate;
     }
 }

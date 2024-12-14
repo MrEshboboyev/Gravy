@@ -313,12 +313,25 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     Guid deliveryPersonId,
     TimeSpan estimatedDeliveryTime)
     {
-        // Ensure a delivery exists
+        #region Checking delivery exists
+
         if (_delivery is null)
         {
             return Result.Failure<Delivery>(
                 DomainErrors.Delivery.NotFound(Id));
         }
+
+        #endregion
+
+        #region Checking Delivery Person already assigned
+
+        if (_delivery.DeliveryPersonId is not null)
+        {
+            return Result.Failure<Delivery>(
+                DomainErrors.Delivery.DeliveryPersonAlreadyAssigned);
+        }
+
+        #endregion
 
         // Assign the delivery person
         var assignResult = _delivery.AssignDeliveryPerson(deliveryPersonId);

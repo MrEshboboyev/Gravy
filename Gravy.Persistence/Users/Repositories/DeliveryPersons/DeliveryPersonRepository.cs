@@ -12,6 +12,7 @@ public sealed class DeliveryPersonRepository(ApplicationDbContext dbContext) : I
         CancellationToken cancellationToken = default) =>
             await _dbContext
             .Set<DeliveryPerson>()
+            .Include(dp => dp.Availabilities)
             .ToListAsync(cancellationToken);
 
     public void Add(DeliveryPerson deliveryPerson) =>

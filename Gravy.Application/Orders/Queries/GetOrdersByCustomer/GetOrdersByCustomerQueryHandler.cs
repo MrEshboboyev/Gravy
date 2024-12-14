@@ -27,19 +27,34 @@ internal sealed class GetOrdersByCustomerQueryHandler(
             return Result.Failure<OrderListResponse>(
                 DomainErrors.User.NotFound(userId));
         }
+        #endregion
+
+        #region Checking Customer details exist for this user
+
+        if (user.CustomerDetails is null)
+        {
+            return Result.Failure<OrderListResponse>(
+                DomainErrors.User.DeliveryPersonDetailsNotExist(userId));
+        }
         var customer = user.CustomerDetails;
+
         #endregion
 
         #region Get Customer Orders By CustomerId
-        var orders = await _orderRepository.GetByCustomerIdAsync(user.CustomerDetails.Id, 
+
+        var orders = await _orderRepository.GetByCustomerIdAsync(
+            user.CustomerDetails.Id, 
             cancellationToken);
+
         #endregion
 
         #region Prepare OrderList response
+
         var response = new OrderListResponse(
             orders
             .Select(OrderResponseFactory.Create)
             .ToList());
+        
         #endregion
 
         return response;
