@@ -10,12 +10,10 @@ namespace Gravy.Application.Users.Commands.CreateUser;
 
 internal sealed class CreateUserCommandHandler(
     IUserRepository userRepository,
-    IRoleRepository roleRepository,
     IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher) : ICommandHandler<CreateUserCommand, Guid>
 {
     private readonly IUserRepository _userRepository = userRepository;
-    private readonly IRoleRepository _roleRepository = roleRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
