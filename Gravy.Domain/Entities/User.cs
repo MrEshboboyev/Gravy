@@ -114,21 +114,33 @@ public sealed class User : AggregateRoot, IAuditableEntity
     /// </summary>
     public Result<Customer> AddCustomerDetails(DeliveryAddress deliveryAddress)
     {
+        #region Checking Customer Details already exists 
+
         if (_customerDetails is not null)
         {
             return Result.Failure<Customer>(
                 DomainErrors.Customer.AlreadyExist(_customerDetails.Id, Id));
         }
 
+        #endregion
+
+        #region Create new Customer and assign _customerDetails for this user
+
         _customerDetails = new Customer(Guid.NewGuid(), Id, deliveryAddress);
         ModifiedOnUtc = DateTime.UtcNow;
+
+        #endregion
+
+        #region Domain Events
 
         RaiseDomainEvent(new CustomerLinkedToUserDomainEvent(
             Guid.NewGuid(), 
             Id, 
             _customerDetails.Id));
 
-        return _customerDetails;
+        #endregion
+
+        return Result.Success(_customerDetails);
     }
     #endregion
 
