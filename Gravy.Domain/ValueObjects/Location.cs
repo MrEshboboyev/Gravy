@@ -31,19 +31,25 @@ public sealed class Location : ValueObject
         double latitude,
         double longitude)
     {
+        #region Checking fields is valid
+
+        // checking latitude
         if (latitude is < -90.0 or > 90.0)
         {
             return Result.Failure<Location>(
                 DomainErrors.Location.InvalidLatitude);
         }
 
+        // checking longitude
         if (longitude is < -180.0 or > 180.0)
         {
             return Result.Failure<Location>(
-                DomainErrors.Location.InvalidLatitude);
+                DomainErrors.Location.InvalidLongitude);
         }
 
-        return new Location(latitude, longitude);
+        #endregion
+
+        return Result.Success(new Location(latitude, longitude));
     }
 
     /// <summary>
