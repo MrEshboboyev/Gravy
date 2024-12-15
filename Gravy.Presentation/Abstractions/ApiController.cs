@@ -20,7 +20,7 @@ public abstract class ApiController : ControllerBase
     /// Initializes a new instance of the <see cref="ApiController"/> class. 
     /// </summary> 
     /// <param name="sender">The sender used for sending commands and queries.</param>
-    public ApiController(ISender sender)
+    protected ApiController(ISender sender)
     {
         Sender = sender;
     }

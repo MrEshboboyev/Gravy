@@ -10,31 +10,23 @@ namespace Gravy.Application.Behaviors;
 /// </summary> 
 /// <typeparam name="TRequest">The type of the request.</typeparam> 
 /// <typeparam name="TResponse">The type of the response.</typeparam>
-public class ValidationPipelineBehavior<TRequest, TResponse>
-    : IPipelineBehavior<TRequest, TResponse>
+public class ValidationPipelineBehavior<TRequest, TResponse>(
+    IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     where TResponse : Result
 {
-    private readonly IEnumerable<IValidator<TRequest>> _validators;
-
-    // Constructor to initialize the behavior with validators
-    public ValidationPipelineBehavior(IEnumerable<IValidator<TRequest>> validators)
-    {
-        _validators = validators;
-    }
-
     // Handles the validation of the request and returns validation errors if any
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        // validators is not exist, await next()
-        if (!_validators.Any())
+        // validators are not exist, await next()
+        if (!validators.Any())
         {
             return await next();
         }
 
         // Validate the request and collect errors
-        Error[] errors = _validators
+        var errors = validators
             .Select(validator => validator.Validate(request))
             .SelectMany(validationResult => validationResult.Errors)
             .Where(validationFailure => validationFailure is not null)
@@ -44,7 +36,7 @@ public class ValidationPipelineBehavior<TRequest, TResponse>
             .Distinct()
             .ToArray();
 
-        // errors is found, return result with errors
+        // errors are found, return result with errors
         if (errors.Length != 0)
         {
             return CreateValidationResult<TResponse>(errors);
@@ -58,17 +50,25 @@ public class ValidationPipelineBehavior<TRequest, TResponse>
     private static TResult CreateValidationResult<TResult>(Error[] errors)
         where TResult : Result
     {
+        // Check if TResult is the non-generic Result type
         if (typeof(TResult) == typeof(Result))
         {
             return (ValidationResult.WithErrors(errors) as TResult)!;
         }
 
-        object validationResult = typeof(ValidationResult<>)
-             .GetGenericTypeDefinition()
-             .MakeGenericType(typeof(Result).GenericTypeArguments[0])
-             .GetMethod(nameof(ValidationResult.WithErrors))!
-             .Invoke(null, [errors])!;
+        // Check if TResult is a generic type and process accordingly
+        if (!typeof(TResult).IsGenericType) 
+            throw new InvalidOperationException("Unsupported result type.");
         
+        var genericType = typeof(TResult).GetGenericArguments()[0];
+
+        var validationResult = typeof(ValidationResult<>)
+            .MakeGenericType(genericType) // Use the actual generic argument of TResult
+            .GetMethod(nameof(ValidationResult.WithErrors))!
+            .Invoke(null, [errors])!;
+
         return (TResult)validationResult;
+
     }
+
 }
