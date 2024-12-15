@@ -21,25 +21,35 @@ internal sealed class AddAvailabilityCommandHandler(
     {
         var (userId, startTimeUtc, endTimeUtc) = request;
 
+        #region Get User with Availabilities
+
         var user = await _userRepository.GetByIdWithDeliveryPersonDetailsAsync(
             userId, cancellationToken);
-
         if (user is null)
         {
             return Result.Failure(
                 DomainErrors.User.NotFound(userId));
         }
 
-        // fix this converting coming soon
-        startTimeUtc = DateTime.SpecifyKind(startTimeUtc, DateTimeKind.Utc);
-        endTimeUtc = DateTime.SpecifyKind(endTimeUtc, DateTimeKind.Utc);
+        #endregion
 
-        // Check for overlapping availability
-        var overlappingEntries = await _deliveryPersonAvailabilityRepository.GetOverlappingAvailabilities(
-            user.DeliveryPersonDetails.Id,
-            startTimeUtc,
-            endTimeUtc);
+        #region Checking Delivery Person details exist for this user
 
+        if (user.DeliveryPersonDetails is null)
+        {
+            return Result.Failure(
+                DomainErrors.User.DeliveryPersonDetailsNotExist(userId));
+        }
+
+        #endregion
+
+        #region  Check for overlapping availability
+
+        var overlappingEntries = 
+            await _deliveryPersonAvailabilityRepository.GetOverlappingAvailabilities(
+                user.DeliveryPersonDetails.Id,
+                startTimeUtc,
+                endTimeUtc);
         if (overlappingEntries.Any())
         {
             return Result.Failure(
@@ -47,18 +57,26 @@ internal sealed class AddAvailabilityCommandHandler(
                 .OverlappingAvailabilityPeriod(startTimeUtc, endTimeUtc));
         }
 
-        var availabilityResult = user.AddDeliveryPersonAvailability(startTimeUtc,
-            endTimeUtc);
+        #endregion
 
-        if (availabilityResult.IsFailure)
+        #region Add Delivery Person Availabity to this user user delivery person details
+
+        var addAvailabilityResult = user.AddDeliveryPersonAvailability(startTimeUtc,
+            endTimeUtc);
+        if (addAvailabilityResult.IsFailure)
         {
             return Result.Failure(
-                availabilityResult.Error);
+                addAvailabilityResult.Error);
         }
 
-        _deliveryPersonAvailabilityRepository.Add(availabilityResult.Value);
+        #endregion
 
+        #region Add and Update database
+
+        _deliveryPersonAvailabilityRepository.Add(addAvailabilityResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        #endregion
 
         return Result.Success();
     }

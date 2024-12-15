@@ -3,13 +3,13 @@ using Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.DeleteAvai
 using Gravy.Application.Users.Commands.DeliveryPersons.Availabilities.UpdateAvailability;
 using Gravy.Application.Users.Queries.DeliveryPersons.GetAllDeliveryPersons;
 using Gravy.Application.Users.Queries.DeliveryPersons.GetDeliveryPersonAvailabilities;
-using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.DeliveryPersons.Availabilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Gravy.Presentation.Helpers;
 
 namespace Gravy.Presentation.Controllers;
 
@@ -17,48 +17,59 @@ namespace Gravy.Presentation.Controllers;
 [Route("api/delivery-persons")]
 public sealed class DeliveryPersonsController(ISender sender) : ApiController(sender)
 {
+    #region User claims
+
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+    #endregion
+
+    #region Get
 
     [HttpGet("all")]
     public async Task<IActionResult> GetAllDeliveryPersons(CancellationToken cancellationToken)
     {
         var query = new GetAllDeliveryPersonsQuery();
-        Result<DeliveryPersonListResponse> response = await Sender.Send(query, cancellationToken);
+        var response = await Sender.Send(query, cancellationToken);
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
 
+    #endregion
+
     #region Availabilities
+
+    #region Get
+
     [HttpGet("availabilities")]
     public async Task<IActionResult> GetAvailabilities(
         CancellationToken cancellationToken)
     {
         var query = new GetDeliveryPersonAvailabilitiesQuery(GetUserId());
-        Result<DeliveryPersonAvailabilityListResponse> response = await Sender.Send(query, cancellationToken);
+        var response = await Sender.Send(query, cancellationToken);
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
 
+    #endregion
+
+    #region Create/Update/Delete  (Receiving Datetime example : "startTimeUtc": "2024-12-17T10:43:00Z")
+
     [HttpPost("availabilities")]
-    public async Task<IActionResult> CreateAvailiability(
+    public async Task<IActionResult> CreateAvailability(
         [FromBody] CreateAvailabilityRequest request,
         CancellationToken cancellationToken)
     {
         var command = new AddAvailabilityCommand(
             GetUserId(),
-            request.StartTimeUtc,
-            request.EndTimeUtc);
+            request.StartTime.ToUtc(),
+            request.EndTime.ToUtc());
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
+        var result = await Sender.Send(command, cancellationToken);
 
-        return NoContent();
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     [HttpPut("availabilities/{availabilityId:guid}")]
-    public async Task<IActionResult> UpdateAvailiability(
+    public async Task<IActionResult> UpdateAvailability(
         Guid availabilityId,
         [FromBody] UpdateAvailabilityRequest request,
         CancellationToken cancellationToken)
@@ -66,20 +77,16 @@ public sealed class DeliveryPersonsController(ISender sender) : ApiController(se
         var command = new UpdateAvailabilityCommand(
             GetUserId(),
             availabilityId,
-            request.StartTimeUtc,
-            request.EndTimeUtc);
+            request.StartTime.ToUtc(),
+            request.EndTime.ToUtc());
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
+        var result = await Sender.Send(command, cancellationToken);
 
-        return NoContent();
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     [HttpDelete("availabilities/{availabilityId:guid}")]
-    public async Task<IActionResult> DeleteAvailiability(
+    public async Task<IActionResult> DeleteAvailability(
         Guid availabilityId,
         CancellationToken cancellationToken)
     {
@@ -87,13 +94,12 @@ public sealed class DeliveryPersonsController(ISender sender) : ApiController(se
             GetUserId(),
             availabilityId);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
+        var result = await Sender.Send(command, cancellationToken);
 
-        return NoContent();
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
+
+    #endregion
+
     #endregion
 }
