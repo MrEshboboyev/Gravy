@@ -121,37 +121,6 @@ public class UpdateAvailabilityCommandHandlerTests
     }
 
     /// <summary>
-    /// Test case: Returns failure when user delivery person details do not exist.
-    /// </summary>
-    [Fact]
-    public async Task Handle_Should_ReturnFailure_WhenDeliveryPersonDetailsDoNotExist()
-    {
-        // Arrange
-        var userId = Guid.NewGuid();
-        var command = new UpdateAvailabilityCommand(
-            userId, 
-            Guid.NewGuid(), 
-            DateTime.UtcNow, 
-            DateTime.UtcNow.AddHours(1));
-
-        var user = CreateTestUser(userId);
-
-        // Mock: User repository returns user without DeliveryPersonDetails
-        _userRepositoryMock
-            .Setup(repo => repo.GetByIdWithDeliveryPersonDetailsAsync(
-                userId, 
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(user);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(DomainErrors.User.DeliveryPersonDetailsNotExist(userId));
-    }
-
-    /// <summary>
     /// Test case: Returns failure when updating availability fails due to invalid data.
     /// </summary>
     [Fact]

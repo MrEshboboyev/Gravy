@@ -269,36 +269,48 @@ public sealed class User : AggregateRoot, IAuditableEntity
     public Result DeleteDeliveryPersonAvailability(
         Guid availabilityId)
     {
-        // checking delivery person details exist
+        #region Checking delivery person details exist
+
         if (DeliveryPersonDetails is null)
         {
             return Result.Failure<DeliveryPersonAvailability>(
                 DomainErrors.User.DeliveryPersonDetailsNotExist(Id));
         }
 
-        #region delete availability
+        #endregion
+
+        #region Delete availability
+
         var deleteAvailabilityResult = DeliveryPersonDetails.DeleteAvailability(
             availabilityId);
-
         if (deleteAvailabilityResult.IsFailure)
         {
             return Result.Failure<DeliveryPersonAvailability>(
                 deleteAvailabilityResult.Error);
         }
+
         #endregion
 
-        // update modified time for user
+        #region Update this user
+
         ModifiedOnUtc = DateTime.UtcNow;
 
-        // add event
+        #endregion
+
+        #region Domain Events
+
         RaiseDomainEvent(new DeliveryPersonAvailabilityDeletedDomainEvent(
             Guid.NewGuid(),
             DeliveryPersonDetails.Id,
             availabilityId));
 
+        #endregion
+
         return Result.Success();
     }
+    
     #endregion
+
     #endregion
 }
 

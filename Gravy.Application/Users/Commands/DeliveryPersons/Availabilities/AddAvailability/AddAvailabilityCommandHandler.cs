@@ -33,16 +33,6 @@ internal sealed class AddAvailabilityCommandHandler(
 
         #endregion
 
-        #region Checking Delivery Person details exist for this user
-
-        if (user.DeliveryPersonDetails is null)
-        {
-            return Result.Failure(
-                DomainErrors.User.DeliveryPersonDetailsNotExist(userId));
-        }
-
-        #endregion
-
         #region Add Delivery Person Availabity to this user delivery person details
 
         var addAvailabilityResult = user.AddDeliveryPersonAvailability(

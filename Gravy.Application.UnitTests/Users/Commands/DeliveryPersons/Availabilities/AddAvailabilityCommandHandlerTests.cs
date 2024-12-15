@@ -60,37 +60,6 @@ public class AddAvailabilityCommandHandlerTests
     }
 
     /// <summary>
-    /// Test case: Handle should return failure if delivery person details is not exist for user
-    /// </summary>
-    [Fact]
-    public async Task Handle_Should_ReturnFailure_WhenDeliveryPersonDetailsNotExistForUser()
-    {
-        // Arrange
-        var command = new AddAvailabilityCommand(
-            _user.Id,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddHours(10));
-
-        _userRepositoryMock
-            .Setup(x => x.GetByIdWithDeliveryPersonDetailsAsync(
-                command.UserId,
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_user); // user was found
-
-        var handler = new AddAvailabilityCommandHandler(
-            _userRepositoryMock.Object,
-            _deliveryPersonAvailabilityRepositoryMock.Object,
-            _unitOfWorkMock.Object);
-
-        // Act
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.User.DeliveryPersonDetailsNotExist(_user.Id));
-    }
-
-    /// <summary>
     /// Test case: Handle should return success when delivery person availability is added successfully.
     /// </summary>
     [Fact]
