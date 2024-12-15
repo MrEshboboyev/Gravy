@@ -59,7 +59,7 @@ internal sealed class AddAvailabilityCommandHandler(
 
         #endregion
 
-        #region Add Delivery Person Availabity to this user user delivery person details
+        #region Add Delivery Person Availabity to this user delivery person details
 
         var addAvailabilityResult = user.AddDeliveryPersonAvailability(
             startTimeUtc,

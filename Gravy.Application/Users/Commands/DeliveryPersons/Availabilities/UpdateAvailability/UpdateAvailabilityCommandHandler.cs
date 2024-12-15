@@ -21,33 +21,48 @@ internal sealed class UpdateAvailabilityCommandHandler(
     {
         var (userId, availabilityId, startTimeUtc, endTimeUtc) = request;
 
+        #region Get User with Delivery Person Details (and availabilities)
+
         var user = await _userRepository.GetByIdWithDeliveryPersonDetailsAsync(
             userId, cancellationToken);
-
         if (user is null)
         {
             return Result.Failure(
                 DomainErrors.User.NotFound(userId));
         }
 
-        // fix this converting coming soon
-        startTimeUtc = DateTime.SpecifyKind(startTimeUtc, DateTimeKind.Utc);
-        endTimeUtc = DateTime.SpecifyKind(endTimeUtc, DateTimeKind.Utc);
+        #endregion
 
-        var availabilityResult = user.UpdateDeliveryPersonAvailability(
+        #region Checking Delivery Person details exist for this user
+
+        if (user.DeliveryPersonDetails is null)
+        {
+            return Result.Failure(
+                DomainErrors.User.DeliveryPersonDetailsNotExist(userId));
+        }
+
+        #endregion
+
+        #region Update Delivery Person Availabity in this user delivery person details
+
+        var updateAvailabilityResult = user.UpdateDeliveryPersonAvailability(
             availabilityId,
             startTimeUtc,
             endTimeUtc);
-
-        if (availabilityResult.IsFailure)
+        if (updateAvailabilityResult.IsFailure)
         {
             return Result.Failure(
-                availabilityResult.Error);
+                updateAvailabilityResult.Error);
         }
 
-        _deliveryPersonAvailabilityRepository.Update(availabilityResult.Value);
+        #endregion
 
+        #region Update database
+
+        _deliveryPersonAvailabilityRepository.Update(updateAvailabilityResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        #endregion
 
         return Result.Success();
     }
