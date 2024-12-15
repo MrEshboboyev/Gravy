@@ -21,7 +21,7 @@ internal sealed class AddAvailabilityCommandHandler(
     {
         var (userId, startTimeUtc, endTimeUtc) = request;
 
-        #region Get User with Availabilities
+        #region Get User with Delivery Person Details (and availabilities)
 
         var user = await _userRepository.GetByIdWithDeliveryPersonDetailsAsync(
             userId, cancellationToken);
@@ -61,7 +61,8 @@ internal sealed class AddAvailabilityCommandHandler(
 
         #region Add Delivery Person Availabity to this user user delivery person details
 
-        var addAvailabilityResult = user.AddDeliveryPersonAvailability(startTimeUtc,
+        var addAvailabilityResult = user.AddDeliveryPersonAvailability(
+            startTimeUtc,
             endTimeUtc);
         if (addAvailabilityResult.IsFailure)
         {

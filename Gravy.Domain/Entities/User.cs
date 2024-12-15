@@ -178,14 +178,18 @@ public sealed class User : AggregateRoot, IAuditableEntity
         DateTime startTimeUtc,
         DateTime endTimeUtc)
     {
-        // checking delivery person details exist
+        #region Checking delivery person details already exist
+
         if (DeliveryPersonDetails is null)
         {
             return Result.Failure<DeliveryPersonAvailability>(
                 DomainErrors.User.DeliveryPersonDetailsNotExist(Id));
         }
 
+        #endregion
+
         #region adding availability
+
         var addingAvailabilityResult = DeliveryPersonDetails
             .AddAvailability(startTimeUtc, endTimeUtc);
 
@@ -194,16 +198,23 @@ public sealed class User : AggregateRoot, IAuditableEntity
             return Result.Failure<DeliveryPersonAvailability>(
                 addingAvailabilityResult.Error);
         }
+
         #endregion
 
-        // update modified time for user
+        #region Update this user
+
         ModifiedOnUtc = DateTime.UtcNow;
 
-        // add event
+        #endregion
+
+        #region Domain Events
+
         RaiseDomainEvent(new AvailabilityAddedToDeliveryPersonDomainEvent(
             Guid.NewGuid(),
             DeliveryPersonDetails.Id,
             addingAvailabilityResult.Value.Id));
+
+        #endregion
 
         return addingAvailabilityResult;
     }
