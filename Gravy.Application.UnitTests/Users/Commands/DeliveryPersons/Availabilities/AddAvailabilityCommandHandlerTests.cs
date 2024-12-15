@@ -91,55 +91,6 @@ public class AddAvailabilityCommandHandlerTests
     }
 
     /// <summary>
-    /// Test case: Handle should return failure when overlapping availability exists.
-    /// </summary>
-    [Fact]
-    public async Task Handle_Should_ReturnFailure_WhenOverlappingAvailabilityExists()
-    {
-        // Arrange: Set up the test scenario
-        var command = new AddAvailabilityCommand(
-            _user.Id,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddHours(10));
-
-        // Add delivery person details for _user
-        _user.AddDeliveryPersonDetails(
-            Vehicle.Create("Car", "license plate").Value,
-            Location.Create(10, 20).Value);
-
-        // create overlapping availability
-        var overlappingAvailabilityResult = _user.AddDeliveryPersonAvailability(
-                DateTime.UtcNow.AddHours(1),
-                DateTime.UtcNow.AddHours(2));
-
-        _userRepositoryMock
-            .Setup(x => x.GetByIdWithDeliveryPersonDetailsAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_user); // user was found
-
-        _deliveryPersonAvailabilityRepositoryMock
-            .Setup(x => x.GetOverlappingAvailabilities(
-                It.IsAny<Guid>(),
-                It.IsAny<DateTime>(),
-                It.IsAny<DateTime>()))
-            .ReturnsAsync([ overlappingAvailabilityResult.Value ]);
-
-        var handler = new AddAvailabilityCommandHandler(
-            _userRepositoryMock.Object,
-            _deliveryPersonAvailabilityRepositoryMock.Object,
-            _unitOfWorkMock.Object);
-
-        // Act: Execute the command handler
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // Assert: Verify that the handler returns a failure result
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(DomainErrors.DeliveryPersonAvailability
-            .OverlappingAvailabilityPeriod(command.StartTimeUtc, command.EndTimeUtc));
-    }
-
-    /// <summary>
     /// Test case: Handle should return success when delivery person availability is added successfully.
     /// </summary>
     [Fact]
@@ -209,14 +160,6 @@ public class AddAvailabilityCommandHandlerTests
                 It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(_user); // user was found
-
-        // Mock the behavior of GetOverlappingAvailabilities to return no overlapping entries
-        _deliveryPersonAvailabilityRepositoryMock
-            .Setup(x => x.GetOverlappingAvailabilities(
-                It.IsAny<Guid>(),
-                It.IsAny<DateTime>(),
-                It.IsAny<DateTime>()))
-            .ReturnsAsync([]);
 
         var handler = new AddAvailabilityCommandHandler(
             _userRepositoryMock.Object,

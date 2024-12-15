@@ -43,22 +43,6 @@ internal sealed class AddAvailabilityCommandHandler(
 
         #endregion
 
-        #region  Check for overlapping availability
-
-        var overlappingEntries = 
-            await _deliveryPersonAvailabilityRepository.GetOverlappingAvailabilities(
-                user.DeliveryPersonDetails.Id,
-                startTimeUtc,
-                endTimeUtc);
-        if (overlappingEntries.Any())
-        {
-            return Result.Failure(
-                DomainErrors.DeliveryPersonAvailability
-                .OverlappingAvailabilityPeriod(startTimeUtc, endTimeUtc));
-        }
-
-        #endregion
-
         #region Add Delivery Person Availabity to this user delivery person details
 
         var addAvailabilityResult = user.AddDeliveryPersonAvailability(
