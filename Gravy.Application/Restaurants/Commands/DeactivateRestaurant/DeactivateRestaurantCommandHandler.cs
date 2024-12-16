@@ -19,6 +19,7 @@ internal sealed class DeactivateRestaurantCommandHandler(
         var restaurantId = request.RestaurantId;
 
         #region Get Restaurant
+
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId,
             cancellationToken);
         if (restaurant is null)
@@ -26,15 +27,20 @@ internal sealed class DeactivateRestaurantCommandHandler(
             return Result.Failure(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+
         #endregion
 
         #region Deactivate Restaurant
+
         restaurant.Deactivate();
+        
         #endregion
 
         #region Update database
+
         _restaurantRepository.Update(restaurant);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success();
