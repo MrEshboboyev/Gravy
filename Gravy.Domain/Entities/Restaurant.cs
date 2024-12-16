@@ -119,7 +119,7 @@ public sealed class Restaurant : AggregateRoot
         IsActive = true;
         ModifiedOnUtc = DateTime.UtcNow;
 
-        RaiseDomainEvent(new RestaurantDeactivatedDomainEvent(
+        RaiseDomainEvent(new RestaurantActivatedDomainEvent(
             Guid.NewGuid(),
             Id,
             Name));
