@@ -19,29 +19,54 @@ internal sealed class CreateUserCommandHandler(
 
     public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        Result<Email> emailResult = Email.Create(request.Email);
+        #region Create Email and checking email unique
 
+        Result<Email> emailResult = Email.Create(request.Email);
         if (!await _userRepository.IsEmailUniqueAsync(emailResult.Value, cancellationToken))
         {
             return Result.Failure<Guid>(DomainErrors.User.EmailAlreadyInUse);
         }
 
-        Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
-        Result<LastName> lastNameResult = LastName.Create(request.LastName);
-        string passwordHash = _passwordHasher.Hash(request.Password);
+        #endregion
 
+        #region Create Other value objects (FirstName, LastName) 
+
+        Result<FirstName> createFirstNameResult = FirstName.Create(request.FirstName);
+        if (createFirstNameResult.IsFailure)
+        {
+            return Result.Failure<Guid>(
+                createFirstNameResult.Error);
+        }
+
+        Result<LastName> createLastNameResult = LastName.Create(request.LastName);
+        if (createLastNameResult.IsFailure)
+        {
+            return Result.Failure<Guid>(
+                createLastNameResult.Error);
+        }
+
+        #endregion
+
+        #region Create Password Hash
+
+        var passwordHash = _passwordHasher.Hash(request.Password);
         var user = User.Create(
             Guid.NewGuid(),
             emailResult.Value,
             passwordHash,
-            firstNameResult.Value,
-            lastNameResult.Value
+            createFirstNameResult.Value,
+            createLastNameResult.Value
             );
 
-        _userRepository.Add(user);
+        #endregion
 
+        #region Add and Update database
+
+        _userRepository.Add(user);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return user.Id;
+        #endregion
+
+        return Result.Success(user.Id);
     }
 }
