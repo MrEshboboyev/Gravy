@@ -24,7 +24,7 @@ public sealed class Address : ValueObject
         {
             return Result.Failure<Address>(DomainErrors.Address.TooLong);
         }
-        return new Address(address);
+        return Result.Success(new Address(address));
     }
 
     public override IEnumerable<object> GetAtomicValues()

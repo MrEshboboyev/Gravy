@@ -25,35 +25,35 @@ internal sealed class CreateRestaurantCommandHandler(
 
         #region Prepare Email
 
-        Result<Email> emailResult = Email.Create(email);
-        if (emailResult.IsFailure)
+        Result<Email> createEmailResult = Email.Create(email);
+        if (createEmailResult.IsFailure)
         {
             return Result.Failure<Guid>(
-                emailResult.Error);
+                createEmailResult.Error);
         }
 
         #endregion
 
         #region Prepare Address
 
-        Result<Address> addressResult = Address.Create(address);
-        if (addressResult.IsFailure)
+        Result<Address> createAddressResult = Address.Create(address);
+        if (createAddressResult.IsFailure)
         {
             return Result.Failure<Guid>(
-                addressResult.Error);
+                createAddressResult.Error);
         }
 
         #endregion
 
         #region Prepare Opening Hours
 
-        Result<OpeningHours> openingHoursResult = OpeningHours.Create(
+        Result<OpeningHours> createOpeningHoursResult = OpeningHours.Create(
             openingHours[0],
             openingHours[1]);
-        if (openingHoursResult.IsFailure)
+        if (createOpeningHoursResult.IsFailure)
         {
             return Result.Failure<Guid>(
-                openingHoursResult.Error);
+                createOpeningHoursResult.Error);
         }
 
         #endregion
@@ -66,11 +66,11 @@ internal sealed class CreateRestaurantCommandHandler(
             Guid.NewGuid(),
             name,
             description,
-            emailResult.Value,
+            createEmailResult.Value,
             phoneNumber,
-            addressResult.Value,
+            createAddressResult.Value,
             ownerId,
-            openingHoursResult.Value
+            createOpeningHoursResult.Value
             );
 
         #endregion

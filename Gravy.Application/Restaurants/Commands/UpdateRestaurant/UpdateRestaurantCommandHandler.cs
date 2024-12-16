@@ -18,37 +18,62 @@ internal sealed class UpdateRestaurantCommandHandler(
     public async Task<Result> Handle(UpdateRestaurantCommand request,
         CancellationToken cancellationToken)
     {
-        var (restaurantId, name, description, email, phoneNumber, address) = request;
+        var (restaurantId, name, description, 
+            email, phoneNumber, address) = request;
 
         #region Get Restaurant 
+
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, cancellationToken);
         if (restaurant is null)
         {
             return Result.Failure(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+
         #endregion
 
+        #region Prepare value objects
+
         #region Prepare Email
-        Result<Email> emailResult = Email.Create(email);
+
+        Result<Email> createEmailResult = Email.Create(email);
+        if (createEmailResult.IsFailure)
+        {
+            return Result.Failure(
+                createEmailResult.Error);
+        }
+        
+        #endregion
+
         #endregion
 
         #region Prepare Address
-        Result<Address> addressResult = Address.Create(address);
+
+        Result<Address> createAddressResult = Address.Create(address);
+        if (createAddressResult.IsFailure)
+        {
+            return Result.Failure(
+                createAddressResult.Error);
+        }
+
         #endregion
 
         #region Update Restaurant Details
+
         restaurant.UpdateDetails(
             name, 
             description, 
-            emailResult.Value,
+            createEmailResult.Value,
             phoneNumber,
-            addressResult.Value);
+            createAddressResult.Value);
+
         #endregion
 
         #region Update database
+
         _restaurantRepository.Update(restaurant);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success();

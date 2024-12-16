@@ -1,31 +1,31 @@
 ﻿using FluentAssertions;
-using Gravy.Application.Restaurants.Commands.ActivateRestaurant;
+using Gravy.Application.Restaurants.Commands.DeactivateRestaurant;
 using Gravy.Domain.Entities;
 using Gravy.Domain.Errors;
 using Gravy.Domain.Repositories;
 using Gravy.Domain.ValueObjects;
 using Moq;
 
-namespace Gravy.Application.UnitTests.Restaurants;
+namespace Gravy.Application.UnitTests.Restaurants.Commands;
 
-public class ActivateRestaurantCommandHandlerTests
+public class DeactivateRestaurantCommandHandlerTests
 {
     #region Fields & Mock Setup
 
-    private readonly ActivateRestaurantCommandHandler _handler;
+    private readonly DeactivateRestaurantCommandHandler _handler;
 
     // Mock dependencies
     private readonly Mock<IRestaurantRepository> _restaurantRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-    public ActivateRestaurantCommandHandlerTests()
+    public DeactivateRestaurantCommandHandlerTests()
     {
         // Initialize mocks
         _restaurantRepositoryMock = new Mock<IRestaurantRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
 
         // Initialize the command handler with mocks
-        _handler = new ActivateRestaurantCommandHandler(
+        _handler = new DeactivateRestaurantCommandHandler(
             _restaurantRepositoryMock.Object,
             _unitOfWorkMock.Object);
     }
@@ -35,21 +35,21 @@ public class ActivateRestaurantCommandHandlerTests
     #region Test Methods
 
     /// <summary>
-    /// Test Case: Successfully activates a restaurant when all conditions are met.
+    /// Test Case: Successfully deactivates a restaurant when all conditions are met.
     /// </summary>
     [Fact]
-    public async Task Handle_Should_ActivateRestaurant_WhenRestaurantExists()
+    public async Task Handle_Should_DeactivateRestaurant_WhenRestaurantExists()
     {
         // Arrange
         var restaurantId = Guid.NewGuid();
-        var command = new ActivateRestaurantCommand(restaurantId);
+        var command = new DeactivateRestaurantCommand(restaurantId);
 
-        var restaurant = CreateTestRestaurant(restaurantId, isActive: false);
+        var restaurant = CreateTestRestaurant(restaurantId, isActive: true);
 
         // Mock: Repository returns the restaurant
         _restaurantRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                restaurantId, 
+                restaurantId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(restaurant);
 
@@ -59,15 +59,15 @@ public class ActivateRestaurantCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
 
-        restaurant.IsActive.Should().BeTrue(); // Verify restaurant was activated
+        restaurant.IsActive.Should().BeFalse(); // Verify restaurant was deactivated
 
         // Verify repository update was called
-        _restaurantRepositoryMock.Verify(repo => repo.Update(restaurant), 
+        _restaurantRepositoryMock.Verify(repo => repo.Update(restaurant),
             Times.Once);
 
         // Verify SaveChangesAsync was called once
         _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(
-            It.IsAny<CancellationToken>()), 
+            It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -79,12 +79,12 @@ public class ActivateRestaurantCommandHandlerTests
     {
         // Arrange
         var restaurantId = Guid.NewGuid();
-        var command = new ActivateRestaurantCommand(restaurantId);
+        var command = new DeactivateRestaurantCommand(restaurantId);
 
         // Mock: Repository returns null (restaurant not found)
         _restaurantRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                restaurantId, 
+                restaurantId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Restaurant)null!);
 
@@ -100,21 +100,21 @@ public class ActivateRestaurantCommandHandlerTests
             It.IsAny<Restaurant>()),
             Times.Never);
         _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(
-            It.IsAny<CancellationToken>()), 
+            It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
     /// <summary>
-    /// Test Case: Ensures SaveChangesAsync is called after activation.
+    /// Test Case: Ensures SaveChangesAsync is called after deactivation.
     /// </summary>
     [Fact]
-    public async Task Handle_Should_CallSaveChanges_WhenRestaurantIsActivated()
+    public async Task Handle_Should_CallSaveChanges_WhenRestaurantIsDeactivated()
     {
         // Arrange
         var restaurantId = Guid.NewGuid();
-        var command = new ActivateRestaurantCommand(restaurantId);
+        var command = new DeactivateRestaurantCommand(restaurantId);
 
-        var restaurant = CreateTestRestaurant(restaurantId, isActive: false);
+        var restaurant = CreateTestRestaurant(restaurantId, isActive: true);
 
         // Mock: Repository returns the restaurant
         _restaurantRepositoryMock
@@ -127,11 +127,11 @@ public class ActivateRestaurantCommandHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        restaurant.IsActive.Should().BeTrue();
+        restaurant.IsActive.Should().BeFalse();
 
         // Verify SaveChangesAsync was called once
         _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(
-            It.IsAny<CancellationToken>()), 
+            It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -155,7 +155,7 @@ public class ActivateRestaurantCommandHandlerTests
             OpeningHours.Create(TimeSpan.FromDays(7), TimeSpan.FromDays(19)).Value);
         if (isActive)
         {
-            restaurant.Activate();
+            restaurant.Deactivate();
         }
         return restaurant;
     }
