@@ -21,36 +21,47 @@ internal sealed class CreateRestaurantCommandHandler(
         var (name, description, email, phoneNumber, address, 
             ownerId, openingHours) = request;
 
+        #region Prepare value objects
+
         #region Prepare Email
+
         Result<Email> emailResult = Email.Create(email);
         if (emailResult.IsFailure)
         {
             return Result.Failure<Guid>(
                 emailResult.Error);
         }
+
         #endregion
 
         #region Prepare Address
+
         Result<Address> addressResult = Address.Create(address);
-        if (addressResult.IsFailure) 
+        if (addressResult.IsFailure)
         {
             return Result.Failure<Guid>(
                 addressResult.Error);
         }
+
         #endregion
 
         #region Prepare Opening Hours
+
         Result<OpeningHours> openingHoursResult = OpeningHours.Create(
-            openingHours[0], 
+            openingHours[0],
             openingHours[1]);
         if (openingHoursResult.IsFailure)
         {
             return Result.Failure<Guid>(
-                openingHoursResult.Error);  
+                openingHoursResult.Error);
         }
+
+        #endregion
+
         #endregion
 
         #region Create Restaurant
+
         var restaurant = Restaurant.Create(
             Guid.NewGuid(),
             name,
@@ -61,14 +72,16 @@ internal sealed class CreateRestaurantCommandHandler(
             ownerId,
             openingHoursResult.Value
             );
+
         #endregion
 
         #region Add and Update database
+
         _restaurantRepository.Add(restaurant);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success(restaurant.Id);
     }
 }
-

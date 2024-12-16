@@ -24,17 +24,25 @@ namespace Gravy.Presentation.Controllers;
 [Route("api/restaurants")]
 public sealed class RestaurantsController(ISender sender) : ApiController(sender)
 {
+    #region User Claims
+
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
+    #endregion
+
     #region Restaurant
+
     #region Get
+
     [AllowAnonymous]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetRestaurantById(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetRestaurantByIdQuery(id);
-        Result<RestaurantResponse> response = await Sender.Send(query, cancellationToken);
+        
+        var response = await Sender.Send(query, cancellationToken);
+        
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
 
@@ -45,12 +53,16 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         CancellationToken cancellationToken)
     {
         var query = new SearchRestaurantsByNameQuery(name);
-        Result<RestaurantListResponse> response = await Sender.Send(query, cancellationToken);
+        
+        var response = await Sender.Send(query, cancellationToken);
+        
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
+    
     #endregion
 
     #region Create/Update
+
     [HttpPost]
     public async Task<IActionResult> CreateRestaurant(
         [FromBody] CreateRestaurantRequest request,
@@ -65,7 +77,8 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
             GetUserId(),
             request.OpeningHours);
 
-        Result<Guid> result = await Sender.Send(command, cancellationToken);
+        var result = await Sender.Send(command, cancellationToken);
+        
         if (result.IsFailure)
         {
             return HandleFailure(result);
@@ -91,29 +104,24 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
             request.PhoneNumber,
             request.Address);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
+    
     #endregion
 
     #region Activate/Deactivate
+
     [HttpPut("{id:guid}/activate")]
     public async Task<IActionResult> ActivateRestaurant(Guid id, 
         CancellationToken cancellationToken)
     {
         var command = new ActivateRestaurantCommand(id);
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
 
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     [HttpPut("{id:guid}/deactivate")]
@@ -121,19 +129,20 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         CancellationToken cancellationToken)
     {
         var command = new DeactivateRestaurantCommand(id);
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
 
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
+
     #endregion
+
     #endregion
 
     #region MenuItem related
+
     #region Get
+
     [AllowAnonymous]
     [HttpGet("{restaurantId:guid}/menu-items")]
     public async Task<IActionResult> GetMenuItemsByCategory(
@@ -142,7 +151,9 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         CancellationToken cancellationToken)
     {
         var query = new GetMenuItemsByCategoryQuery(restaurantId, category);
-        Result<MenuItemListResponse> response = await Sender.Send(query, cancellationToken);
+
+        var response = await Sender.Send(query, cancellationToken);
+        
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
 
@@ -153,12 +164,16 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
         CancellationToken cancellationToken)
     {
         var query = new GetRestaurantOwnerQuery(restaurantId);
-        Result<RestaurantOwnerResponse> response = await Sender.Send(query, cancellationToken);
+        
+        var response = await Sender.Send(query, cancellationToken);
+        
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
+
     #endregion
 
     #region Add/Update/Remove
+
     [HttpPost("{restaurantId:guid}/menu-items")]
     public async Task<IActionResult> AddMenuItem(
         Guid restaurantId,
@@ -172,30 +187,11 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
             request.Price, 
             request.Category);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
-    [HttpDelete("{restaurantId:guid}/menu-items/{menuItemId:guid}")]
-    public async Task<IActionResult> RemoveMenuItem(
-        Guid restaurantId,
-        Guid menuItemId,
-        CancellationToken cancellationToken)
-    {
-        var command = new RemoveMenuItemCommand(restaurantId, menuItemId);
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
-    }
 
     [HttpPut("{restaurantId:guid}/menu-items/{menuItemId:guid}")]
     public async Task<IActionResult> UpdateMenuItem(
@@ -213,14 +209,25 @@ public sealed class RestaurantsController(ISender sender) : ApiController(sender
             request.Category,
             request.IsAvailable);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
+        var result = await Sender.Send(command, cancellationToken);
 
-        return NoContent();
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
+
+    [HttpDelete("{restaurantId:guid}/menu-items/{menuItemId:guid}")]
+    public async Task<IActionResult> RemoveMenuItem(
+        Guid restaurantId,
+        Guid menuItemId,
+        CancellationToken cancellationToken)
+    {
+        var command = new RemoveMenuItemCommand(restaurantId, menuItemId);
+        
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
+    }
+
     #endregion
+
     #endregion
 }

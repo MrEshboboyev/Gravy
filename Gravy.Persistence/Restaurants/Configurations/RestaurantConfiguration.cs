@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Gravy.Domain.Entities;
 using Gravy.Domain.ValueObjects;
+using Gravy.Persistence.Restaurants.Constants;
 
 namespace Gravy.Persistence.Restaurants.Configurations;
 
@@ -13,7 +14,7 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
     public void Configure(EntityTypeBuilder<Restaurant> builder)
     {
         // Table mapping
-        builder.ToTable("Restaurants");
+        builder.ToTable(RestaurantTableNames.Restaurants);
 
         // Primary key
         builder.HasKey(r => r.Id);
@@ -60,8 +61,5 @@ public class RestaurantConfiguration : IEntityTypeConfiguration<Restaurant>
             navigation.Property(o => o.OpenTime).IsRequired();
             navigation.Property(o => o.CloseTime).IsRequired();
         });
-
-        // Indexes
-        builder.HasIndex(r => r.Email).IsUnique();
     }
 }
