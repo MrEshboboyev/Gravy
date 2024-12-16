@@ -6,7 +6,8 @@ using Gravy.Domain.Shared;
 
 namespace Gravy.Application.Restaurants.Commands.MenuItems.AddMenuItem;
 
-internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurantRepository,
+internal sealed class AddMenuItemCommandHandler(
+    IRestaurantRepository restaurantRepository,
     IMenuItemRepository menuItemRepository,
     IUnitOfWork unitOfWork)
     : ICommandHandler<AddMenuItemCommand>
@@ -20,6 +21,7 @@ internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurant
         var (restaurantId, name, description, price, category) = request;
 
         #region Get Restaurant 
+
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, 
             cancellationToken);
         if (restaurant is null)
@@ -27,9 +29,11 @@ internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurant
             return Result.Failure(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+
         #endregion
 
         #region Add Menu Item to this Restaurant
+
         Result<MenuItem> addMenuItemResult = restaurant.AddMenuItem(
             name,
             description,
@@ -40,11 +44,14 @@ internal sealed class AddMenuItemCommandHandler(IRestaurantRepository restaurant
             return Result.Failure(
                 addMenuItemResult.Error);
         }
+
         #endregion
 
-        #region Add menu item and Update database
+        #region Add and Update database
+
         _menuItemRepository.Add(addMenuItemResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success();

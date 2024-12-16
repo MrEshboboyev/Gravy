@@ -63,6 +63,7 @@ public sealed class Restaurant : AggregateRoot
     #endregion
 
     #region Factory methods
+
     /// <summary>
     /// Factory method to create a new restaurant.
     /// </summary>
@@ -86,9 +87,11 @@ public sealed class Restaurant : AggregateRoot
             ownerId,
             openingHours);
     }
+
     #endregion
 
     #region Own Methods
+
     /// <summary>
     /// Updates the restaurant's details.
     /// </summary>
@@ -138,9 +141,11 @@ public sealed class Restaurant : AggregateRoot
             Id,
             Name));
     }
+
     #endregion
 
     #region Menu-Item Related
+
     /// <summary>
     /// Adds a new menu item to the restaurant.
     /// </summary>
@@ -150,16 +155,19 @@ public sealed class Restaurant : AggregateRoot
         decimal price,
         Category category)
     {
-        #region Validation Structs
+        #region Validation Structs (Enum)
+
         var categoryValidationResult = EnumValidator.Validate(category);
         if (categoryValidationResult.IsFailure)
         {
             return Result.Failure<MenuItem>(
                 categoryValidationResult.Error);
         }
+
         #endregion
 
         #region Validation Uniqueness
+
         var uniquenessValidationResult = UniquenessValidator.Validate(
             _menuItems,
             m => m.Name, 
@@ -169,9 +177,21 @@ public sealed class Restaurant : AggregateRoot
             return Result.Failure<MenuItem>(
                 uniquenessValidationResult.Error);
         }
+
+        #endregion
+
+        #region Validation Price
+
+        if (price <= 0)
+        {
+            return Result.Failure<MenuItem>( 
+                DomainErrors.MenuItem.InvalidPrice);
+        } 
+        
         #endregion
 
         #region Create MenuItem
+
         var menuItem = new MenuItem(
             Guid.NewGuid(),
             Id,
@@ -180,13 +200,17 @@ public sealed class Restaurant : AggregateRoot
             price,
             category,
             true);
+
         #endregion
 
         #region Add new menuItem to _menuItems
+
         _menuItems.Add(menuItem);
+        
         #endregion
 
         #region Domain Events
+
         RaiseDomainEvent(new MenuItemAddedDomainEvent(
             Guid.NewGuid(),
             Id,
@@ -194,34 +218,15 @@ public sealed class Restaurant : AggregateRoot
             name,
             price,
             category));
+
         #endregion
 
-        return menuItem;
+        return Result.Success(menuItem);
     }
 
     /// <summary>
-    /// Removes a menu item from the restaurant's menu.
+    /// Update a menu item in the restaurant's menu.
     /// </summary>
-    public Result RemoveMenuItem(Guid menuItemId)
-    {
-        var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId);
-        if (menuItem is null)
-        {
-            return Result.Failure(
-                DomainErrors.Restaurant.MenuItemNotFound(Id, menuItemId));
-        }
-
-        _menuItems.Remove(menuItem);
-        ModifiedOnUtc = DateTime.UtcNow;
-
-        RaiseDomainEvent(new MenuItemRemovedDomainEvent(
-            Guid.NewGuid(),
-            Id,
-            menuItemId));
-
-        return Result.Success();
-    }
-
     public Result<MenuItem> UpdateMenuItem(
         Guid menuItemId,
         string name,
@@ -231,15 +236,18 @@ public sealed class Restaurant : AggregateRoot
         bool isAvailable)
     {
         #region Validation Structs
+
         var validationResult = EnumValidator.Validate(category);
         if (validationResult.IsFailure)
         {
             return Result.Failure<MenuItem>(
                 validationResult.Error);
         }
+
         #endregion
 
         #region Validation Uniqueness
+        
         var uniquenessValidationResult = UniquenessValidator.Validate(
             _menuItems,
             m => m.Name,
@@ -249,27 +257,43 @@ public sealed class Restaurant : AggregateRoot
             return Result.Failure<MenuItem>(
                 uniquenessValidationResult.Error);
         }
+
+        #endregion
+
+        #region Validation Price
+
+        if (price <= 0)
+        {
+            return Result.Failure<MenuItem>(
+                DomainErrors.MenuItem.InvalidPrice);
+        }
+
         #endregion
 
         #region Get MenuItem by Id
+
         var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId);
         if (menuItem is null)
         {
             return Result.Failure<MenuItem>(
                 DomainErrors.Restaurant.MenuItemNotFound(Id, menuItemId));
         }
+        
         #endregion
 
         #region Update this menu item details
+        
         menuItem.UpdateDetails(
-            name, 
-            description, 
-            price, 
-            category, 
+            name,
+            description,
+            price,
+            category,
             isAvailable);
+        
         #endregion
 
         #region Domain Events 
+        
         RaiseDomainEvent(new MenuItemUpdatedDomainEvent(
             Guid.NewGuid(),
             Id,
@@ -278,9 +302,51 @@ public sealed class Restaurant : AggregateRoot
             price,
             category,
             isAvailable));
+        
         #endregion
 
-        return menuItem;
+        return Result.Success(menuItem);
     }
+
+    /// <summary>
+    /// Removes a menu item from the restaurant's menu.
+    /// </summary>
+    public Result RemoveMenuItem(Guid menuItemId)
+    {
+        #region Get MenuItem
+
+        var menuItem = _menuItems.SingleOrDefault(m => m.Id == menuItemId);
+        if (menuItem is null)
+        {
+            return Result.Failure(
+                DomainErrors.Restaurant.MenuItemNotFound(Id, menuItemId));
+        }
+
+        #endregion
+
+        #region Remove menu item from this Restaurant Menu
+
+        _menuItems.Remove(menuItem);
+
+        #endregion
+
+        #region Update this Restaurant
+
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        #endregion
+
+        #region Domain Events
+
+        RaiseDomainEvent(new MenuItemRemovedDomainEvent(
+            Guid.NewGuid(),
+            Id,
+            menuItemId));
+
+        #endregion
+
+        return Result.Success();
+    }
+
     #endregion
 }

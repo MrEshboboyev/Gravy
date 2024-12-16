@@ -10,7 +10,7 @@ internal class AddMenuItemCommandValidator : AbstractValidator<AddMenuItemComman
 
         RuleFor(menuItem => menuItem.Name).NotEmpty();
 
-        RuleFor(menuItem => menuItem.Price).NotEmpty();
+        RuleFor(menuItem => menuItem.Price).GreaterThan(0);
 
         RuleFor(menuItem => menuItem.Category).NotEmpty();
     }

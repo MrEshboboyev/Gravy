@@ -9,7 +9,7 @@ public static class UniquenessValidator
         Func<T, string> keySelector,
         string keyValue)
     {
-        bool exists = items.Any(item => keySelector(item)
+        var exists = items.Any(item => keySelector(item)
             .Equals(keyValue, StringComparison.OrdinalIgnoreCase)); 
         
         return exists 

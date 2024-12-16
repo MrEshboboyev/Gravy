@@ -21,6 +21,7 @@ public sealed class UpdateMenuItemCommandHandler(
             category, isAvailable) = request;
 
         #region Get Restaurant 
+
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId,
             cancellationToken);
         if (restaurant is null)
@@ -28,9 +29,11 @@ public sealed class UpdateMenuItemCommandHandler(
             return Result.Failure(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+
         #endregion
 
         #region Update Menu Item in Restaurant
+
         Result<MenuItem> updatedMenuItemResult = restaurant.UpdateMenuItem(
             menuItemId,
             name,
@@ -43,11 +46,14 @@ public sealed class UpdateMenuItemCommandHandler(
             return Result.Failure(
                 updatedMenuItemResult.Error);
         }
+
         #endregion
 
         #region Update database
+
         _menuItemRepository.Update(updatedMenuItemResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success();

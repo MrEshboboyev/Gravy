@@ -130,6 +130,10 @@ public static class DomainErrors
         public static readonly Func<Guid, Error> NotFound = id => new(
                 "MenuItem.NotFound",
                 $"The Menu item with the identifier {id} was not found.");
+
+        public static readonly Error InvalidPrice = new(
+            "MenuItem.InvalidPrice", 
+            "The price of the menu item must be greater than zero.");
     }
     #endregion
 
