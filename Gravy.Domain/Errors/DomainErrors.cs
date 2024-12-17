@@ -207,7 +207,7 @@ public static class DomainErrors
 
         public static readonly Func<Guid, Error> AlreadySet = id => new(
             "Payment.AlreadySet",
-            $"The payment already set to this order. Setted payment Id : {id}.");
+            $"The payment already set to this order. Set payment Id : {id}.");
 
         public static readonly Func<Guid, Error> NotAssigned = orderId => new(
             "Payment.NotAssigned",

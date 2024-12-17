@@ -17,6 +17,7 @@ internal sealed class CompletePaymentCommandHandler(IOrderRepository orderReposi
         var orderId = request.OrderId;
 
         #region Get Order
+
         var order = await _orderRepository.GetByIdAsync(
             request.OrderId,
             cancellationToken);
@@ -25,14 +26,24 @@ internal sealed class CompletePaymentCommandHandler(IOrderRepository orderReposi
             return Result.Failure<Guid>(
                 DomainErrors.Order.NotFound(request.OrderId));
         }
+
         #endregion
 
         #region Complete Payment for this Order
-        order.CompletePayment();
+
+        var completePaymentResult = order.CompletePayment();
+        if (completePaymentResult.IsFailure)
+        {
+            return Result.Failure(
+                completePaymentResult.Error);
+        }
+        
         #endregion
 
         #region Update database
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success(order);

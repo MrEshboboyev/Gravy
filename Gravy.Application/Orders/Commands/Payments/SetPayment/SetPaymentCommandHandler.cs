@@ -23,6 +23,7 @@ internal sealed class SetPaymentCommandHandler(
         var (orderId, method, transactionId) = request;
 
         #region Get Order
+
         var order = await _orderRepository.GetByIdAsync(
             request.OrderId,
             cancellationToken);
@@ -31,6 +32,7 @@ internal sealed class SetPaymentCommandHandler(
             return Result.Failure<Guid>(
                 DomainErrors.Order.NotFound(request.OrderId));
         }
+
         #endregion
 
         #region Calculate Order amount
@@ -46,26 +48,30 @@ internal sealed class SetPaymentCommandHandler(
         #endregion
 
         #region Set payment in the order
-        var paymentResult = order.SetPayment(
+
+        var setPaymentResult = order.SetPayment(
             amountResult.Value, 
             method, 
             transactionId);
-        if (paymentResult.IsFailure)
+        if (setPaymentResult.IsFailure)
         {
             return Result.Failure(
-                paymentResult.Error);
+                setPaymentResult.Error);
         }
+
         #endregion
 
         #region Add and Update database
+
         // Persist payment entity to repository
-        _paymentRepository.Add(paymentResult.Value);
+        _paymentRepository.Add(setPaymentResult.Value);
 
         // update Order root for updating fields
         _orderRepository.Update(order);
 
         // Save changes atomically
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         #endregion
 
         return Result.Success();

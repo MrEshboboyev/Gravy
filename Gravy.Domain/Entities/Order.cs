@@ -3,6 +3,7 @@ using Gravy.Domain.Errors;
 using Gravy.Domain.Events;
 using Gravy.Domain.Primitives;
 using Gravy.Domain.Shared;
+using Gravy.Domain.Validators;
 using Gravy.Domain.ValueObjects;
 
 namespace Gravy.Domain.Entities;
@@ -444,6 +445,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     #endregion
 
     #region Payment related
+
     /// <summary>
     /// Sets the payment for the order.
     /// </summary>
@@ -452,27 +454,47 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         PaymentMethod method,
         string transactionId)
     {
-        // Ensure a payment has not already been set
+        #region Validation Structs (Enum)
+
+        var methodValidationResult = EnumValidator.Validate(method);
+        if (methodValidationResult.IsFailure)
+        {
+            return Result.Failure<Payment>(
+                methodValidationResult.Error);
+        }
+
+        #endregion
+
+        #region Checking payment is not already set
+
         if (_payment is not null)
         {
             return Result.Failure<Payment>(
                 DomainErrors.Payment.AlreadySet(_payment.Id));
         }
 
-        // Validate the transaction ID
+        #endregion
+
+        #region Validate the transaction ID
+
         if (string.IsNullOrWhiteSpace(transactionId))
         {
             return Result.Failure<Payment>(
                 DomainErrors.Payment.TransactionIdEmpty);
         }
 
-        // Create the payment object
+        #endregion
+
+        #region Create new payment object
+
         _payment = new Payment(
             Guid.NewGuid(),
             Id,
             amount,
             method,
             transactionId);
+
+        #endregion
 
         #region Set Status to Confirmed
 
@@ -481,10 +503,13 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         #endregion
 
         #region Lock the Order
+
         LockOrder();
+
         #endregion
 
-        // Raise a domain event for setting the payment
+        #region Domain events
+
         RaiseDomainEvent(new PaymentSetDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
@@ -493,31 +518,49 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             method,
             transactionId));
 
+        #endregion
+
         return Result.Success(_payment);
     }
-
 
     /// <summary>
     /// Marks the payment as completed
     /// </summary>
     public Result<Payment> CompletePayment()
     {
+        #region Checking Payment is set
+
         if (_payment is null)
         {
             return Result.Failure<Payment>(
-                DomainErrors.Payment.AlreadySet(_payment.Id));
+                DomainErrors.Payment.NotAssigned(Id));
         }
+
+        #endregion
+
+        #region Set the payment status to "Completed"
 
         _payment.MarkAsCompleted();
 
+        #endregion
+
+        #region Update this Order
+
         ModifiedOnUtc = DateTime.UtcNow;
+
+        #endregion
+
+        #region Domain Events
 
         RaiseDomainEvent(new PaymentCompletedDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
             DateTime.UtcNow));
 
-        return _payment;
+        #endregion
+
+        return Result.Success(_payment);
     }
+
     #endregion
 }

@@ -39,6 +39,7 @@ public sealed class Payment : Entity
     #endregion
 
     #region Own methods
+
     /// <summary>
     /// Marks the payment as completed.
     /// </summary>
@@ -56,5 +57,6 @@ public sealed class Payment : Entity
         Status = PaymentStatus.Failed;
         ModifiedOnUtc = DateTime.UtcNow;
     }
+
     #endregion
 }
