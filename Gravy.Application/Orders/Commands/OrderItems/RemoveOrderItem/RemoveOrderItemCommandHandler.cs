@@ -13,7 +13,8 @@ internal sealed class RemoveOrderItemCommandHandler(
     private readonly IOrderRepository _orderRepository = orderRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<Result> Handle(RemoveOrderItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RemoveOrderItemCommand request,
+        CancellationToken cancellationToken)
     {
         var (orderId, orderItemId) = request;
 

@@ -8,6 +8,8 @@ public sealed class UpdateOrderItemCommandValidator : AbstractValidator<UpdateOr
     {
         RuleFor(orderItem => orderItem.OrderId).NotEmpty();
 
+        RuleFor(orderItem => orderItem.OrderItemId).NotEmpty();
+
         RuleFor(orderItem => orderItem.Quantity).GreaterThanOrEqualTo(1);
     }
 }

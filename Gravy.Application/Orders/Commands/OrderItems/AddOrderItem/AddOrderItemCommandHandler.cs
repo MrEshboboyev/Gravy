@@ -25,6 +25,7 @@ internal sealed class AddOrderItemCommandHandler(
         var (orderId, menuItemId, quantity) = request;
 
         #region Get Order
+
         var order = await _orderRepository.GetByIdAsync(
             request.OrderId,
             cancellationToken);
@@ -33,9 +34,11 @@ internal sealed class AddOrderItemCommandHandler(
             return Result.Failure<Guid>(
                 DomainErrors.Order.NotFound(request.OrderId));
         }
+
         #endregion
 
         #region Get Menu Item by Id
+
         var menuItem = await _menuItemRepository.GetByIdAsync(menuItemId, 
             cancellationToken);
         if (menuItem is null)
@@ -43,9 +46,11 @@ internal sealed class AddOrderItemCommandHandler(
             return Result.Failure(
                 DomainErrors.MenuItem.NotFound(menuItemId));
         }
+
         #endregion
 
         #region Calculate Final Price
+
         var finalPriceResult = _pricingService.CalculatePrice(
             menuItem.Price, 
             request.Quantity);
@@ -54,9 +59,11 @@ internal sealed class AddOrderItemCommandHandler(
             return Result.Failure(
                 finalPriceResult.Error);
         }
+
         #endregion
 
         #region Add Order Item to this Order
+
         var addOrderItemResult = order.AddOrderItem(
             menuItem.Id,
             request.Quantity,
@@ -65,11 +72,14 @@ internal sealed class AddOrderItemCommandHandler(
         {
             return Result.Failure(addOrderItemResult.Error);
         }
+
         #endregion
 
         #region Add and Update database
+
         _orderItemRepository.Add(addOrderItemResult.Value);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success();

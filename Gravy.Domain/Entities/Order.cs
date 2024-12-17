@@ -117,32 +117,43 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public Result<OrderItem> AddOrderItem(
         Guid menuItemId, 
         int quantity, 
-     
         decimal price)
     {
         #region Check is Locked (fix this coming soon)
+
         if (IsLocked)
         {
             return Result.Failure<OrderItem>(
                 DomainErrors.Order.OrderIsLocked);
         }
+
         #endregion
 
         #region Create the new Order Item
+
         var orderItem = new OrderItem(
             Guid.NewGuid(), 
             Id, 
             menuItemId, 
             quantity, 
             price);
+
         #endregion
 
-        #region Add and update this Order
+        #region Add this OrderItem to this Order
+
         _orderItems.Add(orderItem);
+
+        #endregion
+
+        #region Update this Order
+
         ModifiedOnUtc = DateTime.UtcNow;
+        
         #endregion
 
         #region Domain Events
+
         RaiseDomainEvent(new OrderItemAddedDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
@@ -150,9 +161,10 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             menuItemId,
             quantity,
             price));
+
         #endregion
 
-        return orderItem;   
+        return Result.Success(orderItem);   
     }
 
     /// <summary>
@@ -164,42 +176,54 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         decimal price)
     {
         #region Check is Locked (fix this coming soon)
+
         if (IsLocked)
         {
             return Result.Failure<OrderItem>(
                 DomainErrors.Order.OrderIsLocked);
         }
+
         #endregion
 
         #region Get this Order Item
+
         var orderItem = _orderItems.Find(oi => oi.Id.Equals((orderItemId)));
         if (orderItem is null)
         {
             return Result.Failure<OrderItem>(
                 DomainErrors.OrderItem.NotFound(orderItemId));
         }
+
         #endregion
 
         #region Update this Order Item 
-        var updatedOrderDetailsResult = orderItem.UpdateDetails(quantity, price);
+
+        var updatedOrderDetailsResult = orderItem.UpdateDetails(
+            quantity, 
+            price);
         if (updatedOrderDetailsResult.IsFailure)
         {
             return Result.Failure<OrderItem>(
                 updatedOrderDetailsResult.Error);
         }
+
         #endregion
 
         #region Update this Order
+
         ModifiedOnUtc = DateTime.UtcNow;
+
         #endregion
 
         #region Domain Events
+
         RaiseDomainEvent(new OrderItemUpdatedDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
             orderItem.Id, // OrderItemId
             quantity,
             price));
+
         #endregion
 
         return Result.Success(orderItem);
@@ -212,20 +236,24 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         Guid orderItemId)
     {
         #region Check is Locked (fix this coming soon)
+
         if (IsLocked)
         {
             return Result.Failure<OrderItem>(
                 DomainErrors.Order.OrderIsLocked);
         }
+
         #endregion
 
         #region Get this Order Item
+
         var orderItem = _orderItems.Find(oi => oi.Id.Equals((orderItemId)));
         if (orderItem is null)
         {
             return Result.Failure<OrderItem>(
                 DomainErrors.OrderItem.NotFound(orderItemId));
         }
+
         #endregion
 
         #region Remove this Order Item
@@ -235,15 +263,19 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         #endregion
 
         #region Update this Order
+
         ModifiedOnUtc = DateTime.UtcNow;
+        
         #endregion
 
         #region Domain Events
+
         RaiseDomainEvent(new OrderItemRemovedDomainEvent(
             Guid.NewGuid(),
             Id, // OrderId
             orderItem.Id // OrderItemId
             ));
+
         #endregion
 
         return Result.Success();

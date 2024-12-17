@@ -62,7 +62,8 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
 
     #endregion
 
-    #region Order-Item related
+    #region Order-Item related (Add/Update/Remove)
+
     [HttpPost("{orderId:guid}/items")]
     public async Task<IActionResult> AddOrderItem(
         Guid orderId,
@@ -74,13 +75,9 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
             request.MenuItemId,
             request.Quantity);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     [HttpPut("{orderId:guid}/items/{orderItemId:guid}")]
@@ -95,13 +92,9 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
             orderItemId,
             request.Quantity);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     [HttpDelete("{orderId:guid}/items/{orderItemId:guid}")]
@@ -114,17 +107,15 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
             orderId,
             orderItemId);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
+
     #endregion
 
     #region Workflow for order delivery
+
     // 1. Pending: Order created but awaiting payment.
     [HttpPost]
     public async Task<IActionResult> CreateOrder(
@@ -228,5 +219,6 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         
         return result.IsFailure ? HandleFailure(result) : NoContent();
     }
+
     #endregion
 }

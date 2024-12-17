@@ -26,6 +26,7 @@ internal sealed class UpdateOrderItemCommandHandler(
         var (orderId, orderItemId, quantity) = request;
 
         #region Get Order by Id
+
         var order = await _orderRepository.GetByIdAsync(orderId, 
             cancellationToken);
         if (order is null)
@@ -33,6 +34,7 @@ internal sealed class UpdateOrderItemCommandHandler(
             return Result.Failure(
                 DomainErrors.Order.NotFound(orderItemId));
         }
+
         #endregion
 
         #region Get Order Item from this Order
@@ -48,6 +50,7 @@ internal sealed class UpdateOrderItemCommandHandler(
         #endregion
 
         #region Get Menu Item by Id
+
         var menuItem = await _menuItemRepository.GetByIdAsync(orderItem.MenuItemId,
             cancellationToken);
         if (menuItem is null)
@@ -55,9 +58,11 @@ internal sealed class UpdateOrderItemCommandHandler(
             return Result.Failure(
                 DomainErrors.MenuItem.NotFound(orderItem.MenuItemId));
         }
+        
         #endregion
 
         #region Calculate Final Price
+
         var finalPriceResult = _pricingService.CalculatePrice(
             menuItem.Price,
             request.Quantity);
@@ -66,6 +71,7 @@ internal sealed class UpdateOrderItemCommandHandler(
             return Result.Failure(
                 finalPriceResult.Error);
         }
+
         #endregion
 
         #region Update Order Item details via aggregate root (Order)
