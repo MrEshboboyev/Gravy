@@ -132,8 +132,8 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         // Generate random location in Tashkent for testing if not provided
-        double latitude = LocationHelpers.GetRandomLatitude();
-        double longitude = LocationHelpers.GetRandomLongitude();
+        var latitude = LocationHelpers.GetRandomLatitude();
+        var longitude = LocationHelpers.GetRandomLongitude();
 
         var command = new CreateOrderCommand(
             GetUserId(),
@@ -144,7 +144,8 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
             latitude,
             longitude);
 
-        Result<Guid> result = await Sender.Send(command, cancellationToken);
+        var result = await Sender.Send(command, cancellationToken);
+        
         if (result.IsFailure)
         {
             return HandleFailure(result);
@@ -168,13 +169,9 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
             request.PaymentMethod,
             request.TransactionId);
 
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     // 3. Delivery Pending: Delivery is created but not yet assigned.
@@ -213,13 +210,10 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var command = new CompleteDeliveryCommand(orderId);
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
 
     // 7. Payment finalized.
@@ -229,13 +223,10 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var command = new CompletePaymentCommand(orderId);
-        Result result = await Sender.Send(command, cancellationToken);
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return NoContent();
+        
+        var result = await Sender.Send(command, cancellationToken);
+        
+        return result.IsFailure ? HandleFailure(result) : NoContent();
     }
     #endregion
 }

@@ -26,6 +26,7 @@ internal sealed class CreateOrderCommandHandler(
                 latitude, longitude) = request;
 
         #region Get User with Customer Details
+
         var user = await _userRepository.GetByIdWithCustomerDetailsAsync(userId,
             cancellationToken);
         if (user is null)
@@ -34,9 +35,11 @@ internal sealed class CreateOrderCommandHandler(
                 DomainErrors.User.NotFound(userId));
         }
         var customer = user.CustomerDetails;
+        
         #endregion
 
         #region Validate this User (penalty, isActive and able to created order)
+
         var validateCustomerCanPlaceOrderResult = ValidateCustomerCanPlaceOrder(
             customer);
         if (validateCustomerCanPlaceOrderResult.IsFailure)
@@ -44,9 +47,11 @@ internal sealed class CreateOrderCommandHandler(
             return Result.Failure<Guid>(
                 validateCustomerCanPlaceOrderResult.Error);
         }
+
         #endregion
 
         #region Get Restaurant
+
         var restaurant = await _restaurantRepository.GetByIdAsync(restaurantId, 
             cancellationToken);
         if (restaurant is null)
@@ -54,9 +59,11 @@ internal sealed class CreateOrderCommandHandler(
             return Result.Failure<Guid>(
                 DomainErrors.Restaurant.NotFound(restaurantId));
         }
+        
         #endregion
 
         #region Prepare Delivery Address for this Order
+
         Result<DeliveryAddress> deliveryAddressResult = DeliveryAddress.Create(
             street, 
             city, 
@@ -68,19 +75,24 @@ internal sealed class CreateOrderCommandHandler(
             return Result.Failure<Guid>(
                 deliveryAddressResult.Error);
         }
+
         #endregion
 
         #region Create Order
+
         var order = Order.Create(
             Guid.NewGuid(),
             customer.Id,
             restaurantId,
             deliveryAddressResult.Value);
+
         #endregion
 
         #region Add and Update database
+
         _orderRepository.Add(order);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success(order.Id);
