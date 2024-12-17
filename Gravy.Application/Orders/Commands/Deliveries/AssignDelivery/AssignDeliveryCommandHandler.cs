@@ -21,6 +21,7 @@ internal sealed class AssignDeliveryCommandHandler(
         CancellationToken cancellationToken)
     {
         #region Get Order
+
         var order = await _orderRepository.GetByIdAsync(request.OrderId, 
             cancellationToken);
         if (order is null)
@@ -28,9 +29,11 @@ internal sealed class AssignDeliveryCommandHandler(
             return Result.Failure(
                 DomainErrors.Order.NotFound(request.OrderId));
         }
+
         #endregion
 
         #region Select Delivery Person
+
         var deliveryPerson = await _deliveryPersonSelector
                 .SelectBestDeliveryPersonAsync(
                     order,
@@ -40,24 +43,31 @@ internal sealed class AssignDeliveryCommandHandler(
             return Result.Failure(
                 DomainErrors.Delivery.NoAvailableDeliveryPerson);
         }
+
         #endregion
 
         #region Determine Estimated Delivery Time
+
         // fix this estimated time coming soon
         var estimatedDeliveryTime = TimeSpan.FromHours(1);
+        
         #endregion
 
         #region Assign Delivery
+
         var assignResult = order.AssignDelivery(deliveryPerson.Id, 
             estimatedDeliveryTime);
         if (assignResult.IsFailure)
         {
             return Result.Failure(assignResult.Error);
         }
+
         #endregion
 
         #region Update database
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success();

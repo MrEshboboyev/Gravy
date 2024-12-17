@@ -9,7 +9,7 @@ using Gravy.Domain.Shared;
 using Gravy.Domain.ValueObjects;
 using Moq;
 
-namespace Gravy.Application.UnitTests.Orders.OrderItems;
+namespace Gravy.Application.UnitTests.Orders.Commands.OrderItems;
 
 public class UpdateOrderItemCommandHandlerTests
 {
@@ -68,25 +68,25 @@ public class UpdateOrderItemCommandHandlerTests
             menuItemPrice);
 
         var command = new UpdateOrderItemCommand(
-            orderId, 
-            addOrderItemResult.Value.Id, 
+            orderId,
+            addOrderItemResult.Value.Id,
             quantity);
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
         _menuItemRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                menuItemId, 
+                menuItemId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(menuItem);
 
         _pricingServiceMock
             .Setup(service => service.CalculatePrice(
-                menuItem.Price, 
+                menuItem.Price,
                 quantity))
             .Returns(Result.Success(finalPrice));
 
@@ -103,19 +103,19 @@ public class UpdateOrderItemCommandHandlerTests
 
         _orderRepositoryMock.Verify(
             repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
         _menuItemRepositoryMock.Verify(
             repo => repo.GetByIdAsync(
-                menuItemId, 
+                menuItemId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
         _pricingServiceMock.Verify(
             service => service.CalculatePrice(
-                menuItem.Price, 
+                menuItem.Price,
                 quantity),
             Times.Once);
 
@@ -139,7 +139,7 @@ public class UpdateOrderItemCommandHandlerTests
         // Arrange
         var orderId = Guid.NewGuid();
         var command = new UpdateOrderItemCommand(
-            orderId, 
+            orderId,
             Guid.NewGuid(),
             2);
 
@@ -170,8 +170,8 @@ public class UpdateOrderItemCommandHandlerTests
         var order = CreateTestOrder(orderId);
 
         var command = new UpdateOrderItemCommand(
-            orderId, 
-            orderItemId, 
+            orderId,
+            orderItemId,
             2);
 
         _orderRepositoryMock
@@ -204,21 +204,21 @@ public class UpdateOrderItemCommandHandlerTests
             menuItemId,
             2,
             20.0m);
-        
+
         var command = new UpdateOrderItemCommand(
             orderId,
-            addOrderItemResult.Value.Id, 
+            addOrderItemResult.Value.Id,
             3);
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
         _menuItemRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                menuItemId, 
+                menuItemId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((MenuItem)null!);
 
@@ -243,12 +243,12 @@ public class UpdateOrderItemCommandHandlerTests
         var order = CreateTestOrder(orderId);
 
         var addOrderItemResult = order.AddOrderItem(
-            menuItemId, 
+            menuItemId,
             2,
             20.0m);
 
         var menuItem = CreateTestMenuItem(
-            menuItemId, 
+            menuItemId,
             10.0m);
 
         var command = new UpdateOrderItemCommand(
@@ -258,19 +258,19 @@ public class UpdateOrderItemCommandHandlerTests
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
         _menuItemRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                menuItemId, 
+                menuItemId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(menuItem);
 
         _pricingServiceMock
             .Setup(service => service.CalculatePrice(
-                menuItem.Price, 
+                menuItem.Price,
                 3))
             .Returns(Result.Failure<decimal>(DomainErrors.Price.InvalidQuantity));
 

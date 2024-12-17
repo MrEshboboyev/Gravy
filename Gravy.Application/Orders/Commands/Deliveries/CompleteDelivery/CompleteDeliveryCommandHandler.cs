@@ -18,6 +18,7 @@ internal sealed class CompleteDeliveryCommandHandler(
         var orderId = request.OrderId;
 
         #region Get Order
+
         var order = await _orderRepository.GetByIdAsync(
             request.OrderId,
             cancellationToken);
@@ -26,14 +27,24 @@ internal sealed class CompleteDeliveryCommandHandler(
             return Result.Failure<Guid>(
                 DomainErrors.Order.NotFound(request.OrderId));
         }
+
         #endregion
 
         #region Complete this Delivery
-        order.CompleteDelivery();
+
+        var completeDeliveryResult = order.CompleteDelivery();
+        if (completeDeliveryResult.IsFailure)
+        {
+            return Result.Failure(
+                completeDeliveryResult.Error);
+        }
+        
         #endregion
 
         #region Update database
+
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         #endregion
 
         return Result.Success(order);

@@ -6,7 +6,7 @@ using Gravy.Domain.Repositories;
 using Gravy.Domain.ValueObjects;
 using Moq;
 
-namespace Gravy.Application.UnitTests.Orders;
+namespace Gravy.Application.UnitTests.Orders.Commands;
 
 public class CreateOrderCommandHandlerTests
 {
@@ -47,7 +47,7 @@ public class CreateOrderCommandHandlerTests
         var userId = Guid.NewGuid();
         var restaurantId = Guid.NewGuid();
         var command = new CreateOrderCommand(
-            userId, 
+            userId,
             restaurantId,
             "Street",
             "City",
@@ -56,7 +56,7 @@ public class CreateOrderCommandHandlerTests
             56.78);
 
         var user = User.Create(
-            userId, 
+            userId,
             Email.Create("test@test.com").Value,
             "password-hash",
             FirstName.Create("firstname").Value,
@@ -66,8 +66,8 @@ public class CreateOrderCommandHandlerTests
             DeliveryAddress.Create(
                 "street",
                 "city",
-                "state", 
-                41.1, 
+                "state",
+                41.1,
                 68.1).Value);
 
         var restaurant = Restaurant.Create(
@@ -85,21 +85,21 @@ public class CreateOrderCommandHandlerTests
 
         // Mock successful delivery address creation
         var deliveryAddress = DeliveryAddress.Create(
-            "Street", 
-            "City", 
-            "State", 
+            "Street",
+            "City",
+            "State",
             12.34,
             56.78).Value;
 
         _userRepositoryMock
             .Setup(repo => repo.GetByIdWithCustomerDetailsAsync(
-                userId, 
+                userId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         _restaurantRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                restaurantId, 
+                restaurantId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(restaurant);
 
@@ -117,7 +117,7 @@ public class CreateOrderCommandHandlerTests
 
         _userRepositoryMock.Verify(
             repo => repo.GetByIdWithCustomerDetailsAsync(
-                userId, 
+                userId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
@@ -148,17 +148,17 @@ public class CreateOrderCommandHandlerTests
         var userId = Guid.NewGuid();
         var restaurantId = Guid.NewGuid();
         var command = new CreateOrderCommand(
-            userId, 
-            restaurantId, 
+            userId,
+            restaurantId,
             "Street",
             "City",
             "State",
-            12.34, 
+            12.34,
             56.78);
 
         _userRepositoryMock
             .Setup(repo => repo.GetByIdWithCustomerDetailsAsync(
-                userId, 
+                userId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((User)null!); // Simulate user not found
 
@@ -171,13 +171,13 @@ public class CreateOrderCommandHandlerTests
 
         _userRepositoryMock.Verify(
             repo => repo.GetByIdWithCustomerDetailsAsync(
-                userId, 
+                userId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
         _restaurantRepositoryMock.Verify(
             repo => repo.GetByIdAsync(
-                It.IsAny<Guid>(), 
+                It.IsAny<Guid>(),
                 It.IsAny<CancellationToken>()),
             Times.Never);
 
@@ -202,12 +202,12 @@ public class CreateOrderCommandHandlerTests
         var userId = Guid.NewGuid();
         var restaurantId = Guid.NewGuid();
         var command = new CreateOrderCommand(
-            userId, 
-            restaurantId, 
+            userId,
+            restaurantId,
             "Street",
             "City",
             "State",
-            12.34, 
+            12.34,
             56.78);
 
         var user = User.Create(
@@ -227,13 +227,13 @@ public class CreateOrderCommandHandlerTests
 
         _userRepositoryMock
             .Setup(repo => repo.GetByIdWithCustomerDetailsAsync(
-                userId, 
+                userId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         _restaurantRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                restaurantId, 
+                restaurantId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Restaurant)null!); // Simulate restaurant not found
 
@@ -246,13 +246,13 @@ public class CreateOrderCommandHandlerTests
 
         _userRepositoryMock.Verify(
             repo => repo.GetByIdWithCustomerDetailsAsync(
-                userId, 
+                userId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
         _restaurantRepositoryMock.Verify(
             repo => repo.GetByIdAsync(
-                restaurantId, 
+                restaurantId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
@@ -277,7 +277,7 @@ public class CreateOrderCommandHandlerTests
         var userId = Guid.NewGuid();
         var restaurantId = Guid.NewGuid();
         var command = new CreateOrderCommand(
-            userId, 
+            userId,
             restaurantId,
             "",
             "",
@@ -321,7 +321,7 @@ public class CreateOrderCommandHandlerTests
 
         _restaurantRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                restaurantId, 
+                restaurantId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(restaurant);
 
@@ -332,7 +332,7 @@ public class CreateOrderCommandHandlerTests
         result.IsFailure.Should().BeTrue();
 
         _orderRepositoryMock.Verify(repo => repo.Add(
-            It.IsAny<Order>()), 
+            It.IsAny<Order>()),
             Times.Never);
         _unitOfWorkMock.Verify(uow => uow.SaveChangesAsync(
             It.IsAny<CancellationToken>()),

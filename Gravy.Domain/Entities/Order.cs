@@ -283,6 +283,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     #endregion
 
     #region Delivery related
+
     public Result<Delivery> CreateDelivery()
     {
         #region Validation: Ensure payment exists and order is locked
@@ -365,12 +366,15 @@ public sealed class Order : AggregateRoot, IAuditableEntity
 
         #endregion
 
-        // Assign the delivery person
+        #region Assign the delivery person
+        
         var assignResult = _delivery.AssignDeliveryPerson(deliveryPersonId);
         if (assignResult.IsFailure)
         {
             return Result.Failure<Delivery>(assignResult.Error);
         }
+
+        #endregion
 
         #region Set Status to OnTheWay
 
@@ -378,12 +382,15 @@ public sealed class Order : AggregateRoot, IAuditableEntity
 
         #endregion
 
-        // Raise a domain event
+        #region Domain events
+
         RaiseDomainEvent(new DeliveryAssignedDomainEvent(
             Guid.NewGuid(),
             _delivery.Id,
             deliveryPersonId,
             DateTime.UtcNow));
+
+        #endregion
 
         return Result.Success(_delivery);
     }
@@ -393,14 +400,28 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     /// </summary>
     public Result<Delivery> CompleteDelivery()
     {
+        #region Checking delivery exists
+
         if (_delivery is null)
         {
             return Result.Failure<Delivery>(
-                DomainErrors.Delivery.NotAssigned(Id));
+                DomainErrors.Delivery.NotFound(Id));
         }
 
+        #endregion
+
+        #region Set the delivery status to "Delivered"
+        
         _delivery.MarkAsDelivered();
+
+        #endregion
+
+        #region Delivered At set to UtcNow for this Order
+
         DeliveredAt = DateTime.UtcNow;
+        ModifiedOnUtc = DateTime.UtcNow;
+
+        #endregion
 
         #region Set Status to Delivered
 
@@ -408,13 +429,18 @@ public sealed class Order : AggregateRoot, IAuditableEntity
 
         #endregion
 
+        #region Domain Events
+
         RaiseDomainEvent(new OrderDeliveredDomainEvent(
             Guid.NewGuid(),
             Id,
             DeliveredAt.Value));
 
-        return _delivery;
+        #endregion
+
+        return Result.Success(_delivery);
     }
+    
     #endregion
 
     #region Payment related

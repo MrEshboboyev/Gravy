@@ -7,7 +7,7 @@ using Gravy.Domain.Repositories;
 using Gravy.Domain.ValueObjects;
 using Moq;
 
-namespace Gravy.Application.UnitTests.Orders.OrderItems;
+namespace Gravy.Application.UnitTests.Orders.Commands.OrderItems;
 
 public class RemoveOrderItemCommandHandlerTests
 {
@@ -49,12 +49,12 @@ public class RemoveOrderItemCommandHandlerTests
             10m);
 
         var command = new RemoveOrderItemCommand(
-            orderId, 
+            orderId,
             addOrderItemResult.Value.Id);
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
@@ -99,7 +99,7 @@ public class RemoveOrderItemCommandHandlerTests
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((Order)null!);
 
@@ -141,7 +141,7 @@ public class RemoveOrderItemCommandHandlerTests
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
@@ -153,7 +153,7 @@ public class RemoveOrderItemCommandHandlerTests
         result.Error.Should().Be(removalError);
 
         _orderRepositoryMock.Verify(
-            repo => repo.GetByIdAsync(orderId, 
+            repo => repo.GetByIdAsync(orderId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 

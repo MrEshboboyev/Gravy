@@ -7,7 +7,7 @@ using Gravy.Domain.Repositories;
 using Gravy.Domain.ValueObjects;
 using Moq;
 
-namespace Gravy.Application.UnitTests.Orders;
+namespace Gravy.Application.UnitTests.Orders.Commands;
 
 public class DeleteOrderCommandHandlerTests
 {
@@ -44,18 +44,18 @@ public class DeleteOrderCommandHandlerTests
 
         var order = Order.Create(
             orderId,
-            Guid.NewGuid(), 
-            Guid.NewGuid(), 
+            Guid.NewGuid(),
+            Guid.NewGuid(),
             DeliveryAddress.Create(
                 "Street",
                 "City",
                 "State",
-                12.34, 
+                12.34,
                 56.78).Value);
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
@@ -112,7 +112,7 @@ public class DeleteOrderCommandHandlerTests
 
         _orderRepositoryMock.Verify(
             repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
@@ -138,7 +138,7 @@ public class DeleteOrderCommandHandlerTests
         var command = new DeleteOrderCommand(orderId);
 
         var order = Order.Create(
-            orderId, 
+            orderId,
             Guid.NewGuid(),
             Guid.NewGuid(),
             DeliveryAddress.Create(
@@ -169,7 +169,7 @@ public class DeleteOrderCommandHandlerTests
 
         _orderRepositoryMock.Verify(
             repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
@@ -207,7 +207,7 @@ public class DeleteOrderCommandHandlerTests
 
         _orderRepositoryMock
             .Setup(repo => repo.GetByIdAsync(
-                orderId, 
+                orderId,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 

@@ -1,13 +1,15 @@
 ﻿using Gravy.Application.Orders.Commands.CreateOrder;
+using Gravy.Application.Orders.Commands.DeleteOrder;
 using Gravy.Application.Orders.Commands.Deliveries.AssignDelivery;
 using Gravy.Application.Orders.Commands.Deliveries.CompleteDelivery;
 using Gravy.Application.Orders.Commands.Deliveries.CreateDelivery;
 using Gravy.Application.Orders.Commands.OrderItems.AddOrderItem;
+using Gravy.Application.Orders.Commands.OrderItems.RemoveOrderItem;
+using Gravy.Application.Orders.Commands.OrderItems.UpdateOrderItem;
 using Gravy.Application.Orders.Commands.Payments.CompletePayment;
 using Gravy.Application.Orders.Commands.Payments.SetPayment;
 using Gravy.Application.Orders.Queries.GetOrderById;
 using Gravy.Application.Orders.Queries.GetOrdersByCustomer;
-using Gravy.Domain.Shared;
 using Gravy.Presentation.Abstractions;
 using Gravy.Presentation.Contracts.Orders;
 using Gravy.Presentation.Helpers;
@@ -15,9 +17,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Gravy.Application.Orders.Commands.DeleteOrder;
-using Gravy.Application.Orders.Commands.OrderItems.RemoveOrderItem;
-using Gravy.Application.Orders.Commands.OrderItems.UpdateOrderItem;
 
 namespace Gravy.Presentation.Controllers;
 
@@ -25,15 +24,22 @@ namespace Gravy.Presentation.Controllers;
 [Route("api/orders")]
 public sealed class OrdersController(ISender sender) : ApiController(sender)
 {
+    #region User Claims
+
     private Guid GetUserId() =>
         Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
+    #endregion
+
     #region Get
+
     [HttpGet]
     public async Task<IActionResult> GetCustomerOrders(CancellationToken cancellationToken)
     {
         var query = new GetOrdersByCustomerQuery(GetUserId());
-        Result<OrderListResponse> response = await Sender.Send(query, cancellationToken);
+    
+        var response = await Sender.Send(query, cancellationToken);
+        
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
 
@@ -42,9 +48,12 @@ public sealed class OrdersController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var query = new GetOrderByIdQuery(id);
-        Result<OrderResponse> response = await Sender.Send(query, cancellationToken);
+        
+        var response = await Sender.Send(query, cancellationToken);
+        
         return response.IsSuccess ? Ok(response.Value) : NotFound(response.Error);
     }
+
     #endregion
 
     #region Delete Order
