@@ -42,14 +42,26 @@ public sealed class DeliveryPersonSelector(IDeliveryPersonRepository
 
         #endregion
 
+        #region Get best candidate
+
         var bestCandidate = candidates.FirstOrDefault();
-        if (bestCandidate is not null)
-        {
-            bestCandidate.SetAvailability(false);
-            _deliveryPersonRepository.Update(bestCandidate);
-        }
+
+        #endregion
+
+        #region Checking best candidate is null
+
+        if (bestCandidate is null) return bestCandidate;
+
+        #endregion
+
+        #region Update this best candidate and return
+
+        bestCandidate.SetAvailability(false);
+        _deliveryPersonRepository.Update(bestCandidate);
 
         // Return the closest candidate, if available
         return bestCandidate;
+
+        #endregion
     }
 }
