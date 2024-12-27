@@ -15,6 +15,7 @@ public sealed class DeliveryPerson : Entity
     #endregion
 
     #region Constructors
+    
     internal DeliveryPerson(
         Guid id, 
         Guid userId, 
@@ -29,9 +30,11 @@ public sealed class DeliveryPerson : Entity
     }
 
     private DeliveryPerson() { }
+    
     #endregion
 
     #region Properties
+    
     public Guid UserId { get; private set; }
     public Vehicle Vehicle { get; private set; }
     public Location HomeLocation { get; private set; }
@@ -41,9 +44,11 @@ public sealed class DeliveryPerson : Entity
     public bool IsAvailable { get; private set; } = true; // Default to available
     public IReadOnlyCollection<DeliveryPersonAvailability> Availabilities => 
         _availabilities.AsReadOnly();
+    
     #endregion
 
     #region Own Methods
+    
     /// <summary>
     /// Updates the delivery person's details.
     /// </summary>
@@ -89,6 +94,7 @@ public sealed class DeliveryPerson : Entity
     {
         return HomeLocation.CalculateDistance(deliveryLocation);
     }
+    
     #endregion
 
     #region Availability methods (Add/Update/Delete)
@@ -113,7 +119,7 @@ public sealed class DeliveryPerson : Entity
         _availabilities.Add(newAvailability);
 
         // return availability
-        return newAvailability;
+        return Result.Success(newAvailability);
     }
 
     public Result<DeliveryPersonAvailability> UpdateAvailability(
@@ -140,7 +146,7 @@ public sealed class DeliveryPerson : Entity
         // update availability details
         availability.UpdateDetails(startTimeUtc, endTimeUtc);
 
-        return availability;
+        return Result.Success(availability);
     }
 
     private Result<DeliveryPersonAvailability> ValidateAvailabilityPeriod(

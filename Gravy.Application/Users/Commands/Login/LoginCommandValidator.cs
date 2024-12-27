@@ -8,6 +8,6 @@ public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
     {
         RuleFor(user => user.Email).NotEmpty();
 
-        RuleFor(user => user.Password).MinimumLength(8);
+        RuleFor(user => user.Password).MinimumLength(5);
     }
 }

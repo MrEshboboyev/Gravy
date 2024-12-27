@@ -70,4 +70,13 @@ public sealed class DeliveryAddress : ValueObject
         yield return State;
         yield return Location;
     }
+    
+    #region Methods
+
+    public override string ToString()
+    {
+        return $"{Street}, {City}, {State}";
+    }
+    
+    #endregion
 }

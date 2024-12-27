@@ -7,38 +7,20 @@ public static class OrderResponseFactory
 {
     public static OrderResponse Create(Order order)
     {
-        var deliveryAddressObject = order.DeliveryAddress;
+        var deliveryAddress = order.GetDeliveryAddress();
 
-        string deliveryAddress =
-            $"{deliveryAddressObject.Street}/" +
-            $"{deliveryAddressObject.City}/" +
-            $"{deliveryAddressObject.State}";
-
-        var orderItemsResponse = order.OrderItems
-                .Select(orderItem => new OrderItemResponse(
-                    orderItem.Id,
-                    orderItem.MenuItemId,
-                    orderItem.Quantity,
-                    orderItem.Price,
-                    orderItem.CreatedOnUtc))
+        var orderItemsResponse = order
+                .OrderItems
+                .Select(OrderItemResponseFactory.Create)
                 .ToList();
 
-        var deliveryResponse = order.Delivery is not null ? new DeliveryResponse(
-                order.Delivery.Id,
-                order.Delivery.DeliveryPersonId,
-                order.Delivery.PickUpTime,
-                order.Delivery.EstimatedDeliveryTime,
-                order.Delivery.ActualDeliveryTime,
-                order.Delivery.DeliveryStatus,
-                order.Delivery.CreatedOnUtc) : null;
+        var deliveryResponse = order.Delivery is not null
+                ? DeliveryResponseFactory.Create(order.Delivery)
+                : null;
 
-        var paymentResponse = order.Payment is not null ? new PaymentResponse(
-                order.Payment.Id,
-                order.Payment.Amount,
-                order.Payment.Method,
-                order.Payment.Status,
-                order.Payment.TransactionId,
-                order.Payment.CreatedOnUtc) : null;
+        var paymentResponse = order.Payment is not null
+                ? PaymentResponseFactory.Create(order.Payment)
+                : null;
 
         return new OrderResponse(
             order.Id,

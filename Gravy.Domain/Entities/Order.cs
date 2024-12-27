@@ -108,6 +108,10 @@ public sealed class Order : AggregateRoot, IAuditableEntity
             DateTime.UtcNow));
     }
 
+    public string GetDeliveryAddress()
+    {
+        return DeliveryAddress.ToString();
+    }
 
     #endregion
 
