@@ -1,33 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.2" />
-    <PackageReference Include="FluentAssertions" Version="8.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="NetArchTest.Rules" Version="1.3.2" />
-    <PackageReference Include="TngTech.ArchUnitNET.xUnit" Version="0.11.3-preview.1" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="FluentAssertions" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+		<PackageReference Include="NetArchTest.Rules" />
+		<PackageReference Include="TngTech.ArchUnitNET.xUnit" />
+		<PackageReference Include="xunit" />
+		<PackageReference Include="xunit.runner.visualstudio">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Gravy.Application\Gravy.Application.csproj" />
-    <ProjectReference Include="..\..\src\Gravy.App\Gravy.App.csproj" />
-    <ProjectReference Include="..\..\src\Gravy.Domain\Gravy.Domain.csproj" />
-    <ProjectReference Include="..\..\src\Gravy.Infrastructure\Gravy.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\src\Gravy.Persistence\Gravy.Persistence.csproj" />
-    <ProjectReference Include="..\..\src\Gravy.Presentation\Gravy.Presentation.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Gravy.Application\Gravy.Application.csproj" />
+		<ProjectReference Include="..\..\src\Gravy.App\Gravy.App.csproj" />
+		<ProjectReference Include="..\..\src\Gravy.Domain\Gravy.Domain.csproj" />
+		<ProjectReference Include="..\..\src\Gravy.Infrastructure\Gravy.Infrastructure.csproj" />
+		<ProjectReference Include="..\..\src\Gravy.Persistence\Gravy.Persistence.csproj" />
+		<ProjectReference Include="..\..\src\Gravy.Presentation\Gravy.Presentation.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
+	<ItemGroup>
+		<Using Include="Xunit" />
+	</ItemGroup>
 
 </Project>
