@@ -25,8 +25,8 @@ internal sealed class GetUserByIdQueryHandler(IUserRepository userRepository)
         #region Prepare Response
 
         // Initialize response objects as null
-        CustomerDetailsResponse? customerDetailsResponse = null;
-        DeliveryPersonDetailsResponse? deliveryPersonDetailsResponse = null;
+        CustomerDetailsResponse customerDetailsResponse = null;
+        DeliveryPersonDetailsResponse deliveryPersonDetailsResponse = null;
 
         // Populate CustomerDetailsResponse if CustomerDetails is not null
         if (user.CustomerDetails is not null)

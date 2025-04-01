@@ -9,8 +9,8 @@ public sealed record OrderResponse(
     string DeliveryAddress,
     OrderStatus OrderStatus,
     DateTime PlacedAt,
-    DateTime? DeliveredAt,
+    DateTime DeliveredAt,
     DateTime CreatedOnUtc,
     IReadOnlyCollection<OrderItemResponse> OrderItemDetails,
-    DeliveryResponse? DeliveryDetails,
-    PaymentResponse? PaymentDetails);
+    DeliveryResponse DeliveryDetails,
+    PaymentResponse PaymentDetails);

@@ -12,7 +12,7 @@ public interface IDeliveryPersonSelector
     /// <returns>
     /// The best available delivery person or null if none are available.
     /// </returns>
-    Task<DeliveryPerson?> SelectBestDeliveryPersonAsync(
+    Task<DeliveryPerson> SelectBestDeliveryPersonAsync(
         Order order,
         CancellationToken cancellationToken);
 }

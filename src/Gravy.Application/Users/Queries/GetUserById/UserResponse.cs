@@ -5,5 +5,5 @@ public sealed record UserResponse(
     string Email,
     string FirstName,
     string LastName,
-    CustomerDetailsResponse? CustomerDetails,
-    DeliveryPersonDetailsResponse? DeliveryPersonDetails);
+    CustomerDetailsResponse CustomerDetails,
+    DeliveryPersonDetailsResponse DeliveryPersonDetails);

@@ -10,7 +10,7 @@ public class JwtBearerOptionsSetup(IOptions<JwtOptions> jwtOptions) : IPostConfi
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public void PostConfigure(string? name, JwtBearerOptions options)
+    public void PostConfigure(string name, JwtBearerOptions options)
     {
         options.TokenValidationParameters.ValidIssuer = _jwtOptions.Issuer;
         options.TokenValidationParameters.ValidAudience = _jwtOptions.Audience;

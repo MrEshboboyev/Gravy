@@ -9,7 +9,7 @@ public sealed class DeliveryPersonSelector(IDeliveryPersonRepository
     private readonly IDeliveryPersonRepository _deliveryPersonRepository = 
         deliveryPersonRepository;
 
-    public async Task<DeliveryPerson?> SelectBestDeliveryPersonAsync(
+    public async Task<DeliveryPerson> SelectBestDeliveryPersonAsync(
         Order order,
         CancellationToken cancellationToken)
     {

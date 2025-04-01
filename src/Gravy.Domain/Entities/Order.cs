@@ -48,7 +48,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
     public DeliveryAddress DeliveryAddress { get; private set; }
     public OrderStatus Status { get; private set; }
     public DateTime PlacedAt { get; private set; }
-    public DateTime? DeliveredAt { get; private set; }
+    public DateTime DeliveredAt { get; private set; }
     public bool IsLocked { get; private set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime? ModifiedOnUtc { get; set; }
@@ -439,7 +439,7 @@ public sealed class Order : AggregateRoot, IAuditableEntity
         RaiseDomainEvent(new OrderDeliveredDomainEvent(
             Guid.NewGuid(),
             Id,
-            DeliveredAt.Value));
+            DeliveredAt));
 
         #endregion
 
